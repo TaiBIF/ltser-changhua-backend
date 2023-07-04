@@ -1,3 +1,7 @@
 from django.contrib import admin
+from .models import HomepagePhoto
 
-# Register your models here.
+class HomepagePhotoAdmin(admin.ModelAdmin):
+    list_display = ('order', 'image', 'display')
+
+admin.site.register(HomepagePhoto, HomepagePhotoAdmin)
