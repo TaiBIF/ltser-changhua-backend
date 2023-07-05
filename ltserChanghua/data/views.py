@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import HomepagePhoto, LatestEvent
-from .serializers import HomepagePhotoSerializer, LatestEventSerializer
+from .models import HomepagePhoto, LatestEvent, CrabSite, WaterQualityManualSite
+from .serializers import HomepagePhotoSerializer, LatestEventSerializer, CrabSiteSerializer, WaterQualityManualSiteSerializer
 from rest_framework import status
 class HomepagePhotoAPIView(APIView):
     def get(self, request):
@@ -31,3 +31,16 @@ class ChangeLatestEventViewsAPIView(APIView):
         latestEvent.views += 1
         latestEvent.save()
         return Response({"message": "更新觀看數成功"},status=status.HTTP_200_OK)
+
+
+class CrabSiteAPIView(APIView):
+    def get(self, request):
+        crabSites = CrabSite.objects.all()
+        serializer = CrabSiteSerializer(crabSites, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class WaterQualityManualSiteAPIView(APIView):
+    def get(self, request):
+        waterQualityManualSites = WaterQualityManualSite.objects.all()
+        serializer = WaterQualityManualSiteSerializer(waterQualityManualSites, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

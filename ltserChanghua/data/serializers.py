@@ -1,4 +1,4 @@
-from .models import HomepagePhoto, LatestEvent, Tag
+from .models import HomepagePhoto, LatestEvent, Tag, CrabSite, WaterQualityManualSite
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -16,5 +16,15 @@ class LatestEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LatestEvent
-        fields = ['id', 'title', 'url', 'organizer', 'activityTime', 'tags', 'views', 'display', 'created_at',
-                  'updated_at']
+        fields = "__all__"
+
+
+class CrabSiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CrabSite
+        fields = "__all__"
+
+class WaterQualityManualSiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WaterQualityManualSite
+        fields = "__all__"
