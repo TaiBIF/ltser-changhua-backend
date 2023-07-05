@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import HomepagePhotoAPIView, LatestEventAPIView, ChangeLatestEventViewsAPIView, CrabSiteAPIView, WaterQualityManualSiteAPIView
+from .views import HomepagePhotoAPIView, LatestEventAPIView, ChangeLatestEventViewsAPIView, CrabSiteAPIView, \
+    WaterQualityManualSiteAPIView, BenthicOrganismAPIView
 
 urlpatterns = [
     path("getHomepagePhotos", HomepagePhotoAPIView.as_view(), name="getHomepagePhotos"),
@@ -7,4 +8,5 @@ urlpatterns = [
     path("changeLatestEventViews/<str:pk>", ChangeLatestEventViewsAPIView.as_view(), name="changeLatestEventViews"),
     path("getCrabSites", CrabSiteAPIView.as_view(), name="getCrabSites"),
     path("getWaterQualityManualSites", WaterQualityManualSiteAPIView.as_view(), name="getWaterQualitySites"),
+    path("getBenthicOrganisms",  BenthicOrganismAPIView.as_view(), name="getBenthicOrganisms")
 ]

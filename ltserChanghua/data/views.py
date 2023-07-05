@@ -1,7 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import HomepagePhoto, LatestEvent, CrabSite, WaterQualityManualSite
-from .serializers import HomepagePhotoSerializer, LatestEventSerializer, CrabSiteSerializer, WaterQualityManualSiteSerializer
+from .models import HomepagePhoto, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism
+from .serializers import HomepagePhotoSerializer, LatestEventSerializer, CrabSiteSerializer, \
+    WaterQualityManualSiteSerializer, BenthicOrganismSerializer
 from rest_framework import status
 class HomepagePhotoAPIView(APIView):
     def get(self, request):
@@ -44,3 +45,13 @@ class WaterQualityManualSiteAPIView(APIView):
         waterQualityManualSites = WaterQualityManualSite.objects.all()
         serializer = WaterQualityManualSiteSerializer(waterQualityManualSites, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class BenthicOrganismAPIView(APIView):
+    def get(self, request):
+        site = request.query_params.get('site', None)
+        if site is not None:
+            bo = BenthicOrganism.objects.filter(site=site)
+            serializer = BenthicOrganismSerializer(bo, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "No site parameter provided."}, status=status.HTTP_200_OK)
