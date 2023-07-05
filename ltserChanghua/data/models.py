@@ -80,7 +80,7 @@ class BenthicOrganism(models.Model):
     class Meta:
         db_table = 'BenthicOrganism'
 
-class CrabData(models.Model):
+class Crab(models.Model):
     year = models.CharField(max_length=6)
     site = models.CharField(max_length=10)
     month = models.CharField(max_length=6)

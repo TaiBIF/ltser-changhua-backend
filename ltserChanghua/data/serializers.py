@@ -1,4 +1,4 @@
-from .models import HomepagePhoto, LatestEvent, Tag, CrabSite, WaterQualityManualSite, BenthicOrganism
+from .models import HomepagePhoto, LatestEvent, Tag, CrabSite, WaterQualityManualSite, BenthicOrganism, Crab
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -32,4 +32,9 @@ class WaterQualityManualSiteSerializer(serializers.ModelSerializer):
 class BenthicOrganismSerializer(serializers.ModelSerializer):
     class Meta:
         model = BenthicOrganism
+        fields = "__all__"
+
+class CrabSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Crab
         fields = "__all__"
