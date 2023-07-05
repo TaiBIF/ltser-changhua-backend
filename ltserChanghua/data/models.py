@@ -11,3 +11,26 @@ class HomepagePhoto(models.Model):
         return f"發表照片: {self.image}"
     class Meta:
         db_table = 'HomepagePhoto'
+
+class Tag(models.Model):
+    title = models.CharField(max_length=200)
+    def __str__(self):
+        return f"標籤: {self.title}"
+    class Meta:
+        db_table = 'Tag'
+
+class LatestEvent(models.Model):
+    title = models.CharField(max_length=200)
+    url = models.CharField(max_length=200)
+    organizer = models.CharField(max_length=200)
+    activityTime = models.DateTimeField()
+    tags = models.ManyToManyField(Tag)
+    views = models.IntegerField(default=0)
+    display = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"活動主題: {self.title}"
+    class Meta:
+        db_table = 'LatestEvent'
