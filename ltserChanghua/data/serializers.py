@@ -12,11 +12,29 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ['title']
 
 class LatestEventSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True, read_only=True)
+    activities = serializers.SerializerMethodField()
+    link = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
 
     class Meta:
         model = LatestEvent
-        fields = "__all__"
+        fields = ['id', 'title', 'activities', 'link', 'tags', 'views']
+
+    def get_activities(self, obj):
+        # 自定義要返回的活動資訊格式
+        activities = {
+            'reference': obj.organizer,
+            'time': obj.activityTime.strftime('%Y/%m/%d %H:%M')  # 更改時間格式
+        }
+        return activities
+
+    def get_link(self, obj):
+        # 返回url作為link
+        return obj.url
+
+    def get_tags(self, obj):
+        # 返回只有標籤標題的列表
+        return [tag.title for tag in obj.tags.all()]
 
 
 class CrabSiteSerializer(serializers.ModelSerializer):
