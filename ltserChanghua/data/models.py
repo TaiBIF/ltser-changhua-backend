@@ -109,3 +109,21 @@ class Crab(models.Model):
     Mt = models.IntegerField(blank=False, null=False, editable=True, default=0)
     class Meta:
         db_table = 'Crab'
+
+class WaterQualityManual(models.Model):
+    year = models.CharField(max_length=6)
+    site = models.CharField(max_length=10)
+    month = models.CharField(max_length=6)
+    w_temp = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, editable=False)
+    w_ph = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True, editable=False)
+    phmv = models.DecimalField(max_digits=7, decimal_places=3 , null=True, blank=True, editable=False)
+    orp = models.DecimalField(max_digits=7, decimal_places=3, null=True, blank=True, editable=False)
+    cond = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, editable=False)
+    turb = models.DecimalField(max_digits=7, decimal_places=3, null=True, blank=True, editable=False)
+    do = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True, editable=False)
+    tds = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, editable=False)
+    w_sal = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, editable=False)
+    sg = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, editable=False)
+
+    class Meta:
+        db_table = 'WaterQualityManual'

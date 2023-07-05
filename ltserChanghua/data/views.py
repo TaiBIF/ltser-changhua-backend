@@ -1,8 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import HomepagePhoto, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism, Crab
+from .models import HomepagePhoto, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism, Crab, WaterQualityManual
 from .serializers import HomepagePhotoSerializer, LatestEventSerializer, CrabSiteSerializer, \
-    WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer
+    WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, WaterQualityManualSerializer
 from rest_framework import status
 class HomepagePhotoAPIView(APIView):
     def get(self, request):
@@ -77,3 +77,22 @@ class CrabAPIView(APIView):
             return Response(res)
         else:
             return Response({"error": "No site parameter provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+class WaterQualityManualsAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        site = request.query_params.get('site', None)
+        wq = WaterQualityManual.objects.filter(site=site)
+        serializer = WaterQualityManualSerializer(wq, many=True)
+        list_of_objects = serializer.data
+        res = []
+        for dic in list_of_objects:
+            obj = {}
+            data = {}
+            for key, value in dic.items():
+                if key == "id" or key == "year" or key == "month":
+                    obj[key] = value
+                else:
+                    data[key] = value
+            obj["data"] = data
+            res.append(obj)
+        return Response(res, status=status.HTTP_200_OK)
