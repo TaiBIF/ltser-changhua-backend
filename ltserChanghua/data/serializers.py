@@ -16,4 +16,5 @@ class LatestEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LatestEvent
-        fields = ['title', 'url', 'organizer', 'activityTime', 'tags', 'views', 'display', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'url', 'organizer', 'activityTime', 'tags', 'views', 'display', 'created_at',
+                  'updated_at']
