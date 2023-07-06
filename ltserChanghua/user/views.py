@@ -1,11 +1,14 @@
 from django.shortcuts import render
-from .serializers import UserProfileSerializer
+from .serializers import UserProfileSerializer, EmailVerificationSerializer, ResendEmailVerifySerializer
 from .models import UserProfile, MyUser
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from rest_framework.response import Response
 from .utils import Util
+import jwt
+from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 class RegisterAPIView(APIView):
     serializer_class = UserProfileSerializer
 
@@ -16,11 +19,47 @@ class RegisterAPIView(APIView):
             userData = serializer.data
             user = MyUser.objects.get(email=userData['user']['email'])
             token = RefreshToken.for_user(user).access_token
-            #current_site = get_current_site(request).domain
-            #relativeLink = reverse('email-verify')
             absurl = f'https://www.ltsertwchanghua.org/mail-verification/?token={str(token)}'
             emailBody = f'Hi {user.last_name}{user.first_name} 請點擊以下連結驗證會員註冊：\n {absurl}'
             data = {'emailBody': emailBody, 'toEmail': user.email, 'emailSubject': '長期社會生態核心觀測彰化站註冊會員驗證信'}
             Util.send_mail(data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class VerifyEmailAPIView(APIView):
+    serializer_class = EmailVerificationSerializer
+
+    def get(self, request):
+        token = request.GET.get('token')
+        try:
+            payload =jwt.decode(str(token), settings.SECRET_KEY, 'HS256')
+            user = MyUser.objects.get(id=payload['user_id'])
+            if not user.is_verified:
+                user.is_verified = True
+                user.save()
+            return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
+        except jwt.ExpiredSignatureError as identifier:
+            return Response({'error': 'Activation Expired'}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.exceptions.DecodeError as identifier:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+
+class ResendEmailVerifyAPIView(APIView):
+    serializer_class = ResendEmailVerifySerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        try:
+            user = MyUser.objects.get(email=email)
+            if user.is_verified:
+                return Response({"message": "使用者已被激活"}, status=status.HTTP_409_CONFLICT)
+            else:
+                token = RefreshToken.for_user(user).access_token
+                absurl = f'https://www.ltsertwchanghua.org/mail-verification/?token={str(token)}'
+                emailBody = f'Hi {user.last_name}{user.first_name} 請點擊以下連結驗證會員註冊：\n {absurl}'
+                data = {'emailBody': emailBody, 'toEmail': user.email, 'emailSubject': '長期社會生態核心觀測彰化站註冊會員驗證信'}
+                Util.send_mail(data)
+                return Response({"message": "已重新發送驗證信"}, status= status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response({"message": "使用者不存在"}, status=status.HTTP_404_NOT_FOUND)

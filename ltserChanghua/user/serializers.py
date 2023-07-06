@@ -64,6 +64,19 @@ class EmailVerificationSerializer(serializers.ModelSerializer):
         model = MyUser
         fields = ['token']
 
+class ResendEmailVerifySerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    class Meta:
+        fields = ['email']
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        # 檢查郵件是否存在於 User 模型中
+        if not MyUser.objects.filter(email=email).exists():
+            raise serializers.ValidationError('提供的郵件地址不存在。')
+
+        return attrs
 
 class LoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=255, min_length=3)
@@ -99,3 +112,4 @@ class LoginSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         token = self.get_token(instance)
         return token
+
