@@ -1,4 +1,5 @@
-from .serializers import UserProfileSerializer, EmailVerificationSerializer, ResendEmailVerifySerializer, LoginSerializer
+from .serializers import UserProfileSerializer, EmailVerificationSerializer, ResendEmailVerifySerializer, \
+    LoginSerializer, UpdatePasswordSerializer
 from .models import UserProfile, MyUser
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -80,3 +81,50 @@ class UserProfileAPIView(APIView):
         userProfile = UserProfile.objects.get(user_id=user.id)
         serializer = UserProfileSerializer(userProfile)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UserProfileUpdateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        user = request.user
+        data = request.data
+        try:
+            userProfile = UserProfile.objects.get(user_id=user.id)
+            userProfile.school = data.get('school', userProfile.school)
+            userProfile.location = data.get('location', userProfile.location)
+            userProfile.department = data.get('department', userProfile.department)
+            userProfile.title = data.get('title', userProfile.title)
+            userProfile.category = data.get('category', userProfile.category)
+            userProfile.application = data.get('application', userProfile.application)
+            userProfile.attention = data.get('attention', userProfile.attention)
+            userProfile.save()
+            return Response({"message": "會員資料更新成功"}, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response({"message": "使用者不存在"}, status=status.HTTP_404_NOT_FOUND)
+class UpdateUserPasswordAPIView(APIView):
+    serializer_class = UpdatePasswordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            if not user.check_password(request.data['oldPassword']):
+                return Response({"message": "舊密碼錯誤"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if request.data['newPassword'] != request.data['newPassword2']:
+                return Response({"message": "密碼確認錯誤"}, status=status.HTTP_400_BAD_REQUEST)
+
+            user.set_password(request.data['newPassword'])
+            user.save()
+            emailBody = f'Hi {user.last_name}{user.first_name} 你已在長期社會生態和新觀測彰化站更新密碼，若沒有進行此操作，請盡速告知我們，以確保帳號安全。'
+            data = {'emailBody': emailBody, 'toEmail': user.email, 'emailSubject': '長期社會生態核心觀測彰化站註冊會員驗證信'}
+            Util.send_mail(data)
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'message': '更新密碼成功'
+            }
+
+            return Response(response)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

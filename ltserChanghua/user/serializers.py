@@ -114,3 +114,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
         user = RegisterSerializer.create(RegisterSerializer(), validated_data=userData)
         userProfile = UserProfile.objects.create(user=user, **validated_data)
         return userProfile
+
+class UpdatePasswordSerializer(serializers.ModelSerializer):
+    newPassword = serializers.CharField(write_only=True, required=True)
+    newPassword2 = serializers.CharField(write_only=True, required=True)
+    oldPassword= serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = ('newPassword', 'newPassword2', 'oldPassword')
