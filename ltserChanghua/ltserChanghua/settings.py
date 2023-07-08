@@ -28,7 +28,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'ltserchanghua-fy.org', 'www.ltserchanghua-fy.org']
+ALLOWED_HOSTS = ['0.0.0.0', '127.0.0.1', 'ltserchanghua-fy.org', 'www.ltserchanghua-fy.org']
 
 AUTH_USER_MODEL = 'user.MyUser'
 
