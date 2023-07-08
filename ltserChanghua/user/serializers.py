@@ -39,23 +39,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    user = RegisterSerializer(required=True, many=False)
-    school = serializers.CharField(required=True)
-    location = serializers.CharField(required=True)
-    department = serializers.CharField(required=True)
-    title = serializers.CharField(required=True)
-    category = serializers.CharField(required=True)
 
-    class Meta:
-        model = UserProfile
-        fields = "__all__"
-
-    def create(self, validated_data):
-        userData = validated_data.pop('user')
-        user = RegisterSerializer.create(RegisterSerializer(), validated_data=userData)
-        userProfile = UserProfile.objects.create(user=user, **validated_data)
-        return userProfile
 
 class EmailVerificationSerializer(serializers.ModelSerializer):
     token = serializers.CharField(max_length=1000)
@@ -113,3 +97,20 @@ class LoginSerializer(serializers.ModelSerializer):
         token = self.get_token(instance)
         return token
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    user = RegisterSerializer(required=True, many=False)
+    school = serializers.CharField(required=True)
+    location = serializers.CharField(required=True)
+    department = serializers.CharField(required=True)
+    title = serializers.CharField(required=True)
+    category = serializers.CharField(required=True)
+
+    class Meta:
+        model = UserProfile
+        fields = "__all__"
+
+    def create(self, validated_data):
+        userData = validated_data.pop('user')
+        user = RegisterSerializer.create(RegisterSerializer(), validated_data=userData)
+        userProfile = UserProfile.objects.create(user=user, **validated_data)
+        return userProfile

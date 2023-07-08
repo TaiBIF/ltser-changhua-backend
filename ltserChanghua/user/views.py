@@ -1,14 +1,15 @@
-from django.shortcuts import render
-from .serializers import UserProfileSerializer, EmailVerificationSerializer, ResendEmailVerifySerializer
+from .serializers import UserProfileSerializer, EmailVerificationSerializer, ResendEmailVerifySerializer, LoginSerializer
 from .models import UserProfile, MyUser
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
-from rest_framework.response import Response
 from .utils import Util
 import jwt
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 class RegisterAPIView(APIView):
     serializer_class = UserProfileSerializer
 
@@ -63,3 +64,19 @@ class ResendEmailVerifyAPIView(APIView):
                 return Response({"message": "已重新發送驗證信"}, status= status.HTTP_200_OK)
         except ObjectDoesNotExist:
             return Response({"message": "使用者不存在"}, status=status.HTTP_404_NOT_FOUND)
+
+class LoginAPIView(TokenObtainPairView):
+    serializer_class = LoginSerializer
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class UserProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        userProfile = UserProfile.objects.get(user_id=user.id)
+        serializer = UserProfileSerializer(userProfile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
