@@ -12,19 +12,19 @@ class HomepagePhoto(models.Model):
     class Meta:
         db_table = 'HomepagePhoto'
 
-class Tag(models.Model):
+class LatestEventTag(models.Model):
     title = models.CharField(max_length=200)
     def __str__(self):
         return f"標籤: {self.title}"
     class Meta:
-        db_table = 'Tag'
+        db_table = 'LatestEventTag'
 
 class LatestEvent(models.Model):
     title = models.CharField(max_length=200)
     url = models.CharField(max_length=200)
     organizer = models.CharField(max_length=200)
     activityTime = models.DateTimeField()
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField(LatestEventTag)
     views = models.IntegerField(default=0)
     display = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

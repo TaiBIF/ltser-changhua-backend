@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import HomepagePhoto, LatestEvent, Tag, CrabSite, WaterQualityManualSite
+from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite
 
 class HomepagePhotoAdmin(admin.ModelAdmin):
     list_display = ('order', 'image', 'display')
 
-class TagAdmin(admin.ModelAdmin):
+class LatestEventTagAdmin(admin.ModelAdmin):
     list_display = ['title']
 
 class LatestEventAdmin(admin.ModelAdmin):
@@ -23,7 +23,7 @@ class WaterQualityManualSiteAdmin(admin.ModelAdmin):
 
 
 admin.site.register(HomepagePhoto, HomepagePhotoAdmin)
-admin.site.register(Tag, TagAdmin)
+admin.site.register(LatestEventTag, LatestEventTagAdmin)
 admin.site.register(LatestEvent, LatestEventAdmin)
 admin.site.register(CrabSite, CrabSiteAdmin)
 admin.site.register(WaterQualityManualSite, WaterQualityManualSiteAdmin)

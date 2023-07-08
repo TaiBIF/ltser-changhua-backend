@@ -1,4 +1,4 @@
-from .models import HomepagePhoto, LatestEvent, Tag, CrabSite, WaterQualityManualSite, BenthicOrganism, Crab, WaterQualityManual
+from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganism, Crab, WaterQualityManual
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -6,10 +6,10 @@ class HomepagePhotoSerializer(serializers.ModelSerializer):
         model = HomepagePhoto
         fields = "__all__"
 
-class TagSerializer(serializers.ModelSerializer):
+class LatestEventTagSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Tag
-        fields = ['title']
+        model = LatestEventTag
+        fields = ['id', 'title']
 
 class LatestEventSerializer(serializers.ModelSerializer):
     activities = serializers.SerializerMethodField()
@@ -21,20 +21,18 @@ class LatestEventSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'activities', 'link', 'tags', 'views']
 
     def get_activities(self, obj):
-        # 自定義要返回的活動資訊格式
         activities = {
             'reference': obj.organizer,
-            'time': obj.activityTime.strftime('%Y/%m/%d %H:%M')  # 更改時間格式
+            'time': obj.activityTime.strftime('%Y/%m/%d %H:%M')
         }
         return activities
 
     def get_link(self, obj):
-        # 返回url作為link
         return obj.url
 
     def get_tags(self, obj):
-        # 返回只有標籤標題的列表
-        return [tag.title for tag in obj.tags.all()]
+        tags = [{'id': tag.id, 'title': tag.title} for tag in obj.tags.all()]
+        return tags
 
 
 class CrabSiteSerializer(serializers.ModelSerializer):

@@ -1,7 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import HomepagePhoto, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism, Crab, WaterQualityManual
-from .serializers import HomepagePhotoSerializer, LatestEventSerializer, CrabSiteSerializer, \
+from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism, \
+    Crab, \
+    WaterQualityManual
+from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
     WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, WaterQualityManualSerializer
 from rest_framework import status
 class HomepagePhotoAPIView(APIView):
@@ -9,6 +11,12 @@ class HomepagePhotoAPIView(APIView):
         homepagePhotos = HomepagePhoto.objects.filter(display=True)
         serializer = HomepagePhotoSerializer(homepagePhotos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class LatestEventTagAPIView(APIView):
+    def get(self, request):
+        tags = LatestEventTag.objects.all()
+        serializer = LatestEventTagSerializer(tags, many=True)
+        return Response(serializer.data)
 
 
 class LatestEventAPIView(APIView):
