@@ -105,7 +105,7 @@ class UpdateUserPasswordAPIView(APIView):
     serializer_class = UpdatePasswordSerializer
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
+    def patch(self, request, *args, **kwargs):
         user = request.user
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():

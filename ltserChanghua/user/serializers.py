@@ -121,5 +121,5 @@ class UpdatePasswordSerializer(serializers.ModelSerializer):
     oldPassword= serializers.CharField(write_only=True, required=True)
 
     class Meta:
-        model = User
+        model = MyUser
         fields = ('newPassword', 'newPassword2', 'oldPassword')
