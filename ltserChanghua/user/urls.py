@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import RegisterAPIView, VerifyEmailAPIView, ResendEmailVerifyAPIView, LoginAPIView, UserProfileAPIView, \
-    UserProfileUpdateAPIView, UpdateUserPasswordAPIView
+    UserProfileUpdateAPIView, UpdateUserPasswordAPIView, RequestPasswordResetEmailAPIView,PasswordTokenCheckAPIView, SetNewPasswordAPIView
 
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
@@ -15,4 +15,7 @@ urlpatterns = [
     path('getUserProfile/', UserProfileAPIView.as_view(), name='getUserProfile'),
     path('updateUserProfile/', UserProfileUpdateAPIView.as_view(), name="update_user_profile"),
     path('updateUserPassword/', UpdateUserPasswordAPIView.as_view(), name='update-user-password'),
+    path('request-rest-email/', RequestPasswordResetEmailAPIView.as_view(), name='request-rest-email'),
+    path('password-reset/<uidb64>/<token>/', PasswordTokenCheckAPIView.as_view(), name='password-reset-confirm'),
+    path('password-reset-complete/', SetNewPasswordAPIView.as_view(), name='password-reset-complete')
 ]

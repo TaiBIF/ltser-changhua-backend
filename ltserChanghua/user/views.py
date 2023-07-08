@@ -1,5 +1,5 @@
 from .serializers import UserProfileSerializer, EmailVerificationSerializer, ResendEmailVerifySerializer, \
-    LoginSerializer, UpdatePasswordSerializer
+    LoginSerializer, UpdatePasswordSerializer, ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer
 from .models import UserProfile, MyUser
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -11,6 +11,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import smart_bytes, smart_str, DjangoUnicodeDecodeError
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+
 class RegisterAPIView(APIView):
     serializer_class = UserProfileSerializer
 
@@ -128,3 +132,39 @@ class UpdateUserPasswordAPIView(APIView):
 
             return Response(response)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class RequestPasswordResetEmailAPIView(APIView):
+    serializer_class = ResetPasswordEmailRequestSerializer
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        email = request.data['email']
+        if MyUser.objects.filter(email=email).exists():
+            user = MyUser.objects.get(email=email)
+            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+            absurl = f'https://www.ltsertwchanghua.org/login/forgot-password/?uidb64={str(uidb64)}&token={str(token)}'
+            emailBody = f'Hello, \n 使用以下的連結來重置你的密碼:\n {absurl}'
+            data = {'emailBody': emailBody, 'toEmail': user.email, 'emailSubject': '長期社會生態核心觀測彰化站重置密碼驗證信'}
+            Util.send_mail(data)
+        return Response({'status': 'success', 'message': '已經寄出連結，請使用連結重置密碼'}, status=status.HTTP_200_OK)
+
+class PasswordTokenCheckAPIView(APIView):
+    def get(self, request, uidb64, token):
+        try:
+            id = smart_str(urlsafe_base64_decode(uidb64))
+            user = MyUser.objects.get(id=id)
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                return Response({'error': 'Token is not valid, please request a new one'},
+                                status=status.HTTP_401_UNAUTHORIZED)
+            return Response({'success':True, 'message': 'Credentials Valid', 'uidb64': uidb64, 'token': token},
+                            status=status.HTTP_200_OK)
+        except DjangoUnicodeDecodeError as identifier:
+            return Response({'error': 'Token is not valid, please request a new one'},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+class SetNewPasswordAPIView(APIView):
+    serializer_class = SetNewPasswordSerializer
+
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({'success': True, 'message': '重置密碼成功'}, status=status.HTTP_200_OK)
