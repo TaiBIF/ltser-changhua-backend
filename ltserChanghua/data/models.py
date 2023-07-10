@@ -127,3 +127,76 @@ class WaterQualityManual(models.Model):
 
     class Meta:
         db_table = 'WaterQualityManual'
+
+class InterviewTag1(models.Model):
+    title = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"InterviewTag1: {self.title}"
+
+    class Meta:
+        db_table = 'InterviewTag1'
+
+
+class InterviewTag2(models.Model):
+    title = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    interview_tag1 = models.ForeignKey(InterviewTag1, on_delete=models.CASCADE, related_name='interviewtag2_set')
+    def __str__(self):
+        return f"InterviewTag2: {self.title}"
+
+    class Meta:
+        db_table = 'InterviewTag2'
+
+class InterviewTag3(models.Model):
+    title = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    interview_tag2 = models.ForeignKey(InterviewTag2, on_delete=models.CASCADE, related_name='interviewtag3_set')
+    def __str__(self):
+        return f"InterviewTag3: {self.title}"
+
+    class Meta:
+        db_table = 'InterviewTag3'
+
+class InterviewStakeholder(models.Model):
+    title = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"InterviewStakeholder: {self.title}"
+
+    class Meta:
+        db_table = 'InterviewStakeholder'
+
+class InterviewPeople(models.Model):
+    title = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    interview_stakeholder = models.ForeignKey(InterviewStakeholder, on_delete=models.CASCADE,
+                                              related_name='interviewpeople_set')
+    def __str__(self):
+        return f"InterviewPeople: {self.title}"
+
+    class Meta:
+        db_table = 'InterviewPeople'
+
+class InterviewContent(models.Model):
+    text = models.TextField()
+    interview_tag2 = models.ManyToManyField(InterviewTag2)
+    interview_tag3 = models.ManyToManyField(InterviewTag3)
+    date = models.DateField()
+    interview_people = models.ManyToManyField(InterviewPeople)
+    interview_stakeholder = models.ManyToManyField(InterviewStakeholder)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"InterviewContent: {self.text}"
+
+    class Meta:
+        db_table = 'InterviewContent'
