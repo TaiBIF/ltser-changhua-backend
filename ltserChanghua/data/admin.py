@@ -44,19 +44,20 @@ class InterviewPeopleAdmin(admin.ModelAdmin):
         return obj.interview_stakeholder.title
 
 class InterviewContentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'content', 'interview_tag2', 'interview_tag3', 'interview_people', 'interview_stakeholder']
+    list_display = ['id', 'content', 'display_interview_tag2', 'display_interview_tag3', 'display_interview_people', 'display_interview_stakeholder']
 
-    def interview_tag2(self, obj):
-        return obj.interview_tag2.title
+    def display_interview_tag2(self, obj):
+        return ', '.join([tag.title for tag in obj.interview_tag2.all()])
 
-    def interview_tag3(self, obj):
-        return obj.interview_tag3.title
+    def display_interview_tag3(self, obj):
+        return ', '.join([tag.title for tag in obj.interview_tag3.all()])
 
-    def interview_people(self, obj):
-        return obj.interview_people.title
+    def display_interview_people(self, obj):
+        return ', '.join([person.title for person in obj.interview_people.all()])
 
-    def interview_stakeholder(self, obj):
-        return obj.interview_stakeholder.title
+    def display_interview_stakeholder(self, obj):
+        return ', '.join([stakeholder.title for stakeholder in obj.interview_stakeholder.all()])
+
 
 
 admin.site.register(HomepagePhoto, HomepagePhotoAdmin)

@@ -134,7 +134,7 @@ class InterviewTag1(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"InterviewTag1: {self.title}"
+        return f"{self.title}"
 
     class Meta:
         db_table = 'InterviewTag1'
@@ -146,7 +146,7 @@ class InterviewTag2(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     interview_tag1 = models.ForeignKey(InterviewTag1, on_delete=models.CASCADE, related_name='interviewtag2_set')
     def __str__(self):
-        return f"InterviewTag2: {self.title}"
+        return f"{self.title}"
 
     class Meta:
         db_table = 'InterviewTag2'
@@ -157,7 +157,7 @@ class InterviewTag3(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     interview_tag2 = models.ForeignKey(InterviewTag2, on_delete=models.CASCADE, related_name='interviewtag3_set')
     def __str__(self):
-        return f"InterviewTag3: {self.title}"
+        return f"{self.title}"
 
     class Meta:
         db_table = 'InterviewTag3'
@@ -168,7 +168,7 @@ class InterviewStakeholder(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"InterviewStakeholder: {self.title}"
+        return f"{self.title}"
 
     class Meta:
         db_table = 'InterviewStakeholder'
@@ -180,7 +180,7 @@ class InterviewPeople(models.Model):
     interview_stakeholder = models.ForeignKey(InterviewStakeholder, on_delete=models.CASCADE,
                                               related_name='interviewpeople_set')
     def __str__(self):
-        return f"InterviewPeople: {self.title}"
+        return f"{self.title}"
 
     class Meta:
         db_table = 'InterviewPeople'
@@ -196,7 +196,7 @@ class InterviewContent(models.Model):
     # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"InterviewContent: {self.text}"
+        return f"{self.content}"
 
     class Meta:
         db_table = 'InterviewContent'
