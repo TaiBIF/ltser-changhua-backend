@@ -44,7 +44,7 @@ class InterviewPeopleAdmin(admin.ModelAdmin):
         return obj.interview_stakeholder.title
 
 class InterviewContentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'text', 'interview_tag2', 'interview_tag3', 'interview_people', 'interview_stakeholder']
+    list_display = ['id', 'content', 'interview_tag2', 'interview_tag3', 'interview_people', 'interview_stakeholder']
 
     def interview_tag2(self, obj):
         return obj.interview_tag2.title

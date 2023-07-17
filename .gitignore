@@ -50,3 +50,13 @@ Thumbs.db
 
 /ltserChanghua/.env
 /ltserChanghua/staticfiles/
+/ltserChanghua/data/utils/InterviewContent.xlsx
+/ltserChanghua/data/utils/InterviewContent_interview_people.csv
+/ltserChanghua/data/utils/InterviewContent_interview_people.xlsx
+/ltserChanghua/data/utils/InterviewContent_interview_stakeholder.csv
+/ltserChanghua/data/utils/InterviewContent_interview_stakeholder.xlsx
+/ltserChanghua/data/utils/InterviewContent_interview_tag2.csv
+/ltserChanghua/data/utils/InterviewContent_interview_tag2.xlsx
+/ltserChanghua/data/utils/InterviewContent_interview_tag3.csv
+/ltserChanghua/data/utils/InterviewContent_interview_tag3.xlsx
+/ltserChanghua/data/utils/InterviewContent_postprocess.csv

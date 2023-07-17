@@ -186,14 +186,14 @@ class InterviewPeople(models.Model):
         db_table = 'InterviewPeople'
 
 class InterviewContent(models.Model):
-    text = models.TextField()
+    content = models.TextField()
     interview_tag2 = models.ManyToManyField(InterviewTag2)
     interview_tag3 = models.ManyToManyField(InterviewTag3)
-    date = models.DateField()
+    interview_date = models.DateField()
     interview_people = models.ManyToManyField(InterviewPeople)
     interview_stakeholder = models.ManyToManyField(InterviewStakeholder)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"InterviewContent: {self.text}"
