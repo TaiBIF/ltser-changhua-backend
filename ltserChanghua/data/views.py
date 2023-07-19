@@ -113,7 +113,7 @@ class WaterQualityManualsAPIView(APIView):
 class LiteratureAPIView(APIView):
     def get(self, request):
         paginator = CustomPageNumberPagination()
-        literature = Literature.objects.all().order_by('id')
+        literature = Literature.objects.all().order_by('-id')
         result_page = paginator.paginate_queryset(literature, request)
         serializer = LiteratureSerializer(result_page, many=True)
         return Response({
