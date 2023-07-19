@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, InterviewTag1, \
-    InterviewTag2, InterviewTag3, InterviewStakeholder, InterviewPeople, InterviewContent
+    InterviewTag2, InterviewTag3, InterviewStakeholder, InterviewPeople, InterviewContent, Literature
 
 class HomepagePhotoAdmin(admin.ModelAdmin):
     list_display = ('order', 'image', 'display')
@@ -58,7 +58,8 @@ class InterviewContentAdmin(admin.ModelAdmin):
     def display_interview_stakeholder(self, obj):
         return ', '.join([stakeholder.title for stakeholder in obj.interview_stakeholder.all()])
 
-
+class LiteratureAdmin(admin.ModelAdmin):
+    list_display = ['id', 'title', 'author', 'publisher', 'date', 'is_ebook', 'views']
 
 admin.site.register(HomepagePhoto, HomepagePhotoAdmin)
 admin.site.register(LatestEventTag, LatestEventTagAdmin)
@@ -71,3 +72,4 @@ admin.site.register(InterviewTag3, InterviewTag3Admin)
 admin.site.register(InterviewStakeholder, InterviewStakeholderAdmin)
 admin.site.register(InterviewPeople, InterviewPeopleAdmin)
 admin.site.register(InterviewContent, InterviewContentAdmin)
+admin.site.register(Literature, LiteratureAdmin)
