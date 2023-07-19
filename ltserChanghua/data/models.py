@@ -200,3 +200,19 @@ class InterviewContent(models.Model):
 
     class Meta:
         db_table = 'InterviewContent'
+
+
+class Literature(models.Model):
+    title = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
+    publisher = models.CharField(max_length=255)
+    date = models.IntegerField()
+    refID = models.CharField(max_length=255)
+    link = models.URLField()
+    is_ebook = models.BooleanField()
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        db_table = 'Literature'
