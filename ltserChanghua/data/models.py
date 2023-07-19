@@ -209,7 +209,8 @@ class Literature(models.Model):
     date = models.IntegerField()
     refID = models.CharField(max_length=255)
     link = models.URLField()
-    is_ebook = models.CharField(max_length=2)
+    is_ebook = models.BooleanField(max_length=2)
+    views = models.IntegerField(default=0)
 
     def __str__(self):
         return self.title

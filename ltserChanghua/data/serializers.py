@@ -1,4 +1,5 @@
-from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganism, Crab, WaterQualityManual
+from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganism, \
+    Crab, WaterQualityManual, Literature
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -59,3 +60,18 @@ class WaterQualityManualSerializer(serializers.ModelSerializer):
     class Meta:
         model = WaterQualityManual
         fields = "__all__"
+
+class LiteratureSerializer(serializers.ModelSerializer):
+    literature = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Literature
+        fields = ['id', 'title', 'literature', 'link', 'views']
+
+    def get_literature(self, obj):
+        return {
+            'author': obj.author,
+            'publisher': obj.publisher,
+            'date': obj.date,
+            'refId': obj.refID,
+        }

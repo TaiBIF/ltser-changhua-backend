@@ -2,10 +2,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism, \
     Crab, \
-    WaterQualityManual
+    WaterQualityManual, Literature
 from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
-    WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, WaterQualityManualSerializer
+    WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, WaterQualityManualSerializer, LiteratureSerializer
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
+
+class CustomPageNumberPagination(PageNumberPagination):
+    page_size = 10
+
 class HomepagePhotoAPIView(APIView):
     def get(self, request):
         homepagePhotos = HomepagePhoto.objects.filter(display=True)
@@ -104,3 +109,23 @@ class WaterQualityManualsAPIView(APIView):
             obj["data"] = data
             res.append(obj)
         return Response(res, status=status.HTTP_200_OK)
+
+class LiteratureAPIView(APIView):
+    def get(self, request):
+        paginator = CustomPageNumberPagination()
+        literature = Literature.objects.all().order_by('id')
+        result_page = paginator.paginate_queryset(literature, request)
+        serializer = LiteratureSerializer(result_page, many=True)
+        return Response({
+            'currentPage': paginator.page.number,
+            'recordsPerPage': paginator.page_size,
+            'totalPages': paginator.page.paginator.num_pages,
+            'totalRecords': paginator.page.paginator.count,
+            'records': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        literature = Literature.objects.get(id=pk)
+        literature.views += 1
+        literature.save()
+        return Response({"message": "更新文獻觀看數成功"}, status=status.HTTP_200_OK)
