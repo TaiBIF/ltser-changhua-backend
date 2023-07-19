@@ -1,5 +1,5 @@
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganism, \
-    Crab, WaterQualityManual, Literature
+    Crab, WaterQualityManual, Literature, NewsTag, News
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -75,3 +75,26 @@ class LiteratureSerializer(serializers.ModelSerializer):
             'date': obj.date,
             'refId': obj.refID,
         }
+
+
+class NewsTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NewsTag
+        fields = ('id', 'title')
+
+class NewsSerializer(serializers.ModelSerializer):
+    news = serializers.SerializerMethodField()
+    tags = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    def get_news(self, obj):
+        news_data = {
+            'reference': obj.reference,
+            'date': obj.date.strftime('%Y-%m-%d'),
+            'reporter': obj.reporter,
+            'photographer': obj.photographer,
+        }
+        return news_data
+
+    class Meta:
+        model = News
+        fields = ('id', 'title', 'news', 'link', 'tags', 'views')

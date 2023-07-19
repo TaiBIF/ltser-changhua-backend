@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, InterviewTag1, \
-    InterviewTag2, InterviewTag3, InterviewStakeholder, InterviewPeople, InterviewContent, Literature
+    InterviewTag2, InterviewTag3, InterviewStakeholder, InterviewPeople, InterviewContent, Literature, NewsTag, News
 
 class HomepagePhotoAdmin(admin.ModelAdmin):
     list_display = ('order', 'image', 'display')
@@ -61,6 +61,15 @@ class InterviewContentAdmin(admin.ModelAdmin):
 class LiteratureAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'author', 'publisher', 'date', 'is_ebook', 'views']
 
+class NewsTagAdmin(admin.ModelAdmin):
+    list_display = ['id', 'title']
+
+class NewsAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'reference', 'reporter', 'photographer', 'date', 'link', 'views')
+    list_filter = ('date',)
+    search_fields = ('title', 'reference', 'reporter')
+    ordering = ('-date',)
+
 admin.site.register(HomepagePhoto, HomepagePhotoAdmin)
 admin.site.register(LatestEventTag, LatestEventTagAdmin)
 admin.site.register(LatestEvent, LatestEventAdmin)
@@ -73,3 +82,5 @@ admin.site.register(InterviewStakeholder, InterviewStakeholderAdmin)
 admin.site.register(InterviewPeople, InterviewPeopleAdmin)
 admin.site.register(InterviewContent, InterviewContentAdmin)
 admin.site.register(Literature, LiteratureAdmin)
+admin.site.register(NewsTag, NewsTagAdmin)
+admin.site.register(News, NewsAdmin)

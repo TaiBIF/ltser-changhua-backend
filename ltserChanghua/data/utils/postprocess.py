@@ -1,5 +1,8 @@
+
 import pandas as pd
-data = pd.read_excel('InterviewContent.xlsx')
-data['interview_date'] = pd.to_datetime(data['interview_date'], format='%Y-%m-%d')
-data['interview_date'] = data['interview_date'].dt.strftime('%Y-%m-%d')
-data.to_csv("InterviewContent_postprocess.csv", index=False, encoding='utf-8')
+# 读取 CSV 文件
+df = pd.read_csv('news.csv')
+df['date'] = pd.to_datetime(df['date'], format='%Y/%m/%d')
+
+df['date'] = df['date'].dt.strftime('%y-%m-%d')
+df.to_csv('news_processed.csv', index=False)

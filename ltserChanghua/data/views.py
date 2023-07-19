@@ -2,9 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism, \
     Crab, \
-    WaterQualityManual, Literature
+    WaterQualityManual, Literature, NewsTag, News
 from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
-    WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, WaterQualityManualSerializer, LiteratureSerializer
+    WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, WaterQualityManualSerializer, \
+    LiteratureSerializer, NewsTagSerializer, NewsSerializer
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 
@@ -129,3 +130,36 @@ class LiteratureAPIView(APIView):
         literature.views += 1
         literature.save()
         return Response({"message": "更新文獻觀看數成功"}, status=status.HTTP_200_OK)
+
+class NewsTagsAPIView(APIView):
+    def get(self, request):
+        newstags = NewsTag.objects.all()
+        serializer = NewsTagSerializer(newstags, many=True)
+        return Response(serializer.data)
+
+
+class NewsAPIView(APIView):
+    def get(self, request):
+        tag_id = request.GET.get('tag')
+        page_number = request.GET.get('page')
+        news = News.objects.filter(tags__id=tag_id).order_by('-id') if tag_id else News.objects.all().order_by('-id')
+
+        paginator = CustomPageNumberPagination()
+        result_page = paginator.paginate_queryset(news, request)
+        serializer = NewsSerializer(result_page, many=True)
+
+        response_data = {
+            'currentPage': paginator.page.number,
+            'recordsPerPage': paginator.page_size,
+            'totalPages': paginator.page.paginator.num_pages,
+            'totalRecords': paginator.page.paginator.count,
+            'records': serializer.data
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        news = News.objects.get(id=pk)
+        news.views += 1
+        news.save()
+        return Response({"message": "更新新聞觀看數成功"}, status=status.HTTP_200_OK)

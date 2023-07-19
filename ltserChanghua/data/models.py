@@ -217,3 +217,26 @@ class Literature(models.Model):
 
     class Meta:
         db_table = 'Literature'
+
+class NewsTag(models.Model):
+    title = models.CharField(max_length=200)
+    def __str__(self):
+        return f"標籤: {self.title}"
+    class Meta:
+        db_table = 'NewsTag'
+
+
+class News(models.Model):
+    title = models.CharField(max_length=255)
+    reference = models.CharField(max_length=255)
+    reporter = models.CharField(max_length=255)
+    photographer = models.CharField(max_length=255, null=True, blank=True)
+    date = models.DateField()
+    link = models.URLField()
+    views = models.IntegerField(default=0)
+    tags = models.ManyToManyField('NewsTag', related_name='news')
+
+    def __str__(self):
+        return f"標籤: {self.title}"
+    class Meta:
+        db_table = 'News'
