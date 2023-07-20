@@ -26,21 +26,18 @@ class LatestEventTagAPIView(APIView):
 
 
 class LatestEventAPIView(APIView):
-    def get(self, request):
-        queryset = LatestEvent.objects.filter(display=True)
-        sort_order = request.query_params.get('sort', None)
+    SORT_OPTIONS = {
+        "dateAscending": "activityTime",
+        "dateDescending": "-activityTime",
+        "views": "-views",
+    }
 
-        if sort_order == "dateAscending":
-            queryset = queryset.order_by("activityTime")
-        elif sort_order == 'dateDescending':
-            queryset = queryset.order_by("-activityTime")
-        elif sort_order == 'views':
-            queryset = queryset.order_by("-views")
+    def get(self, request):
+        queryset = self.get_queryset(request)
 
         # Add pagination
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset(queryset, request)
-
         serializer = LatestEventSerializer(result_page, many=True)
 
         response_data = {
@@ -52,11 +49,29 @@ class LatestEventAPIView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
     def patch(self, request, pk, format=None):
         latestEvent = LatestEvent.objects.get(id=pk)
         latestEvent.views += 1
         latestEvent.save()
-        return Response({"message": "更新觀看數成功"},status=status.HTTP_200_OK)
+        return Response({"message": "更新觀看數成功"}, status=status.HTTP_200_OK)
+
+    def get_queryset(self, request):
+        tag_id = request.GET.get('tag')
+        sort_order = request.query_params.get('sort', None)
+
+        if tag_id:
+            queryset = LatestEvent.objects.filter(display=True, tags__id=tag_id)
+        else:
+            queryset = LatestEvent.objects.filter(display=True)
+
+        sort_field = self.SORT_OPTIONS.get(sort_order)
+        if sort_field:
+            queryset = queryset.order_by(sort_field)
+        else:
+            queryset = queryset.order_by('-id')
+
+        return queryset
 
 
 
