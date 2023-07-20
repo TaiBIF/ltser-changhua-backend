@@ -52,14 +52,12 @@ class LatestEventAPIView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
-
-class ChangeLatestEventViewsAPIView(APIView):
-
     def patch(self, request, pk, format=None):
         latestEvent = LatestEvent.objects.get(id=pk)
         latestEvent.views += 1
         latestEvent.save()
         return Response({"message": "更新觀看數成功"},status=status.HTTP_200_OK)
+
 
 
 class CrabSiteAPIView(APIView):

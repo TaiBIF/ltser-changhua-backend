@@ -1,14 +1,13 @@
 from django.urls import path
-from .views import HomepagePhotoAPIView, LatestEventTagAPIView, LatestEventAPIView, ChangeLatestEventViewsAPIView, \
-    CrabSiteAPIView, \
+from .views import HomepagePhotoAPIView, LatestEventTagAPIView, LatestEventAPIView, CrabSiteAPIView, \
     WaterQualityManualSiteAPIView, BenthicOrganismAPIView, CrabAPIView, WaterQualityManualsAPIView, \
     LiteratureAPIView, NewsTagsAPIView, NewsAPIView
 
 urlpatterns = [
     path("getHomepagePhotos", HomepagePhotoAPIView.as_view(), name="getHomepagePhotos"),
     path("getLatestEventsTags", LatestEventTagAPIView.as_view(), name="getLatestEventTags"),
-    path("getLatestEvents", LatestEventAPIView.as_view(), name="getLatestEvents"),
-    path("changeLatestEventViews/<str:pk>", ChangeLatestEventViewsAPIView.as_view(), name="changeLatestEventViews"),
+    path("latestEvents/", LatestEventAPIView.as_view(), name="getLatestEvents"),
+    path("latestEvents/<str:pk>/", LatestEventAPIView.as_view(), name="latest_events_detail"),
     path("getCrabSites", CrabSiteAPIView.as_view(), name="getCrabSites"),
     path("getWaterQualityManualSites", WaterQualityManualSiteAPIView.as_view(), name="getWaterQualitySites"),
     path("getBenthicOrganisms",  BenthicOrganismAPIView.as_view(), name="getBenthicOrganisms"),
