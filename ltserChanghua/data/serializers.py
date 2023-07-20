@@ -32,7 +32,7 @@ class LatestEventSerializer(serializers.ModelSerializer):
         return obj.url
 
     def get_tags(self, obj):
-        tags = [{'id': tag.id, 'title': tag.title} for tag in obj.tags.all()]
+        tags = [tag.id for tag in obj.tags.all()]
         return tags
 
 

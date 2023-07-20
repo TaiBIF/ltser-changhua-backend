@@ -29,6 +29,7 @@ class LatestEventAPIView(APIView):
     def get(self, request):
         queryset = LatestEvent.objects.filter(display=True)
         sort_order = request.query_params.get('sort', None)
+
         if sort_order == "dateAscending":
             queryset = queryset.order_by("activityTime")
         elif sort_order == 'dateDescending':
@@ -36,8 +37,21 @@ class LatestEventAPIView(APIView):
         elif sort_order == 'views':
             queryset = queryset.order_by("-views")
 
-        serializer = LatestEventSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        # Add pagination
+        paginator = CustomPageNumberPagination()
+        result_page = paginator.paginate_queryset(queryset, request)
+
+        serializer = LatestEventSerializer(result_page, many=True)
+
+        response_data = {
+            'currentPage': paginator.page.number,
+            'recordsPerPage': paginator.page_size,
+            'totalPages': paginator.page.paginator.num_pages,
+            'totalRecords': paginator.page.paginator.count,
+            'records': serializer.data
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 class ChangeLatestEventViewsAPIView(APIView):
 
