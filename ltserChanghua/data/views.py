@@ -8,6 +8,7 @@ from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, Late
     LiteratureSerializer, NewsTagSerializer, NewsSerializer
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
+from datetime import datetime, timedelta
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
@@ -168,19 +169,30 @@ class NewsTagsAPIView(APIView):
 class NewsAPIView(APIView):
     def get(self, request):
         tag_id = request.GET.get('tag')
-        page_number = request.GET.get('page')
-        news = News.objects.filter(tags__id=tag_id).order_by('-id') if tag_id else News.objects.all().order_by('-id')
+        if tag_id:
+            # 如果有 tag_id，則根據日期順序排序
+            news = News.objects.filter(tags__id=tag_id).order_by('-date')
+        else:
+            # 如果沒有 tag_id，找出離現在最新的兩個月日期
+            two_months_ago = datetime.now() - timedelta(days=60)
+            news = News.objects.filter(date__gte=two_months_ago).order_by('-date')
 
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset(news, request)
         serializer = NewsSerializer(result_page, many=True)
 
+        # 獲取所有新聞標籤
+        newstags = NewsTag.objects.all()
+        tag_serializer = NewsTagSerializer(newstags, many=True)
+
+        # 將數據整理成所需的回傳格式
         response_data = {
-            'currentPage': paginator.page.number,
-            'recordsPerPage': paginator.page_size,
-            'totalPages': paginator.page.paginator.num_pages,
-            'totalRecords': paginator.page.paginator.count,
-            'records': serializer.data
+            "currentPage": paginator.page.number,
+            "recordsPerPage": paginator.page_size,
+            "totalPages": paginator.page.paginator.num_pages,
+            "totalRecords": paginator.page.paginator.count,
+            "newsTag": tag_serializer.data,
+            "records": serializer.data
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
