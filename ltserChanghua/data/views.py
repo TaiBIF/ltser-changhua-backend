@@ -191,7 +191,7 @@ class NewsAPIView(APIView):
             "recordsPerPage": paginator.page_size,
             "totalPages": paginator.page.paginator.num_pages,
             "totalRecords": paginator.page.paginator.count,
-            "newsTag": tag_serializer.data,
+            "tags": tag_serializer.data,
             "records": serializer.data
         }
 
