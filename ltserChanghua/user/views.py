@@ -156,7 +156,7 @@ class RequestPasswordResetEmailAPIView(APIView):
             data = {
                 'url': absurl,
                 'toEmail': user.email,
-                'emailSubject': 'LTSER 翡翠站會員重置密碼',
+                'emailSubject': 'LTSER 彰化站會員重置密碼',
                 'username': f'{user.last_name}{user.first_name}'
             }
             Util.send_mail("password_reset_template.html", data)
