@@ -26,9 +26,13 @@ class RegisterAPIView(APIView):
             user = MyUser.objects.get(email=userData['user']['email'])
             token = RefreshToken.for_user(user).access_token
             absurl = f'https://www.ltsertwchanghua.org/mail-verification/?token={str(token)}'
-            emailBody = f'Hi {user.last_name}{user.first_name} 請點擊以下連結驗證會員註冊：\n {absurl}'
-            data = {'emailBody': emailBody, 'toEmail': user.email, 'emailSubject': '長期社會生態核心觀測彰化站註冊會員驗證信'}
-            Util.send_mail(data)
+            data = {
+                'url': absurl,
+                'toEmail': user.email,
+                'emailSubject': 'LTSER 彰化站會員註冊驗證信',
+                'username': f'{user.last_name}{user.first_name}'
+            }
+            Util.send_mail("email_template.html", data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -63,9 +67,13 @@ class ResendEmailVerifyAPIView(APIView):
             else:
                 token = RefreshToken.for_user(user).access_token
                 absurl = f'https://www.ltsertwchanghua.org/mail-verification/?token={str(token)}'
-                emailBody = f'Hi {user.last_name}{user.first_name} 請點擊以下連結驗證會員註冊：\n {absurl}'
-                data = {'emailBody': emailBody, 'toEmail': user.email, 'emailSubject': '長期社會生態核心觀測彰化站註冊會員驗證信'}
-                Util.send_mail(data)
+                data = {
+                    'url': absurl,
+                    'toEmail': user.email,
+                    'emailSubject': 'LTSER 彰化站會員註冊驗證信',
+                    'username': f'{user.last_name}{user.first_name}'
+                }
+                Util.send_mail("email_template.html", data)
                 return Response({"message": "已重新發送驗證信"}, status= status.HTTP_200_OK)
         except ObjectDoesNotExist:
             return Response({"message": "使用者不存在"}, status=status.HTTP_404_NOT_FOUND)
@@ -121,9 +129,12 @@ class UpdateUserPasswordAPIView(APIView):
 
             user.set_password(request.data['newPassword'])
             user.save()
-            emailBody = f'Hi {user.last_name}{user.first_name} 你已在長期社會生態和新觀測彰化站更新密碼，若沒有進行此操作，請盡速告知我們，以確保帳號安全。'
-            data = {'emailBody': emailBody, 'toEmail': user.email, 'emailSubject': '長期社會生態核心觀測彰化站註冊會員驗證信'}
-            Util.send_mail(data)
+            data = {
+                'toEmail': user.email,
+                'emailSubject': 'LTSER 彰化站會員更新密碼',
+                'username': f'{user.last_name}{user.first_name}'
+            }
+            Util.send_mail("password_update_template.html", data)
             response = {
                 'status': 'success',
                 'code': status.HTTP_200_OK,
@@ -142,9 +153,13 @@ class RequestPasswordResetEmailAPIView(APIView):
             uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
             token = PasswordResetTokenGenerator().make_token(user)
             absurl = f'https://www.ltsertwchanghua.org/login/forgot-password/?uidb64={str(uidb64)}&token={str(token)}'
-            emailBody = f'Hello, \n 使用以下的連結來重置你的密碼:\n {absurl}'
-            data = {'emailBody': emailBody, 'toEmail': user.email, 'emailSubject': '長期社會生態核心觀測彰化站重置密碼驗證信'}
-            Util.send_mail(data)
+            data = {
+                'url': absurl,
+                'toEmail': user.email,
+                'emailSubject': 'LTSER 翡翠站會員重置密碼',
+                'username': f'{user.last_name}{user.first_name}'
+            }
+            Util.send_mail("password_reset_template.html", data)
         return Response({'status': 'success', 'message': '已經寄出連結，請使用連結重置密碼'}, status=status.HTTP_200_OK)
 
 class PasswordTokenCheckAPIView(APIView):
