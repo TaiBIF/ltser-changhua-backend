@@ -240,3 +240,24 @@ class News(models.Model):
         return f"標籤: {self.title}"
     class Meta:
         db_table = 'News'
+
+class ResearchTag(models.Model):
+    title = models.CharField(max_length=200)
+    def __str__(self):
+        return f"標籤: {self.title}"
+    class Meta:
+        db_table = 'ResearchTag'
+
+class Research(models.Model):
+    title = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
+    year = models.PositiveIntegerField(null=True, blank=True)
+    reference = models.CharField(max_length=255)
+    link = models.URLField()
+    views = models.IntegerField(default=0)
+    tags = models.ManyToManyField('ResearchTag', related_name='research')
+
+    def __str__(self):
+        return f"標籤: {self.title}"
+    class Meta:
+        db_table = 'Research'

@@ -1,5 +1,5 @@
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganism, \
-    Crab, WaterQualityManual, Literature, NewsTag, News
+    Crab, WaterQualityManual, Literature, NewsTag, News, ResearchTag, Research
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -98,3 +98,15 @@ class NewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = News
         fields = ('id', 'title', 'news', 'link', 'tags', 'views')
+
+class ResearchTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResearchTag
+        fields = ('id', 'title')
+
+class ResearchSerializer(serializers.ModelSerializer):
+    tags = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = Research
+        fields = ('id', 'title', 'author', 'year', 'reference', 'link', 'tags', 'views')

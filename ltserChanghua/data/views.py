@@ -2,10 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism, \
     Crab, \
-    WaterQualityManual, Literature, NewsTag, News
+    WaterQualityManual, Literature, NewsTag, News, ResearchTag, Research
 from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
     WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, WaterQualityManualSerializer, \
-    LiteratureSerializer, NewsTagSerializer, NewsSerializer
+    LiteratureSerializer, NewsTagSerializer, NewsSerializer, ResearchTagSerializer, ResearchSerializer
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
@@ -202,3 +202,37 @@ class NewsAPIView(APIView):
         news.views += 1
         news.save()
         return Response({"message": "更新新聞觀看數成功"}, status=status.HTTP_200_OK)
+
+class ResearchAPIView(APIView):
+    def get(self, request):
+        tag_id = request.GET.get('tag')
+        if tag_id:
+            # 如果有 tag_id，則根據日期順序排序
+            research = Research.objects.filter(tags__id=tag_id).order_by('-year')
+        else:
+            research =  Research.objects.all().order_by('-year')
+
+        paginator = CustomPageNumberPagination()
+        result_page = paginator.paginate_queryset(research, request)
+        serializer = ResearchSerializer(result_page, many=True)
+
+        researchTags = ResearchTag.objects.all()
+        tag_serializer = ResearchTagSerializer(researchTags, many=True)
+
+        # 將數據整理成所需的回傳格式
+        response_data = {
+            "currentPage": paginator.page.number,
+            "recordsPerPage": paginator.page_size,
+            "totalPages": paginator.page.paginator.num_pages,
+            "totalRecords": paginator.page.paginator.count,
+            "tags": tag_serializer.data,
+            "records": serializer.data
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        research = Research.objects.get(id=pk)
+        research.views += 1
+        research.save()
+        return Response({"message": "更新相關研究觀看數成功"}, status=status.HTTP_200_OK)

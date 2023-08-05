@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, InterviewTag1, \
-    InterviewTag2, InterviewTag3, InterviewStakeholder, InterviewPeople, InterviewContent, Literature, NewsTag, News
+    InterviewTag2, InterviewTag3, InterviewStakeholder, InterviewPeople, InterviewContent, Literature, NewsTag, News,\
+    ResearchTag, Research
 
 class HomepagePhotoAdmin(admin.ModelAdmin):
     list_display = ('order', 'image', 'display')
@@ -70,6 +71,16 @@ class NewsAdmin(admin.ModelAdmin):
     search_fields = ('title', 'reference', 'reporter')
     ordering = ('-date',)
 
+class ResearchTagAdmin(admin.ModelAdmin):
+    list_display = ['id', 'title']
+
+class ResearchAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'author', 'year', 'reference', 'link', 'display_research_tag', 'views')
+    ordering = ('-year',)
+
+    def display_research_tag(self, obj):
+        return ', '.join([tag.title for tag in obj.tags.all()])
+
 admin.site.register(HomepagePhoto, HomepagePhotoAdmin)
 admin.site.register(LatestEventTag, LatestEventTagAdmin)
 admin.site.register(LatestEvent, LatestEventAdmin)
@@ -84,3 +95,5 @@ admin.site.register(InterviewContent, InterviewContentAdmin)
 admin.site.register(Literature, LiteratureAdmin)
 admin.site.register(NewsTag, NewsTagAdmin)
 admin.site.register(News, NewsAdmin)
+admin.site.register(ResearchTag, ResearchTagAdmin)
+admin.site.register(Research, ResearchAdmin)
