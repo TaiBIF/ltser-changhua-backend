@@ -166,4 +166,4 @@ class DownloadRecordSerializer(serializers.ModelSerializer):
         fields = ['filename', 'time']
 
     def get_time(self, obj):
-        return (obj.time + timezone.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S')
+        return (obj.time + timezone.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
