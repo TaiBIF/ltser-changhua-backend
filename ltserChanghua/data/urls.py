@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import HomepagePhotoAPIView, LatestEventTagAPIView, LatestEventAPIView, CrabSiteAPIView, \
     WaterQualityManualSiteAPIView, BenthicOrganismAPIView, CrabAPIView, WaterQualityManualsAPIView, \
-    LiteratureAPIView, NewsAPIView, ResearchAPIView
+    LiteratureAPIView, NewsAPIView, ResearchAPIView, DownloadWaterQualityManyalAPIView, DownloadCrabAPIView
 
 urlpatterns = [
     path("getHomepagePhotos", HomepagePhotoAPIView.as_view(), name="getHomepagePhotos"),
@@ -19,4 +19,8 @@ urlpatterns = [
     path('news/<str:pk>/', NewsAPIView.as_view(), name='news_detail'),
     path('research/', ResearchAPIView.as_view(), name='get_research_lists'),
     path('research/<str:pk>/', ResearchAPIView.as_view(), name='research_detail'),
+    path('download/waterQualityManual/', DownloadWaterQualityManyalAPIView.as_view(),
+         name='download-waterquality-manual'),
+    path('download/crab/', DownloadCrabAPIView.as_view(),
+         name='download-crab')
 ]

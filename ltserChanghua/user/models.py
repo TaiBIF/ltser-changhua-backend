@@ -74,3 +74,15 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+class DownloadRecord(models.Model):
+    filename = models.CharField(max_length=200)
+    time = models.DateTimeField(default=timezone.now)
+    user = models.ForeignKey(MyUser, on_delete=models.CASCADE, related_name='download_records')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.filename}"
+    class Meta:
+        db_table = 'DownloadRecord'

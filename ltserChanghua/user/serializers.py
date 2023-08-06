@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from .models import UserProfile, MyUser
+from .models import UserProfile, MyUser, DownloadRecord
 from django.core.validators import RegexValidator
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
@@ -8,6 +8,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str
+from django.utils import timezone
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         required=True,
@@ -157,3 +158,12 @@ class SetNewPasswordSerializer(serializers.ModelSerializer):
             return user
         except Exception as e:
             raise AuthenticationFailed('The rest link is invalid', 401)
+
+class DownloadRecordSerializer(serializers.ModelSerializer):
+    time = serializers.SerializerMethodField()
+    class Meta:
+        model = DownloadRecord
+        fields = ['filename', 'time']
+
+    def get_time(self, obj):
+        return (obj.time + timezone.timedelta(hours=8)).strftime('%Y-%m-%dT%H:%M:%S')

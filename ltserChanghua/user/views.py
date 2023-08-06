@@ -1,6 +1,6 @@
 from .serializers import UserProfileSerializer, EmailVerificationSerializer, ResendEmailVerifySerializer, \
-    LoginSerializer, UpdatePasswordSerializer, ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer
-from .models import UserProfile, MyUser
+    LoginSerializer, UpdatePasswordSerializer, ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer, DownloadRecordSerializer
+from .models import UserProfile, MyUser, DownloadRecord
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
@@ -14,6 +14,9 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import smart_bytes, smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from rest_framework.pagination import PageNumberPagination
+class CustomPageNumberPagination(PageNumberPagination):
+    page_size = 10
 
 class RegisterAPIView(APIView):
     serializer_class = UserProfileSerializer
@@ -183,3 +186,20 @@ class SetNewPasswordAPIView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({'success': True, 'message': '重置密碼成功'}, status=status.HTTP_200_OK)
+
+class DownloadRecordAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        paginator = CustomPageNumberPagination()
+        records = DownloadRecord.objects.filter(user__id=user.id).order_by('-id')
+        result_page = paginator.paginate_queryset(records, request)
+        serializer = DownloadRecordSerializer(result_page, many=True)
+        return Response({
+            'currentPage': paginator.page.number,
+            'recordsPerPage': paginator.page_size,
+            'totalPages': paginator.page.paginator.num_pages,
+            'totalRecords': paginator.page.paginator.count,
+            'records': serializer.data
+        }, status=status.HTTP_200_OK)

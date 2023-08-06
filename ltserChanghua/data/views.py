@@ -9,6 +9,15 @@ from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, Late
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+import io
+from datetime import datetime, timedelta
+import zipfile
+import csv
+import os
+from user.models import DownloadRecord
+from django.http import FileResponse
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
@@ -235,3 +244,70 @@ class ResearchAPIView(APIView):
         research.views += 1
         research.save()
         return Response({"message": "更新相關研究觀看數成功"}, status=status.HTTP_200_OK)
+
+class DownloadWaterQualityManyalAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user = request.user
+        except:
+            raise PermissionDenied('No permission. Please login as a member.')
+
+        zip_io = io.BytesIO()
+        now = datetime.now()
+        filename = "LTSER Changhua_水質觀測資料_" + now.strftime("%Y-%m-%d")
+        with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            csv_file = f'{filename}.csv'
+            with open(csv_file, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([field.name for field in WaterQualityManual._meta.fields])
+                for instance in WaterQualityManual.objects.all():
+                    row = []
+                    for field in WaterQualityManual._meta.fields:
+                        value = getattr(instance, field.name)
+                        row.append(value)
+                    writer.writerow(row)
+
+            zipf.write(csv_file)
+            os.remove(csv_file)
+
+        DownloadRecord.objects.create(filename=f'{filename}.csv', user=user)
+        zip_io.seek(0)
+        response = FileResponse(zip_io, as_attachment=True, filename=f'{filename}.zip')
+        return response
+
+
+class DownloadCrabAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user = request.user
+        except:
+            raise PermissionDenied('No permission. Please login as a member.')
+
+        zip_io = io.BytesIO()
+        now = datetime.now()
+        filename1 = "LTSER Changhua_底棲生物資料_土壤" + now.strftime("%Y-%m-%d")
+        filename2 = "LTSER Changhua_底棲生物資料_螃蟹" + now.strftime("%Y-%m-%d")
+
+        with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for filename, model in [(filename1, BenthicOrganism), (filename2, Crab)]:
+                csv_file = f'{filename}.csv'
+                with open(csv_file, 'w', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow([field.name for field in model._meta.fields])
+                    for instance in model.objects.all():
+                        row = []
+                        for field in model._meta.fields:
+                            value = getattr(instance, field.name)
+                            row.append(value)
+                        writer.writerow(row)
+
+                zipf.write(csv_file)
+                DownloadRecord.objects.create(filename=f'{filename}.csv', user=user)
+                os.remove(csv_file)
+        zip_io.seek(0)
+        response = FileResponse(zip_io, as_attachment=True, filename=f'LTSER Changhua_底棲生物資料_{now.strftime("%Y-%m-%d")}.zip')
+        return response
