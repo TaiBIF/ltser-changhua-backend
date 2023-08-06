@@ -105,8 +105,18 @@ class ResearchTagSerializer(serializers.ModelSerializer):
         fields = ('id', 'title')
 
 class ResearchSerializer(serializers.ModelSerializer):
+    research = serializers.SerializerMethodField()
     tags = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
+    def get_research(self, obj):
+        resarch_data = {
+            'author': obj.author,
+            'year': obj.year,
+            'reference': obj.reference,
+        }
+        return resarch_data
 
     class Meta:
         model = Research
-        fields = ('id', 'title', 'author', 'year', 'reference', 'link', 'tags', 'views')
+        fields = ('id', 'title', 'research', 'link', 'tags', 'views')
+

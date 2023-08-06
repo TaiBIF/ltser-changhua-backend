@@ -207,7 +207,6 @@ class ResearchAPIView(APIView):
     def get(self, request):
         tag_id = request.GET.get('tag')
         if tag_id:
-            # 如果有 tag_id，則根據日期順序排序
             research = Research.objects.filter(tags__id=tag_id).order_by('-year')
         else:
             research =  Research.objects.all().order_by('-year')
