@@ -252,7 +252,7 @@ class Research(models.Model):
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
     year = models.PositiveIntegerField(null=True, blank=True)
-    reference = models.CharField(max_length=255)
+    reference = models.CharField(max_length=255, null=True, blank=True)
     link = models.URLField()
     views = models.IntegerField(default=0)
     tags = models.ManyToManyField('ResearchTag', related_name='research')
