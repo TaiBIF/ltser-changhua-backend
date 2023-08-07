@@ -2,10 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism, \
     Crab, \
-    WaterQualityManual, Literature, NewsTag, News, ResearchTag, Research
+    WaterQualityManual, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, InterviewTag3, \
+    InterviewTag2, InterviewStakeholder, InterviewPeople
 from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
     WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, WaterQualityManualSerializer, \
-    LiteratureSerializer, NewsTagSerializer, NewsSerializer, ResearchTagSerializer, ResearchSerializer
+    LiteratureSerializer, NewsTagSerializer, NewsSerializer, ResearchTagSerializer, ResearchSerializer, InterviewContentSerializer
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
@@ -18,6 +19,7 @@ import csv
 import os
 from user.models import DownloadRecord
 from django.http import FileResponse
+import calendar
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
@@ -244,6 +246,33 @@ class ResearchAPIView(APIView):
         research.views += 1
         research.save()
         return Response({"message": "更新相關研究觀看數成功"}, status=status.HTTP_200_OK)
+
+class InterviewSingleAPIView(APIView):
+    def get(self, request):
+        d1_str = request.GET.get('d1')
+        d2_str = request.GET.get('d2')
+        people = request.GET.get('people')
+
+        # 轉換 d1 和 d2 為日期範圍
+        d1_year, d1_month = map(int, d1_str.split('-'))
+        d2_year, d2_month = map(int, d2_str.split('-'))
+
+        # 獲取 d1 的開始日期 (第一天)
+        d1_start = datetime(d1_year, d1_month, 1).date()
+
+        # 獲取 d2 的結束日期 (該月的最後一天)
+        last_day_d2 = calendar.monthrange(d2_year, d2_month)[1]
+        d2_end = datetime(d2_year, d2_month, last_day_d2).date()
+
+        try:
+            person = InterviewPeople.objects.get(title=people)
+            interview_contents = InterviewContent.objects.filter(interview_date__range=(d1_start, d2_end), interview_people=person)
+        except InterviewPeople.DoesNotExist:
+            return Response({"error": "Invalid person ID."}, status=400)
+
+        serializer = InterviewContentSerializer(interview_contents, many=True, context={'request': request})
+        return Response(serializer.data)
+
 
 class DownloadWaterQualityManyalAPIView(APIView):
     permission_classes = [IsAuthenticated]
