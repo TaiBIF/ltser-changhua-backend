@@ -122,13 +122,18 @@ class ResearchSerializer(serializers.ModelSerializer):
 
 class InterviewContentSerializer(serializers.ModelSerializer):
     content = serializers.SerializerMethodField()
+    date = serializers.DateField(source='interview_date')
+    tag2 = serializers.PrimaryKeyRelatedField(source='interview_tag2', many=True, read_only=True)
+    tag3 = serializers.PrimaryKeyRelatedField(source='interview_tag3', many=True, read_only=True)
+    people = serializers.PrimaryKeyRelatedField(source='interview_people', many=True, read_only=True)
+    stakeholder = serializers.PrimaryKeyRelatedField(source='interview_stakeholder', many=True, read_only=True)
 
     class Meta:
         model = InterviewContent
-        fields = '__all__'  # 或者您想要顯示的其他字段列表
+        fields = ['date', 'content', 'tag2', 'tag3', 'people', 'stakeholder']
 
     def get_content(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
             return obj.content
-        return obj.content[:20]
+        return obj.content[:20] + '......'
