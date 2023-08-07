@@ -1,5 +1,5 @@
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganism, \
-    Crab, WaterQualityManual, Literature, NewsTag, News, ResearchTag, Research
+    Crab, WaterQualityManual, Literature, NewsTag, News, ResearchTag, Research, InterviewContent
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -120,3 +120,15 @@ class ResearchSerializer(serializers.ModelSerializer):
         model = Research
         fields = ('id', 'title', 'research', 'link', 'tags', 'views')
 
+class InterviewContentSerializer(serializers.ModelSerializer):
+    content = serializers.SerializerMethodField()
+
+    class Meta:
+        model = InterviewContent
+        fields = '__all__'  # 或者您想要顯示的其他字段列表
+
+    def get_content(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
+            return obj.content
+        return obj.content[:20]
