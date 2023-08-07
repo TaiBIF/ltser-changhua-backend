@@ -20,6 +20,7 @@ import os
 from user.models import DownloadRecord
 from django.http import FileResponse
 import calendar
+from django.db.models import Q
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
@@ -266,7 +267,7 @@ class InterviewSingleAPIView(APIView):
 
         try:
             person = InterviewPeople.objects.get(title=people)
-            interview_contents = InterviewContent.objects.filter(interview_date__range=(d1_start, d2_end), interview_people=person)
+            interview_contents = InterviewContent.objects.filter(interview_date__range=(d1_start, d2_end), interview_people=person).order_by('-interview_date')
         except InterviewPeople.DoesNotExist:
             return Response({"error": "Invalid person ID."}, status=400)
 
@@ -285,6 +286,37 @@ class InterviewSingleAPIView(APIView):
 
         return Response(response_data, status=status.HTTP_200_OK)
 
+class InterviewMultipleAPIView(APIView):
+    def get(self, request):
+        tag2_values = request.query_params.get('tag2', None)
+        tag3_values = request.query_params.get('tag3', None)
+        stakeholder_values = request.query_params.get('stakeholder', None)
+
+        query = Q()
+
+        # Check and filter by tag2 values
+        if tag2_values:
+            tag2_list = [int(tag) for tag in tag2_values.split(',')]
+            query |= Q(interview_tag2__id__in=tag2_list)
+
+        # Check and filter by tag3 values
+        if tag3_values:
+            tag3_list = [int(tag) for tag in tag3_values.split(',')]
+            query |= Q(interview_tag3__id__in=tag3_list)
+
+        # Check and filter by stakeholder values
+        if stakeholder_values:
+            stakeholder_list = [int(stakeholder) for stakeholder in stakeholder_values.split(',')]
+            query |= Q(interview_stakeholder__id__in=stakeholder_list)
+
+
+        interview_contents = InterviewContent.objects.filter(query).order_by('-interview_date')
+
+
+        paginator = CustomPageNumberPagination()
+        result_page = paginator.paginate_queryset(interview_contents, request)
+        serializer = InterviewContentSerializer(result_page, many=True, context={'request': request})
+        return Response(serializer.data)
 
 class DownloadWaterQualityManyalAPIView(APIView):
     permission_classes = [IsAuthenticated]
