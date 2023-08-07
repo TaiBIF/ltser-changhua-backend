@@ -123,10 +123,11 @@ class ResearchSerializer(serializers.ModelSerializer):
 class InterviewContentSerializer(serializers.ModelSerializer):
     content = serializers.SerializerMethodField()
     date = serializers.DateField(source='interview_date')
-    tag2 = serializers.PrimaryKeyRelatedField(source='interview_tag2', many=True, read_only=True)
-    tag3 = serializers.PrimaryKeyRelatedField(source='interview_tag3', many=True, read_only=True)
-    people = serializers.PrimaryKeyRelatedField(source='interview_people', many=True, read_only=True)
-    stakeholder = serializers.PrimaryKeyRelatedField(source='interview_stakeholder', many=True, read_only=True)
+    tag2 = serializers.SlugRelatedField(slug_field='title', source='interview_tag2', many=True, read_only=True)
+    tag3 = serializers.SlugRelatedField(slug_field='title', source='interview_tag3', many=True, read_only=True)
+    people = serializers.SlugRelatedField(slug_field='title', source='interview_people', many=True, read_only=True)
+    stakeholder = serializers.SlugRelatedField(slug_field='title', source='interview_stakeholder', many=True,
+                                               read_only=True)
 
     class Meta:
         model = InterviewContent
