@@ -316,7 +316,16 @@ class InterviewMultipleAPIView(APIView):
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset(interview_contents, request)
         serializer = InterviewContentSerializer(result_page, many=True, context={'request': request})
-        return Response(serializer.data)
+
+        response_data = {
+            "currentPage": paginator.page.number,
+            "recordsPerPage": paginator.page_size,
+            "totalPages": paginator.page.paginator.num_pages,
+            "totalRecords": paginator.page.paginator.count,
+            "records": serializer.data
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 class DownloadWaterQualityManyalAPIView(APIView):
     permission_classes = [IsAuthenticated]
