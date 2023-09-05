@@ -202,8 +202,8 @@ class Literature(models.Model):
     author = models.CharField(max_length=255)
     publisher = models.CharField(max_length=255)
     date = models.IntegerField()
-    refID = models.CharField(max_length=255)
-    link = models.URLField()
+    refID = models.CharField(max_length=255, null=True, blank=True)
+    link = models.URLField(null=True, blank=True)
     is_ebook = models.BooleanField(max_length=2)
     views = models.IntegerField(default=0)
 
@@ -248,7 +248,7 @@ class Research(models.Model):
     author = models.CharField(max_length=255)
     year = models.PositiveIntegerField(null=True, blank=True)
     reference = models.CharField(max_length=255, null=True, blank=True)
-    link = models.URLField()
+    link = models.URLField(null=True, blank=True)
     views = models.IntegerField(default=0)
     tags = models.ManyToManyField('ResearchTag', related_name='research')
 
