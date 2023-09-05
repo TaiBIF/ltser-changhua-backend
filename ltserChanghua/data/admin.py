@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, InterviewTag1, \
     InterviewTag2, InterviewTag3, InterviewStakeholder, InterviewPeople, InterviewContent, Literature, NewsTag, News,\
-    ResearchTag, Research, WaterQualityManualData
+    ResearchTag, Research, WaterQualityManualData, BenthicOrganismData
 
 class HomepagePhotoAdmin(admin.ModelAdmin):
     list_display = ('order', 'image', 'display')
@@ -14,6 +14,9 @@ class LatestEventAdmin(admin.ModelAdmin):
     list_filter = ['display', 'created_at', 'updated_at']
     search_fields = ['title', 'organizer']
     raw_id_fields = ['tags']
+
+class BenthicOrganismDataAdmin(admin.ModelAdmin):
+    list_display = ['id', 'year', 'site', 'month']
 
 class CrabSiteAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'latitude', 'longitude']
@@ -101,3 +104,4 @@ admin.site.register(News, NewsAdmin)
 admin.site.register(ResearchTag, ResearchTagAdmin)
 admin.site.register(Research, ResearchAdmin)
 admin.site.register(WaterQualityManualData, WaterQualityManualDataAdmin)
+admin.site.register(BenthicOrganismData, BenthicOrganismDataAdmin)

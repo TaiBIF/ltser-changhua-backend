@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism, \
+from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganismData, \
     Crab, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, InterviewTag3, \
     InterviewTag2, InterviewStakeholder, InterviewPeople, WaterQualityManualData
 from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
@@ -103,7 +103,7 @@ class BenthicOrganismAPIView(APIView):
     def get(self, request):
         site = request.query_params.get('site', None)
         if site is not None:
-            bo = BenthicOrganism.objects.filter(site=site)
+            bo = BenthicOrganismData.objects.filter(site=site)
             serializer = BenthicOrganismSerializer(bo, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:

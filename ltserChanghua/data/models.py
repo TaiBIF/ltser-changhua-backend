@@ -53,7 +53,7 @@ class WaterQualityManualSite(models.Model):
     class Meta:
         db_table = 'WaterQualityManualSite'
 
-class BenthicOrganism(models.Model):
+class BenthicOrganismData(models.Model):
     year = models.CharField(max_length=6)
     site = models.CharField(max_length=10)
     month = models.CharField(max_length=6)
@@ -74,7 +74,7 @@ class BenthicOrganism(models.Model):
     orp = models.DecimalField(max_digits=7, decimal_places=3, null=True, blank=True, editable=False)
 
     class Meta:
-        db_table = 'BenthicOrganism'
+        db_table = 'BenthicOrganismData'
 
 class Crab(models.Model):
     year = models.CharField(max_length=6)
