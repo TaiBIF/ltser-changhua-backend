@@ -76,7 +76,7 @@ class BenthicOrganismData(models.Model):
     class Meta:
         db_table = 'BenthicOrganismData'
 
-class Crab(models.Model):
+class CrabData(models.Model):
     year = models.CharField(max_length=6)
     site = models.CharField(max_length=10)
     month = models.CharField(max_length=6)
@@ -90,7 +90,6 @@ class Crab(models.Model):
     Sb = models.IntegerField(blank=False, null=False, editable=True, default=0)
     Sl = models.IntegerField(blank=False, null=False, editable=True, default=0)
     It = models.IntegerField(blank=False, null=False, editable=True, default=0)
-    If = models.IntegerField(blank=False, null=False, editable=True, default=0)
     Oc = models.IntegerField(blank=False, null=False, editable=True, default=0)
     Al = models.IntegerField(blank=False, null=False, editable=True, default=0)
     Ta = models.IntegerField(blank=False, null=False, editable=True, default=0)

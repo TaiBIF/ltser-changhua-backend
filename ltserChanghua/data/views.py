@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganismData, \
-    Crab, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, InterviewTag3, \
+    CrabData, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, InterviewTag3, \
     InterviewTag2, InterviewStakeholder, InterviewPeople, WaterQualityManualData
 from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
     WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, LiteratureSerializer, \
@@ -113,7 +113,7 @@ class CrabAPIView(APIView):
     def get(self, request):
         site = request.query_params.get('site', None)
         if site is not None:
-            crabs = Crab.objects.filter(site=site)
+            crabs = CrabData.objects.filter(site=site)
             serializer = CrabSerializer(crabs, many=True)
             list_of_objects = serializer.data
             res = []
