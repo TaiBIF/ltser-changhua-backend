@@ -400,13 +400,19 @@ class InterviewTag2ListAPIView(APIView):
     @staticmethod
     def extract_option_id(title):
         return title.split('.')[-1][0]
+
+    @staticmethod
+    def extract_category_id(title):
+        return title.split('.')[0]
+
     def get(self, request):
         categoryId = request.query_params.get('categoryId', None)
 
-        if not categoryId:
-            return Response({'error': 'categoryId is required'}, status=400)
+        if categoryId:
+            interviewtag2_list = InterviewTag2.objects.filter(interview_tag1_id=categoryId)
+        else:
+            interviewtag2_list = InterviewTag2.objects.all()
 
-        interviewtag2_list = InterviewTag2.objects.filter(interview_tag1_id=categoryId)
         serializer = InterviewTag2Serializer(interviewtag2_list, many=True)
 
         # Constructing the response data
@@ -415,16 +421,17 @@ class InterviewTag2ListAPIView(APIView):
             has_child_tags = InterviewTag3.objects.filter(interview_tag2_id=item['id']).exists()
 
             option_id_from_title = self.extract_option_id(item['title'])
+            category_id_from_title = self.extract_category_id(item['title'])
 
             optionId = option_id_from_title if not has_child_tags else None
             groupId = option_id_from_title if has_child_tags else None
 
             data = {
                 'tag2': item['id'],
-                'categoryId': str(item['interview_tag1_id']),
+                'categoryId': category_id_from_title,
                 'optionId': optionId,
                 'groupId': groupId,
-                'title': item['title'].split(' ')[-1]  # assuming title format is 'X.Y Title'
+                'title': item['title'].split(' ')[-1]
             }
             records.append(data)
 
@@ -434,35 +441,39 @@ class InterviewTag2ListAPIView(APIView):
 class InterviewTag3ListAPIView(APIView):
 
     @staticmethod
-    def extract_option_id(title):
-        return title.split('.')[-1][0]
+    def extract_ids_from_title(title):
+        parts = title.split('.')
+        categoryId = parts[0] if len(parts) > 0 else None
+        groupId = parts[1] if len(parts) > 1 else None
+        optionId = parts[2][0] if len(parts) > 2 else None
+        return categoryId, groupId, optionId
 
     def get(self, request):
         categoryId = request.query_params.get('categoryId', None)
         groupId = request.query_params.get('groupId', None)
 
-        if not categoryId or not groupId:
-            return Response({'error': 'categoryId and groupId are required'}, status=400)
+        if categoryId and groupId:
+            # We fetch the InterviewTag2 instance matching the groupId (by title) and the categoryId
+            tag2_instance = InterviewTag2.objects.filter(title__startswith=f"{categoryId}.{groupId} ", interview_tag1_id=categoryId).first()
+            if not tag2_instance:
+                return Response({'error': 'No matching InterviewTag2 found'}, status=400)
+            interviewtag3_list = InterviewTag3.objects.filter(interview_tag2=tag2_instance)
+        else:
+            # Fetch all InterviewTag3 instances
+            interviewtag3_list = InterviewTag3.objects.all()
 
-        # We fetch the InterviewTag2 instance matching the groupId (by title) and the categoryId
-        tag2_instance = InterviewTag2.objects.filter(title__startswith=f"{categoryId}.{groupId} ", interview_tag1_id=categoryId).first()
-        if not tag2_instance:
-            return Response({'error': 'No matching InterviewTag2 found'}, status=400)
-
-        # Fetch the InterviewTag3 instances that belong to the above found InterviewTag2 instance
-        interviewtag3_list = InterviewTag3.objects.filter(interview_tag2=tag2_instance)
         serializer = InterviewTag3Serializer(interviewtag3_list, many=True)
 
         # Constructing the response data
         records = []
         for item in serializer.data:
-            optionId = self.extract_option_id(item['title'])  # 使用 self 調用靜態方法
+            catId, grpId, optionId = self.extract_ids_from_title(item['title'])
             data = {
                 'tag3': item['id'],
-                'categoryId': categoryId,
-                'groupId': groupId,
+                'categoryId': catId,
+                'groupId': grpId,
                 'optionId': optionId,
-                'title': item['title'].split(' ')[-1],  # Assuming title format remains consistent
+                'title': item['title'].split(' ')[-1]  # Assuming title format remains consistent
             }
             records.append(data)
 
