@@ -1,5 +1,6 @@
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganismData, \
-    CrabData, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, WaterQualityManualData
+    CrabData, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, WaterQualityManualData, \
+    InterviewTag2, InterviewTag3
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -138,3 +139,15 @@ class InterviewContentSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
             return obj.content
         return obj.content[:20] + '......'
+
+
+class InterviewTag2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = InterviewTag2
+        fields = ['id', 'title', 'interview_tag1_id']
+
+
+class InterviewTag3Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = InterviewTag3
+        fields = ['id', 'title']
