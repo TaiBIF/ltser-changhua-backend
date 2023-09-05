@@ -1,12 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism, \
-    Crab, \
-    WaterQualityManual, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, InterviewTag3, \
-    InterviewTag2, InterviewStakeholder, InterviewPeople
+    Crab, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, InterviewTag3, \
+    InterviewTag2, InterviewStakeholder, InterviewPeople, WaterQualityManual
 from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
-    WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, WaterQualityManualSerializer, \
-    LiteratureSerializer, NewsTagSerializer, NewsSerializer, ResearchTagSerializer, ResearchSerializer, InterviewContentSerializer
+    WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, LiteratureSerializer, \
+    NewsTagSerializer, NewsSerializer, ResearchTagSerializer, ResearchSerializer, InterviewContentSerializer, WaterQualityManualSerializer
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta

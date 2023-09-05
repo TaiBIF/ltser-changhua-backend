@@ -48,8 +48,6 @@ class WaterQualityManualSite(models.Model):
     title = models.CharField(max_length=200)
     latitude = models.DecimalField(max_digits=15, decimal_places=8, null=True, blank=True)
     longitude = models.DecimalField(max_digits=15, decimal_places=8, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
         return f"水質人工觀測點位: {self.title}"
     class Meta:
@@ -112,16 +110,16 @@ class WaterQualityManual(models.Model):
     year = models.CharField(max_length=6)
     site = models.CharField(max_length=10)
     month = models.CharField(max_length=6)
-    w_temp = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, editable=False)
-    w_ph = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True, editable=False)
-    phmv = models.DecimalField(max_digits=7, decimal_places=3 , null=True, blank=True, editable=False)
-    orp = models.DecimalField(max_digits=7, decimal_places=3, null=True, blank=True, editable=False)
-    cond = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, editable=False)
-    turb = models.DecimalField(max_digits=7, decimal_places=3, null=True, blank=True, editable=False)
-    do = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True, editable=False)
-    tds = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, editable=False)
-    w_sal = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, editable=False)
-    sg = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, editable=False)
+    w_temp = models.FloatField()
+    w_ph = models.FloatField()
+    phmv = models.FloatField()
+    orp = models.FloatField()
+    cond = models.FloatField()
+    turb = models.FloatField()
+    do = models.FloatField()
+    tds = models.FloatField()
+    w_sal = models.FloatField()
+    sg = models.FloatField()
 
     class Meta:
         db_table = 'WaterQualityManual'

@@ -1,5 +1,5 @@
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganism, \
-    Crab, WaterQualityManual, Literature, NewsTag, News, ResearchTag, Research, InterviewContent
+    Crab, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, WaterQualityManual
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
