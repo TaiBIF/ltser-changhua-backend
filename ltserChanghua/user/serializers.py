@@ -91,7 +91,7 @@ class LoginSerializer(serializers.ModelSerializer):
         if not user:
             raise AuthenticationFailed('無效的帳號或密碼')
 
-        if not user.is_active:
+        if not user.is_verified:
             raise AuthenticationFailed('尚未確認驗證信')
 
         return user
