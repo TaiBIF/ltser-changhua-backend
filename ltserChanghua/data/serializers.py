@@ -1,5 +1,5 @@
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganism, \
-    Crab, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, WaterQualityManual
+    Crab, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, WaterQualityManualData
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -58,7 +58,7 @@ class CrabSerializer(serializers.ModelSerializer):
 
 class WaterQualityManualSerializer(serializers.ModelSerializer):
     class Meta:
-        model = WaterQualityManual
+        model = WaterQualityManualData
         fields = "__all__"
 
 class LiteratureSerializer(serializers.ModelSerializer):

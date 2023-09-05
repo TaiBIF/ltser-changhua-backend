@@ -106,7 +106,7 @@ class Crab(models.Model):
     class Meta:
         db_table = 'Crab'
 
-class WaterQualityManual(models.Model):
+class WaterQualityManualData(models.Model):
     year = models.CharField(max_length=6)
     site = models.CharField(max_length=10)
     month = models.CharField(max_length=6)
@@ -122,7 +122,7 @@ class WaterQualityManual(models.Model):
     sg = models.FloatField()
 
     class Meta:
-        db_table = 'WaterQualityManual'
+        db_table = 'WaterQualityManualData'
 
 class InterviewTag1(models.Model):
     title = models.CharField(max_length=200)

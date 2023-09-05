@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganism, \
     Crab, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, InterviewTag3, \
-    InterviewTag2, InterviewStakeholder, InterviewPeople, WaterQualityManual
+    InterviewTag2, InterviewStakeholder, InterviewPeople, WaterQualityManualData
 from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
     WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, LiteratureSerializer, \
     NewsTagSerializer, NewsSerializer, ResearchTagSerializer, ResearchSerializer, InterviewContentSerializer, WaterQualityManualSerializer
@@ -134,7 +134,7 @@ class CrabAPIView(APIView):
 class WaterQualityManualsAPIView(APIView):
     def get(self, request, *args, **kwargs):
         site = request.query_params.get('site', None)
-        wq = WaterQualityManual.objects.filter(site=site)
+        wq = WaterQualityManualData.objects.filter(site=site)
         serializer = WaterQualityManualSerializer(wq, many=True)
         list_of_objects = serializer.data
         res = []
