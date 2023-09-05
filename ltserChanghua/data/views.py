@@ -374,7 +374,7 @@ class DownloadCrabAPIView(APIView):
         filename2 = "LTSER Changhua_螃蟹資料" + now.strftime("%Y-%m-%d")
 
         with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for filename, model in [(filename1, BenthicOrganismData), (filename2, Crab)]:
+            for filename, model in [(filename1, BenthicOrganismData), (filename2, CrabData)]:
                 csv_file = f'{filename}.csv'
                 with open(csv_file, 'w', newline='') as f:
                     writer = csv.writer(f)
