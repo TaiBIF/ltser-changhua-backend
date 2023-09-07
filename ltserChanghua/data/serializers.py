@@ -85,7 +85,7 @@ class NewsTagSerializer(serializers.ModelSerializer):
 
 class NewsSerializer(serializers.ModelSerializer):
     news = serializers.SerializerMethodField()
-    tags = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    #tags = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     def get_news(self, obj):
         news_data = {
@@ -98,7 +98,7 @@ class NewsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = News
-        fields = ('id', 'title', 'news', 'link', 'tags', 'views')
+        fields = ('id', 'title', 'news', 'link',  'views')
 
 class ResearchTagSerializer(serializers.ModelSerializer):
     class Meta:
