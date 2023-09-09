@@ -214,14 +214,17 @@ class NewsAPIView(APIView):
         news.views += 1
         news.save()
         return Response({"message": "更新新聞觀看數成功"}, status=status.HTTP_200_OK)
-
 class ResearchAPIView(APIView):
     def get(self, request):
+        keyword = request.GET.get('keyword')
         tag_id = request.GET.get('tag')
-        if tag_id:
+
+        if keyword:
+            research = Research.objects.filter(Q(title__icontains=keyword)).order_by('-year')
+        elif tag_id:
             research = Research.objects.filter(tags__id=tag_id).order_by('-year')
         else:
-            research =  Research.objects.all().order_by('-year')
+            research = Research.objects.all().order_by('-year')
 
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset(research, request)
@@ -230,7 +233,6 @@ class ResearchAPIView(APIView):
         researchTags = ResearchTag.objects.all()
         tag_serializer = ResearchTagSerializer(researchTags, many=True)
 
-        # 將數據整理成所需的回傳格式
         response_data = {
             "currentPage": paginator.page.number,
             "recordsPerPage": paginator.page_size,
@@ -241,7 +243,6 @@ class ResearchAPIView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
-
     def patch(self, request, pk):
         research = Research.objects.get(id=pk)
         research.views += 1
@@ -480,26 +481,3 @@ class InterviewTag3ListAPIView(APIView):
         return Response({'records': records})
 
 
-class ResearchKeywordAPIView(APIView):
-    def get(self, request):
-        keyword = request.GET.get('keyword')
-        if keyword:
-            # 使用 Q 物件來搜尋 title 包含 keyword 的資料
-            research = Research.objects.filter(Q(title__icontains=keyword)).order_by('-year')
-        else:
-            return Response({"error": "keyword parameter is missing"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # 這裡假設你要使用分頁和序列化，你可以根據需求進行調整
-        paginator = CustomPageNumberPagination()
-        result_page = paginator.paginate_queryset(research, request)
-        serializer = ResearchSerializer(result_page, many=True)
-
-        response_data = {
-            "currentPage": paginator.page.number,
-            "recordsPerPage": paginator.page_size,
-            "totalPages": paginator.page.paginator.num_pages,
-            "totalRecords": paginator.page.paginator.count,
-            "records": serializer.data
-        }
-
-        return Response(response_data, status=status.HTTP_200_OK)
