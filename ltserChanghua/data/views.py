@@ -150,13 +150,19 @@ class WaterQualityManualsAPIView(APIView):
             obj["data"] = data
             res.append(obj)
         return Response(res, status=status.HTTP_200_OK)
-
 class LiteratureAPIView(APIView):
     def get(self, request):
+        keyword = request.GET.get('keyword')
+
+        if keyword:
+            literature = Literature.objects.filter(Q(title__icontains=keyword)).order_by('-id')
+        else:
+            literature = Literature.objects.all().order_by('-id')
+
         paginator = CustomPageNumberPagination()
-        literature = Literature.objects.all().order_by('-id')
         result_page = paginator.paginate_queryset(literature, request)
         serializer = LiteratureSerializer(result_page, many=True)
+
         return Response({
             'currentPage': paginator.page.number,
             'recordsPerPage': paginator.page_size,
@@ -164,7 +170,6 @@ class LiteratureAPIView(APIView):
             'totalRecords': paginator.page.paginator.count,
             'records': serializer.data
         }, status=status.HTTP_200_OK)
-
     def patch(self, request, pk):
         literature = Literature.objects.get(id=pk)
         literature.views += 1
@@ -180,12 +185,15 @@ class NewsTagsAPIView(APIView):
 
 class NewsAPIView(APIView):
     def get(self, request):
+        keyword = request.GET.get('keyword')
         tag_id = request.GET.get('tag')
-        if tag_id:
-            # 如果有 tag_id，則根據日期順序排序
+
+        if keyword:
+            news = News.objects.filter(Q(title__icontains=keyword)).order_by('-date')
+        elif tag_id:
             news = News.objects.filter(tags__id=tag_id).order_by('-date')
         else:
-            # 如果沒有 tag_id，找出離現在最新的兩個月日期
+            # 如果沒有 keyword 和 tag_id，找出離現在最新的兩個月日期
             two_months_ago = datetime.now() - timedelta(days=60)
             news = News.objects.filter(date__gte=two_months_ago).order_by('-date')
 
@@ -214,6 +222,7 @@ class NewsAPIView(APIView):
         news.views += 1
         news.save()
         return Response({"message": "更新新聞觀看數成功"}, status=status.HTTP_200_OK)
+
 class ResearchAPIView(APIView):
     def get(self, request):
         keyword = request.GET.get('keyword')
