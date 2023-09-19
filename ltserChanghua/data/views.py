@@ -20,7 +20,7 @@ import os
 from user.models import DownloadRecord
 from django.http import FileResponse
 import calendar
-from django.db.models import Q
+from django.db.models import Q, Case, When, IntegerField, Count, Value
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
@@ -302,26 +302,28 @@ class InterviewMultipleAPIView(APIView):
         tag3_values = request.query_params.get('tag3', None)
         stakeholder_values = request.query_params.get('stakeholder', None)
 
-        query = Q()
+        # Process input values
+        tag2_list = [int(tag) for tag in tag2_values.split(',')] if tag2_values else []
+        tag3_list = [int(tag) for tag in tag3_values.split(',')] if tag3_values else []
+        stakeholder_list = [int(stakeholder) for stakeholder in stakeholder_values.split(',')] if stakeholder_values else []
 
-        # Check and filter by tag2 values
-        if tag2_values:
-            tag2_list = [int(tag) for tag in tag2_values.split(',')]
-            query |= Q(interview_tag2__id__in=tag2_list)
+        whens = []
+        for tag in tag2_list:
+            whens.append(When(interview_tag2__id=tag, then=1))
+        for tag in tag3_list:
+            whens.append(When(interview_tag3__id=tag, then=1))
+        for stakeholder in stakeholder_list:
+            whens.append(When(interview_stakeholder__id=stakeholder, then=1))
 
-        # Check and filter by tag3 values
-        if tag3_values:
-            tag3_list = [int(tag) for tag in tag3_values.split(',')]
-            query |= Q(interview_tag3__id__in=tag3_list)
+        annotations = {
+            'match_count': Count(Case(*whens, default=Value(0), output_field=IntegerField()), distinct=True)
+        }
 
-        # Check and filter by stakeholder values
-        if stakeholder_values:
-            stakeholder_list = [int(stakeholder) for stakeholder in stakeholder_values.split(',')]
-            query |= Q(interview_stakeholder__id__in=stakeholder_list)
-
-
-        interview_contents = InterviewContent.objects.filter(query).order_by('-interview_date')
-
+        interview_contents = (InterviewContent.objects
+                              .annotate(**annotations)
+                              .filter(match_count__gt=0)  # Only include articles with matches
+                              .order_by('-match_count', '-interview_date')
+                              .distinct())
 
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset(interview_contents, request)
@@ -336,6 +338,8 @@ class InterviewMultipleAPIView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+
 
 class DownloadWaterQualityManyalAPIView(APIView):
     permission_classes = [IsAuthenticated]
