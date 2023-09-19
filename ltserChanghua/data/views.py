@@ -264,22 +264,31 @@ class InterviewSingleAPIView(APIView):
         d2_str = request.GET.get('d2')
         people = request.GET.get('people')
 
-        # 轉換 d1 和 d2 為日期範圍
-        d1_year, d1_month = map(int, d1_str.split('-'))
-        d2_year, d2_month = map(int, d2_str.split('-'))
+        if (d1_str and d2_str and people) or (not d1_str and not d2_str and not people):
+            return Response({"error": "Invalid parameters."}, status=400)
 
-        # 獲取 d1 的開始日期 (第一天)
-        d1_start = datetime(d1_year, d1_month, 1).date()
+        if d1_str and d2_str:
+            # 轉換 d1 和 d2 為日期範圍
+            d1_year, d1_month = map(int, d1_str.split('-'))
+            d2_year, d2_month = map(int, d2_str.split('-'))
 
-        # 獲取 d2 的結束日期 (該月的最後一天)
-        last_day_d2 = calendar.monthrange(d2_year, d2_month)[1]
-        d2_end = datetime(d2_year, d2_month, last_day_d2).date()
+            # 獲取 d1 的開始日期 (第一天)
+            d1_start = datetime(d1_year, d1_month, 1).date()
 
-        try:
-            person = InterviewPeople.objects.get(title=people)
-            interview_contents = InterviewContent.objects.filter(interview_date__range=(d1_start, d2_end), interview_people=person).order_by('-interview_date')
-        except InterviewPeople.DoesNotExist:
-            return Response({"error": "Invalid person ID."}, status=400)
+            # 獲取 d2 的結束日期 (該月的最後一天)
+            last_day_d2 = calendar.monthrange(d2_year, d2_month)[1]
+            d2_end = datetime(d2_year, d2_month, last_day_d2).date()
+
+            interview_contents = InterviewContent.objects.filter(interview_date__range=(d1_start, d2_end))
+
+        elif people:
+            try:
+                person = InterviewPeople.objects.get(title=people)
+                interview_contents = InterviewContent.objects.filter(interview_people=person)
+            except InterviewPeople.DoesNotExist:
+                return Response({"error": "Invalid person ID."}, status=400)
+
+        interview_contents = interview_contents.order_by('-interview_date')
 
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset(interview_contents, request)
@@ -295,6 +304,7 @@ class InterviewSingleAPIView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
 
 class InterviewMultipleAPIView(APIView):
     def get(self, request):
