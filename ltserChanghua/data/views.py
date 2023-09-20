@@ -259,34 +259,22 @@ class ResearchAPIView(APIView):
         return Response({"message": "更新相關研究觀看數成功"}, status=status.HTTP_200_OK)
 
 class InterviewSingleAPIView(APIView):
+
     def get(self, request):
         d1_str = request.GET.get('d1')
         d2_str = request.GET.get('d2')
         people = request.GET.get('people')
+        tag3_id = request.GET.get('tag3')
 
-        if (d1_str and d2_str and people) or (not d1_str and not d2_str and not people):
+        if not self._validate_parameters(d1_str, d2_str, people, tag3_id):
             return Response({"error": "Invalid parameters."}, status=400)
 
         if d1_str and d2_str:
-            # 轉換 d1 和 d2 為日期範圍
-            d1_year, d1_month = map(int, d1_str.split('-'))
-            d2_year, d2_month = map(int, d2_str.split('-'))
-
-            # 獲取 d1 的開始日期 (第一天)
-            d1_start = datetime(d1_year, d1_month, 1).date()
-
-            # 獲取 d2 的結束日期 (該月的最後一天)
-            last_day_d2 = calendar.monthrange(d2_year, d2_month)[1]
-            d2_end = datetime(d2_year, d2_month, last_day_d2).date()
-
-            interview_contents = InterviewContent.objects.filter(interview_date__range=(d1_start, d2_end))
-
+            interview_contents = self._filter_by_date(d1_str, d2_str)
         elif people:
-            try:
-                person = InterviewPeople.objects.get(title=people)
-                interview_contents = InterviewContent.objects.filter(interview_people=person)
-            except InterviewPeople.DoesNotExist:
-                return Response({"error": "Invalid person ID."}, status=400)
+            interview_contents = self._filter_by_people(people)
+        elif tag3_id:
+            interview_contents = self._filter_by_tag3(tag3_id)
 
         interview_contents = interview_contents.order_by('-interview_date')
 
@@ -304,6 +292,37 @@ class InterviewSingleAPIView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+    def _validate_parameters(self, d1_str, d2_str, people, tag3_id):
+        valid_combinations = [
+            (d1_str and d2_str and not people and not tag3_id),
+            (people and not d1_str and not d2_str and not tag3_id),
+            (tag3_id and not d1_str and not d2_str and not people)
+        ]
+        return any(valid_combinations)
+
+    def _filter_by_date(self, d1_str, d2_str):
+        d1_year, d1_month = map(int, d1_str.split('-'))
+        d2_year, d2_month = map(int, d2_str.split('-'))
+        d1_start = datetime(d1_year, d1_month, 1).date()
+        last_day_d2 = calendar.monthrange(d2_year, d2_month)[1]
+        d2_end = datetime(d2_year, d2_month, last_day_d2).date()
+        return InterviewContent.objects.filter(interview_date__range=(d1_start, d2_end))
+
+    def _filter_by_people(self, people):
+        try:
+            person = InterviewPeople.objects.get(title=people)
+            return InterviewContent.objects.filter(interview_people=person)
+        except InterviewPeople.DoesNotExist:
+            raise ValueError("Invalid person ID.")
+
+    def _filter_by_tag3(self, tag3_id):
+        try:
+            tag_id = int(tag3_id)
+            tag = InterviewTag3.objects.get(id=tag_id)
+            return InterviewContent.objects.filter(interview_tag3=tag)
+        except (ValueError, InterviewTag3.DoesNotExist):
+            raise ValueError("Invalid tag3 ID.")
 
 
 class InterviewMultipleAPIView(APIView):
