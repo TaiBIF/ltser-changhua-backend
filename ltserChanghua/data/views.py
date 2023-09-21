@@ -20,7 +20,7 @@ import os
 from user.models import DownloadRecord
 from django.http import FileResponse
 import calendar
-from django.db.models import Q, Case, When, IntegerField, Count, Value
+from django.db.models import Q, Case, When, IntegerField, Count, Value, Sum, F
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
@@ -331,31 +331,33 @@ class InterviewMultipleAPIView(APIView):
         tag3_values = request.query_params.get('tag3', None)
         stakeholder_values = request.query_params.get('stakeholder', None)
 
-        # Process input values
-        tag2_list = [int(tag) for tag in tag2_values.split(',')] if tag2_values else []
-        tag3_list = [int(tag) for tag in tag3_values.split(',')] if tag3_values else []
-        stakeholder_list = [int(stakeholder) for stakeholder in stakeholder_values.split(',')] if stakeholder_values else []
+        tag2_list = map(int, tag2_values.split(',')) if tag2_values else []
+        tag3_list = map(int, tag3_values.split(',')) if tag3_values else []
+        stakeholder_list = map(int, stakeholder_values.split(',')) if stakeholder_values else []
 
-        whens = []
-        for tag in tag2_list:
-            whens.append(When(interview_tag2__id=tag, then=1))
-        for tag in tag3_list:
-            whens.append(When(interview_tag3__id=tag, then=1))
-        for stakeholder in stakeholder_list:
-            whens.append(When(interview_stakeholder__id=stakeholder, then=1))
+        tag2_q = Q(interview_tag2__id__in=tag2_list)
+        tag3_q = Q(interview_tag3__id__in=tag3_list)
+        stakeholder_q = Q(interview_stakeholder__id__in=stakeholder_list)
 
-        annotations = {
-            'match_count': Count(Case(*whens, default=Value(0), output_field=IntegerField()), distinct=True)
-        }
+        matched_contents = (
+            InterviewContent.objects
+            .filter(tag2_q | tag3_q | stakeholder_q)
+            .distinct()
+            .prefetch_related('interview_tag2', 'interview_tag3', 'interview_stakeholder')
+        )
 
-        interview_contents = (InterviewContent.objects
-                              .annotate(**annotations)
-                              .filter(match_count__gt=0)  # Only include articles with matches
-                              .order_by('-match_count', '-interview_date')
-                              .distinct())
+        def calculate_score(content):
+            score = sum(tag2.id in tag2_list for tag2 in content.interview_tag2.all())
+            score += sum(tag3.id in tag3_list for tag3 in content.interview_tag3.all())
+            score += sum(stakeholder.id in stakeholder_list for stakeholder in content.interview_stakeholder.all())
+            return score
+
+        contents_with_scores = [(content, calculate_score(content)) for content in matched_contents]
+        contents_with_scores.sort(key=lambda x: (x[1], x[0].interview_date), reverse=True)
 
         paginator = CustomPageNumberPagination()
-        result_page = paginator.paginate_queryset(interview_contents, request)
+        result_page = paginator.paginate_queryset([content[0] for content in contents_with_scores], request)
+
         serializer = InterviewContentSerializer(result_page, many=True, context={'request': request})
 
         response_data = {
@@ -367,7 +369,6 @@ class InterviewMultipleAPIView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
-
 
 
 class DownloadWaterQualityManyalAPIView(APIView):
