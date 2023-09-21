@@ -132,7 +132,7 @@ class InterviewContentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InterviewContent
-        fields = ['date', 'content', 'tag2', 'tag3', 'people', 'stakeholder']
+        fields = ['id', 'date', 'content', 'tag2', 'tag3', 'people', 'stakeholder']
 
     def get_content(self, obj):
         request = self.context.get('request')
