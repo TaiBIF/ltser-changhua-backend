@@ -182,8 +182,8 @@ class InterviewPeople(models.Model):
 
 class InterviewContent(models.Model):
     content = models.TextField()
-    interview_tag2 = models.ManyToManyField(InterviewTag2)
-    interview_tag3 = models.ManyToManyField(InterviewTag3)
+    interview_tag2 = models.ManyToManyField(InterviewTag2, blank=True)
+    interview_tag3 = models.ManyToManyField(InterviewTag3, blank=True)
     interview_date = models.DateField()
     interview_people = models.ManyToManyField(InterviewPeople)
     interview_stakeholder = models.ManyToManyField(InterviewStakeholder)
