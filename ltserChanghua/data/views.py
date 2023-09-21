@@ -338,7 +338,8 @@ class InterviewSingleAPIView(APIView):
 
 
 class InterviewMultipleAPIView(APIView):
-    def get(self, request):
+    @staticmethod
+    def get_contents_with_scores(request):
         tag2_values = request.query_params.get('tag2', None)
         tag3_values = request.query_params.get('tag3', None)
         stakeholder_values = request.query_params.get('stakeholder', None)
@@ -367,6 +368,11 @@ class InterviewMultipleAPIView(APIView):
         contents_with_scores = [(content, calculate_score(content)) for content in matched_contents]
         contents_with_scores.sort(key=lambda x: (x[1], x[0].interview_date), reverse=True)
 
+        return contents_with_scores
+
+    def get(self, request, *args, **kwargs):
+        contents_with_scores = self.get_contents_with_scores(request)
+
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset([content[0] for content in contents_with_scores], request)
 
@@ -381,6 +387,7 @@ class InterviewMultipleAPIView(APIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
 
 
 class DownloadWaterQualityManyalAPIView(APIView):
@@ -594,11 +601,7 @@ class DownloadInterviewMultipleAPIView(APIView):
         if not (user.is_staff or user.is_superuser or getattr(user, 'is_applied', False)):
             return Response({'detail': "權限不足，請填寫申請表格"}, status=status.HTTP_403_FORBIDDEN)
 
-        interview_view = InterviewSingleAPIView()
-        interview_contents = interview_view.get_interview_contents(request)
-
-        if isinstance(interview_contents, Response):
-            return interview_contents
+        contents_with_scores = InterviewMultipleAPIView.get_contents_with_scores(request)
 
         zip_io = io.BytesIO()
         now = datetime.now()
@@ -607,29 +610,27 @@ class DownloadInterviewMultipleAPIView(APIView):
         with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
             csv_file_name = f'{filename}.csv'
             csv_io = io.StringIO()
-
             writer = csv.writer(csv_io)
-            # 改变 header
-            writer.writerow(['訪談內容', '相關分類', '訪談日期', '受訪者代碼', '類別'])
 
-            # 在 loop 中，按照新的 header 对应地重新排列 row 的内容
-            for content in interview_contents:
+            writer.writerow(['訪談內容', '相關分類', '訪談日期', '受訪者代碼', '類別'])
+            for content, _ in contents_with_scores:  # Note that get_contents_with_scores returns a tuple
                 row = [
-                    content.content,  # 訪談內容
-                    ", ".join(str(tag) for tag in content.interview_tag2.all()) + ", " + ", ".join(
-                        str(tag) for tag in content.interview_tag3.all()),  # 相關分類
-                    content.interview_date,  # 訪談日期
-                    ", ".join(str(people) for people in content.interview_people.all()),  # 受訪者代碼
-                    ", ".join(str(stakeholder) for stakeholder in content.interview_stakeholder.all()),  # 類別
+                    content.content,
+                    ", ".join(str(tag) for tag in content.interview_tag2.all()) + ", " +
+                    ", ".join(str(tag) for tag in content.interview_tag3.all()),
+                    content.interview_date,
+                    ", ".join(str(people) for people in content.interview_people.all()),
+                    ", ".join(str(stakeholder) for stakeholder in content.interview_stakeholder.all()),
                 ]
                 writer.writerow(row)
 
-            csv_io.seek(0)  # reset the stream position to the beginning
-            zipf.writestr(csv_file_name, csv_io.getvalue())  # write the in-memory text stream to the zip file
+            csv_io.seek(0)
+            zipf.writestr(csv_file_name, csv_io.getvalue())
 
         zip_io.seek(0)
         response = FileResponse(zip_io, as_attachment=True, filename=f'{filename}.zip')
 
+        # Create a DownloadRecord after successfully creating the zip file.
         DownloadRecord.objects.create(filename=f'{filename}.csv', user=user)
 
         return response
