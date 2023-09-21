@@ -260,7 +260,7 @@ class ResearchAPIView(APIView):
 
 class InterviewSingleAPIView(APIView):
 
-    def get(self, request):
+    def get_interview_contents(self, request):
         d1_str = request.GET.get('d1')
         d2_str = request.GET.get('d2')
         people = request.GET.get('people')
@@ -269,12 +269,24 @@ class InterviewSingleAPIView(APIView):
         if not self._validate_parameters(d1_str, d2_str, people, tag3_id):
             return Response({"error": "Invalid parameters."}, status=400)
 
-        if d1_str and d2_str:
-            interview_contents = self._filter_by_date(d1_str, d2_str)
-        elif people:
-            interview_contents = self._filter_by_people(people)
-        elif tag3_id:
-            interview_contents = self._filter_by_tag3(tag3_id)
+        try:
+            if d1_str and d2_str:
+                interview_contents = self._filter_by_date(d1_str, d2_str)
+            elif people:
+                interview_contents = self._filter_by_people(people)
+            elif tag3_id:
+                interview_contents = self._filter_by_tag3(tag3_id)
+            else:
+                return Response({"error": "No filter provided."}, status=400)
+        except ValueError as ve:
+            return Response({"error": str(ve)}, status=400)
+
+        return interview_contents
+
+    def get(self, request):
+        interview_contents = self.get_interview_contents(request)
+        if isinstance(interview_contents, Response):
+            return interview_contents
 
         interview_contents = interview_contents.order_by('-interview_date')
 
@@ -524,3 +536,100 @@ class InterviewTag3ListAPIView(APIView):
         return Response({'records': records})
 
 
+class DownloadInterviewSingleAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+
+        if not (user.is_staff or user.is_superuser or getattr(user, 'is_applied', False)):
+            return Response({'detail': "權限不足，請填寫申請表格"}, status=status.HTTP_403_FORBIDDEN)
+
+        interview_view = InterviewSingleAPIView()
+        interview_contents = interview_view.get_interview_contents(request)
+
+        if isinstance(interview_contents, Response):
+            return interview_contents
+
+        zip_io = io.BytesIO()
+        now = datetime.now()
+        filename = "LTSER Changhua_訪談資料_" + now.strftime("%Y-%m-%d")
+
+        with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            csv_file_name = f'{filename}.csv'
+            csv_io = io.StringIO()
+
+            writer = csv.writer(csv_io)
+            # 改变 header
+            writer.writerow(['訪談內容', '相關分類', '訪談日期', '受訪者代碼', '類別'])
+
+            # 在 loop 中，按照新的 header 对应地重新排列 row 的内容
+            for content in interview_contents:
+                row = [
+                    content.content,  # 訪談內容
+                    ", ".join(str(tag) for tag in content.interview_tag2.all()) + ", " + ", ".join(
+                        str(tag) for tag in content.interview_tag3.all()),  # 相關分類
+                    content.interview_date,  # 訪談日期
+                    ", ".join(str(people) for people in content.interview_people.all()),  # 受訪者代碼
+                    ", ".join(str(stakeholder) for stakeholder in content.interview_stakeholder.all()),  # 類別
+                ]
+                writer.writerow(row)
+
+            csv_io.seek(0)  # reset the stream position to the beginning
+            zipf.writestr(csv_file_name, csv_io.getvalue())  # write the in-memory text stream to the zip file
+
+        zip_io.seek(0)
+        response = FileResponse(zip_io, as_attachment=True, filename=f'{filename}.zip')
+
+        DownloadRecord.objects.create(filename=f'{filename}.csv', user=user)
+
+        return response
+
+class DownloadInterviewMultipleAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+
+        if not (user.is_staff or user.is_superuser or getattr(user, 'is_applied', False)):
+            return Response({'detail': "權限不足，請填寫申請表格"}, status=status.HTTP_403_FORBIDDEN)
+
+        interview_view = InterviewSingleAPIView()
+        interview_contents = interview_view.get_interview_contents(request)
+
+        if isinstance(interview_contents, Response):
+            return interview_contents
+
+        zip_io = io.BytesIO()
+        now = datetime.now()
+        filename = "LTSER Changhua_訪談資料_" + now.strftime("%Y-%m-%d")
+
+        with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            csv_file_name = f'{filename}.csv'
+            csv_io = io.StringIO()
+
+            writer = csv.writer(csv_io)
+            # 改变 header
+            writer.writerow(['訪談內容', '相關分類', '訪談日期', '受訪者代碼', '類別'])
+
+            # 在 loop 中，按照新的 header 对应地重新排列 row 的内容
+            for content in interview_contents:
+                row = [
+                    content.content,  # 訪談內容
+                    ", ".join(str(tag) for tag in content.interview_tag2.all()) + ", " + ", ".join(
+                        str(tag) for tag in content.interview_tag3.all()),  # 相關分類
+                    content.interview_date,  # 訪談日期
+                    ", ".join(str(people) for people in content.interview_people.all()),  # 受訪者代碼
+                    ", ".join(str(stakeholder) for stakeholder in content.interview_stakeholder.all()),  # 類別
+                ]
+                writer.writerow(row)
+
+            csv_io.seek(0)  # reset the stream position to the beginning
+            zipf.writestr(csv_file_name, csv_io.getvalue())  # write the in-memory text stream to the zip file
+
+        zip_io.seek(0)
+        response = FileResponse(zip_io, as_attachment=True, filename=f'{filename}.zip')
+
+        DownloadRecord.objects.create(filename=f'{filename}.csv', user=user)
+
+        return response
