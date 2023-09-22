@@ -43,6 +43,8 @@ class CrabSite(models.Model):
         return f"螃蟹觀測點位: {self.title}"
     class Meta:
         db_table = 'CrabSite'
+        verbose_name = '底棲生物-人工點位'
+        verbose_name_plural = '底棲生物-人工點位'
 
 class WaterQualityManualSite(models.Model):
     title = models.CharField(max_length=200)
@@ -52,6 +54,8 @@ class WaterQualityManualSite(models.Model):
         return f"水質人工觀測點位: {self.title}"
     class Meta:
         db_table = 'WaterQualityManualSite'
+        verbose_name = '水質觀測-人工點位'
+        verbose_name_plural = '水質觀測-人工點位'
 
 class BenthicOrganismData(models.Model):
     year = models.CharField(max_length=6)
@@ -75,6 +79,8 @@ class BenthicOrganismData(models.Model):
 
     class Meta:
         db_table = 'BenthicOrganismData'
+        verbose_name = '底棲生物-人工數據-底質資料'
+        verbose_name_plural = '底棲生物-人工數據-底質資料'
 
 class CrabData(models.Model):
     year = models.CharField(max_length=6)
@@ -104,6 +110,8 @@ class CrabData(models.Model):
     Mt = models.IntegerField(blank=True, null=True, default=0)
     class Meta:
         db_table = 'Crab'
+        verbose_name = '底棲生物-人工數據-螃蟹資料'
+        verbose_name_plural = '底棲生物-人工數據-螃蟹資料'
 
 class WaterQualityManualData(models.Model):
     year = models.CharField(max_length=6)
@@ -122,6 +130,8 @@ class WaterQualityManualData(models.Model):
 
     class Meta:
         db_table = 'WaterQualityManualData'
+        verbose_name = '水質觀測-人工數據'
+        verbose_name_plural = '水質觀測-人工數據'
 
 class InterviewTag1(models.Model):
     title = models.CharField(max_length=200)
@@ -212,6 +222,8 @@ class Literature(models.Model):
 
     class Meta:
         db_table = 'Literature'
+        verbose_name = '地方文獻'
+        verbose_name_plural = '地方文獻'
 
 class NewsTag(models.Model):
     title = models.CharField(max_length=200)
@@ -219,6 +231,8 @@ class NewsTag(models.Model):
         return f"標籤: {self.title}"
     class Meta:
         db_table = 'NewsTag'
+        verbose_name = '新聞報導標籤'
+        verbose_name_plural = '新聞報導標籤'
 
 
 class News(models.Model):
@@ -235,6 +249,8 @@ class News(models.Model):
         return f"標籤: {self.title}"
     class Meta:
         db_table = 'News'
+        verbose_name = '新聞資料'
+        verbose_name_plural = '新聞資料'
 
 class ResearchTag(models.Model):
     title = models.CharField(max_length=200)

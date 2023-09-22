@@ -203,3 +203,4 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+LANGUAGE_CODE = 'zh-hant'  # 繁體中文

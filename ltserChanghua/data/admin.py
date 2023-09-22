@@ -4,6 +4,10 @@ from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQ
     ResearchTag, Research, WaterQualityManualData, BenthicOrganismData, CrabData
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+from django.template.defaultfilters import truncatechars
+from import_export import fields
+from import_export.widgets import ManyToManyWidget
+from datetime import datetime
 
 class HomepagePhotoAdmin(admin.ModelAdmin):
     list_display = ('order', 'image', 'display')
@@ -83,17 +87,67 @@ class InterviewContentAdmin(admin.ModelAdmin):
     def display_interview_stakeholder(self, obj):
         return ', '.join([stakeholder.title for stakeholder in obj.interview_stakeholder.all()])
 
-class LiteratureAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'author', 'publisher', 'date', 'is_ebook', 'views']
+
+class LiteratureResource(resources.ModelResource):
+    class Meta:
+        model = Literature
+
+
+class LiteratureAdmin(ImportExportModelAdmin):
+    resource_class = LiteratureResource
+    list_display = ('truncated_title', 'truncated_author', 'publisher', 'date', 'refID', 'truncated_link', 'is_ebook', 'views')
+
+    # 定义其他的设置 ...
+
+    def truncated_title(self, obj):
+        return truncatechars(obj.title, 10)
+
+    def truncated_author(self, obj):
+        return truncatechars(obj.author, 10)
+
+    def truncated_link(self, obj):
+        return truncatechars(obj.link, 10)
+
+    truncated_title.short_description = 'Title'
+    truncated_author.short_description = 'Author'
+    truncated_link.short_description = 'Link'
 
 class NewsTagAdmin(admin.ModelAdmin):
     list_display = ['id', 'title']
 
-class NewsAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'reference', 'reporter', 'photographer', 'date', 'link', 'views')
-    list_filter = ('date',)
-    search_fields = ('title', 'reference', 'reporter')
-    ordering = ('-date',)
+
+class NewsResource(resources.ModelResource):
+    tags = fields.Field(
+        column_name='tags',
+        attribute='tags',
+        widget=ManyToManyWidget(NewsTag, ',', 'title')
+    )
+    class Meta:
+        model = News
+        fields = ('title', 'reference', 'reporter', 'photographer', 'date', 'link', 'views', 'tags')
+        import_id_fields = []
+
+    def before_import_row(self, row, **kwargs):
+        date_str = row.get('date')
+        if date_str:
+            date_obj = datetime.strptime(date_str, '%Y/%m/%d').date()
+            row['date'] = date_obj.isoformat()
+
+        tags = row.get('tags')
+        if tags:
+            tag_list = [tag.strip() for tag in tags.split(',')]
+            for tag_title in tag_list:
+                NewsTag.objects.get_or_create(title=tag_title)
+
+
+
+class NewsAdmin(ImportExportModelAdmin):
+    resource_class = NewsResource
+    list_display = ('title', 'reference', 'reporter', 'photographer', 'date', 'link', 'views', 'display_tags')
+
+    def display_tags(self, obj):
+        return ", ".join([tag.title for tag in obj.tags.all()])
+    display_tags.short_description = 'Tags'
 
 class ResearchTagAdmin(admin.ModelAdmin):
     list_display = ['id', 'title']
