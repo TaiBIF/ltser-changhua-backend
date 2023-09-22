@@ -1,7 +1,9 @@
 from django.contrib import admin
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, InterviewTag1, \
     InterviewTag2, InterviewTag3, InterviewStakeholder, InterviewPeople, InterviewContent, Literature, NewsTag, News,\
-    ResearchTag, Research, WaterQualityManualData, BenthicOrganismData
+    ResearchTag, Research, WaterQualityManualData, BenthicOrganismData, CrabData
+from import_export import resources
+from import_export.admin import ImportExportModelAdmin
 
 class HomepagePhotoAdmin(admin.ModelAdmin):
     list_display = ('order', 'image', 'display')
@@ -15,8 +17,16 @@ class LatestEventAdmin(admin.ModelAdmin):
     search_fields = ['title', 'organizer']
     raw_id_fields = ['tags']
 
-class BenthicOrganismDataAdmin(admin.ModelAdmin):
-    list_display = ['id', 'year', 'site', 'month']
+class BenthicOrganismDataResource(resources.ModelResource):
+    class Meta:
+        model = BenthicOrganismData
+class BenthicOrganismDataAdmin(ImportExportModelAdmin):
+    resource_class = BenthicOrganismDataResource
+    list_display = (
+        'year', 'site', 'month', 'cw', 'mm', 'sc', 'co',
+        's_temp', 't_sal', 's_ph', 'w_temp', 'w_ph',
+        'cond', 'do', 'w_sal', 'tds', 'turb', 'orp'
+    )
 
 class CrabSiteAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'latitude', 'longitude']
@@ -25,8 +35,16 @@ class CrabSiteAdmin(admin.ModelAdmin):
 class WaterQualityManualSiteAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'latitude', 'longitude']
 
-class WaterQualityManualDataAdmin(admin.ModelAdmin):
-    list_display = ['id', 'year', 'site', 'month']
+class WaterQualityManualDataResource(resources.ModelResource):
+    class Meta:
+        model = WaterQualityManualData
+
+class WaterQualityManualDataAdmin(ImportExportModelAdmin):
+    resource_class = WaterQualityManualDataResource
+    list_display = (
+        'year', 'site', 'month', 'w_temp', 'w_ph', 'phmv', 'orp',
+        'cond', 'turb', 'do', 'tds', 'w_sal', 'sg'
+    )
 
 class InterviewTag1Admin(admin.ModelAdmin):
     list_display = ['id', 'title']
@@ -87,10 +105,24 @@ class ResearchAdmin(admin.ModelAdmin):
     def display_research_tag(self, obj):
         return ', '.join([tag.title for tag in obj.tags.all()])
 
+
+class CrabDataResource(resources.ModelResource):
+    class Meta:
+        model = CrabData
+
+class CrabDataAdmin(ImportExportModelAdmin):
+    resource_class = CrabDataResource
+    list_display = (
+        'year', 'site', 'month', 'Mbr', 'Mb', 'Ma', 'Hf', 'Hd', 'Hp', 'Me', 'Sb',
+        'Sl', 'It', 'Oc', 'Al', 'Ta', 'Gb', 'Xf', 'Pa', 'Pp', 'Tc', 'Ppi',
+        'Mv', 'Charybids_sp', 'Mt'
+    )
+
 admin.site.register(HomepagePhoto, HomepagePhotoAdmin)
 admin.site.register(LatestEventTag, LatestEventTagAdmin)
 admin.site.register(LatestEvent, LatestEventAdmin)
 admin.site.register(CrabSite, CrabSiteAdmin)
+admin.site.register(CrabData, CrabDataAdmin)
 admin.site.register(WaterQualityManualSite, WaterQualityManualSiteAdmin)
 admin.site.register(InterviewTag1, InterviewTag1Admin)
 admin.site.register(InterviewTag2, InterviewTag2Admin)

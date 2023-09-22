@@ -406,10 +406,11 @@ class DownloadWaterQualityManyalAPIView(APIView):
             csv_file = f'{filename}.csv'
             with open(csv_file, 'w', newline='') as f:
                 writer = csv.writer(f)
-                writer.writerow([field.name for field in WaterQualityManualData._meta.fields])
+                fields = [field for field in WaterQualityManualData._meta.fields if field.name != 'id']
+                writer.writerow([field.name for field in fields])
                 for instance in WaterQualityManualData.objects.all():
                     row = []
-                    for field in WaterQualityManualData._meta.fields:
+                    for field in fields :
                         value = getattr(instance, field.name)
                         row.append(value)
                     writer.writerow(row)
@@ -442,10 +443,11 @@ class DownloadCrabAPIView(APIView):
                 csv_file = f'{filename}.csv'
                 with open(csv_file, 'w', newline='') as f:
                     writer = csv.writer(f)
-                    writer.writerow([field.name for field in model._meta.fields])
+                    fields = [field for field in model._meta.fields if field.name != 'id']
+                    writer.writerow([field.name for field in fields])
                     for instance in model.objects.all():
                         row = []
-                        for field in model._meta.fields:
+                        for field in fields:
                             value = getattr(instance, field.name)
                             row.append(value)
                         writer.writerow(row)
