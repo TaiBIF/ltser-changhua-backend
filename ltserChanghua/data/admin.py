@@ -152,12 +152,45 @@ class NewsAdmin(ImportExportModelAdmin):
 class ResearchTagAdmin(admin.ModelAdmin):
     list_display = ['id', 'title']
 
-class ResearchAdmin(admin.ModelAdmin):
-    list_display = ('id', 'title', 'author', 'year', 'reference', 'link', 'display_research_tag', 'views')
-    ordering = ('-year',)
+class ResearchResource(resources.ModelResource):
+    tags = fields.Field(
+        column_name='tags',
+        attribute='tags',
+        widget=ManyToManyWidget(ResearchTag, ',', 'title')
+    )
 
-    def display_research_tag(self, obj):
-        return ', '.join([tag.title for tag in obj.tags.all()])
+    class Meta:
+        model = Research
+        fields = ('title', 'author', 'year', 'reference', 'link', 'views', 'tags')
+        import_id_fields = []  # 這樣可以讓 'id' 變為非必需
+
+    def before_import_row(self, row, **kwargs):
+        tags = row.get('tags')
+        if tags:
+            tag_list = [tag.strip() for tag in tags.split(',')]
+            for tag_title in tag_list:
+                ResearchTag.objects.get_or_create(title=tag_title)
+
+
+class ResearchAdmin(ImportExportModelAdmin):
+    resource_class = ResearchResource
+    list_display = ('truncated_title', 'author', 'year', 'truncated_reference', 'truncated_link', 'views', 'display_tags')
+
+    def truncated_title(self, obj):
+        return truncatechars(obj.title, 10)
+    def truncated_reference(self, obj):
+        return truncatechars(obj.reference, 10)
+
+    def truncated_link(self, obj):
+        return truncatechars(obj.link, 10)
+
+    def display_tags(self, obj):
+        return ", ".join([tag.title for tag in obj.tags.all()])
+
+    display_tags.short_description = 'Tags'
+    truncated_title.short_description = 'Title'
+    truncated_reference.short_description = 'Reference'
+    truncated_link.short_description = 'Link'
 
 
 class CrabDataResource(resources.ModelResource):
