@@ -11,6 +11,8 @@ class HomepagePhoto(models.Model):
         return f"發表照片: {self.image}"
     class Meta:
         db_table = 'HomepagePhoto'
+        verbose_name = '首頁照片'
+        verbose_name_plural = '首頁照片'
 
 class LatestEventTag(models.Model):
     title = models.CharField(max_length=200)
@@ -18,6 +20,8 @@ class LatestEventTag(models.Model):
         return f"標籤: {self.title}"
     class Meta:
         db_table = 'LatestEventTag'
+        verbose_name = '最新消息-標籤'
+        verbose_name_plural = '最新消息-標籤'
 
 class LatestEvent(models.Model):
     title = models.CharField(max_length=200)
@@ -34,6 +38,8 @@ class LatestEvent(models.Model):
         return f"活動主題: {self.title}"
     class Meta:
         db_table = 'LatestEvent'
+        verbose_name = '最新消息-內容'
+        verbose_name_plural = '最新消息-內容'
 
 class CrabSite(models.Model):
     title = models.CharField(max_length=200)
@@ -231,8 +237,8 @@ class NewsTag(models.Model):
         return f"標籤: {self.title}"
     class Meta:
         db_table = 'NewsTag'
-        verbose_name = '新聞報導標籤'
-        verbose_name_plural = '新聞報導標籤'
+        verbose_name = '新聞報導-標籤'
+        verbose_name_plural = '新聞報導-標籤'
 
 
 class News(models.Model):
@@ -249,8 +255,8 @@ class News(models.Model):
         return f"標籤: {self.title}"
     class Meta:
         db_table = 'News'
-        verbose_name = '新聞資料'
-        verbose_name_plural = '新聞資料'
+        verbose_name = '新聞報導-內容'
+        verbose_name_plural = '新聞報導-內容'
 
 class ResearchTag(models.Model):
     title = models.CharField(max_length=200)
@@ -258,6 +264,8 @@ class ResearchTag(models.Model):
         return f"標籤: {self.title}"
     class Meta:
         db_table = 'ResearchTag'
+        verbose_name = '相關研究-標籤'
+        verbose_name_plural = '相關研究-標籤'
 
 class Research(models.Model):
     title = models.CharField(max_length=255)
@@ -272,3 +280,5 @@ class Research(models.Model):
         return f"標籤: {self.title}"
     class Meta:
         db_table = 'Research'
+        verbose_name = '相關研究-內容'
+        verbose_name_plural = '相關研究-內容'
