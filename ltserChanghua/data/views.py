@@ -344,10 +344,9 @@ class InterviewMultipleAPIView(APIView):
         tag3_values = request.query_params.get('tag3', None)
         stakeholder_values = request.query_params.get('stakeholder', None)
 
-        tag2_list = map(int, tag2_values.split(',')) if tag2_values else []
-        tag3_list = map(int, tag3_values.split(',')) if tag3_values else []
+        tag2_list = list(map(int, tag2_values.split(','))) if tag2_values else []
+        tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
         stakeholder_list = list(map(int, stakeholder_values.split(',')) )if stakeholder_values else []
-        print(stakeholder_list)
 
         tag2_q = Q(interview_tag2__id__in=tag2_list)
         tag3_q = Q(interview_tag3__id__in=tag3_list)
@@ -370,8 +369,6 @@ class InterviewMultipleAPIView(APIView):
         contents_with_scores = [(content, calculate_score(content)) for content in matched_contents]
 
         contents_with_scores.sort(key=lambda x: (x[1], x[0].interview_date), reverse=True)
-        for content, score in contents_with_scores:
-            print(f"Content ID: {content.id}, Score: {score}, Date: {content.interview_date}")
 
         return contents_with_scores
 
