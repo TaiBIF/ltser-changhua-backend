@@ -104,7 +104,7 @@ class BenthicOrganismAPIView(APIView):
     def get(self, request):
         site = request.query_params.get('site', None)
         if site is not None:
-            bo = BenthicOrganismData.objects.filter(site=site)
+            bo = BenthicOrganismData.objects.filter(site=site).order_by('year', 'month')
             serializer = BenthicOrganismSerializer(bo, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
@@ -114,7 +114,7 @@ class CrabAPIView(APIView):
     def get(self, request):
         site = request.query_params.get('site', None)
         if site is not None:
-            crabs = CrabData.objects.filter(site=site)
+            crabs = CrabData.objects.filter(site=site).order_by('year', 'month')
             serializer = CrabSerializer(crabs, many=True)
             list_of_objects = serializer.data
             res = []
@@ -135,7 +135,7 @@ class CrabAPIView(APIView):
 class WaterQualityManualsAPIView(APIView):
     def get(self, request, *args, **kwargs):
         site = request.query_params.get('site', None)
-        wq = WaterQualityManualData.objects.filter(site=site)
+        wq = WaterQualityManualData.objects.filter(site=site).order_by('year', 'month')
         serializer = WaterQualityManualSerializer(wq, many=True)
         list_of_objects = serializer.data
         res = []
@@ -344,9 +344,9 @@ class InterviewMultipleAPIView(APIView):
         tag3_values = request.query_params.get('tag3', None)
         stakeholder_values = request.query_params.get('stakeholder', None)
 
-        tag2_list = map(int, tag2_values.split(',')) if tag2_values else []
-        tag3_list = map(int, tag3_values.split(',')) if tag3_values else []
-        stakeholder_list = map(int, stakeholder_values.split(',')) if stakeholder_values else []
+        tag2_list = list(map(int, tag2_values.split(','))) if tag2_values else []
+        tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
+        stakeholder_list = list(map(int, stakeholder_values.split(',')) )if stakeholder_values else []
 
         tag2_q = Q(interview_tag2__id__in=tag2_list)
         tag3_q = Q(interview_tag3__id__in=tag3_list)
@@ -363,9 +363,11 @@ class InterviewMultipleAPIView(APIView):
             score = sum(tag2.id in tag2_list for tag2 in content.interview_tag2.all())
             score += sum(tag3.id in tag3_list for tag3 in content.interview_tag3.all())
             score += sum(stakeholder.id in stakeholder_list for stakeholder in content.interview_stakeholder.all())
+
             return score
 
         contents_with_scores = [(content, calculate_score(content)) for content in matched_contents]
+
         contents_with_scores.sort(key=lambda x: (x[1], x[0].interview_date), reverse=True)
 
         return contents_with_scores
@@ -408,7 +410,7 @@ class DownloadWaterQualityManyalAPIView(APIView):
                 writer = csv.writer(f)
                 fields = [field for field in WaterQualityManualData._meta.fields if field.name != 'id']
                 writer.writerow([field.name for field in fields])
-                for instance in WaterQualityManualData.objects.all():
+                for instance in WaterQualityManualData.objects.all().order_by('year', 'month'):
                     row = []
                     for field in fields :
                         value = getattr(instance, field.name)
@@ -445,7 +447,7 @@ class DownloadCrabAPIView(APIView):
                     writer = csv.writer(f)
                     fields = [field for field in model._meta.fields if field.name != 'id']
                     writer.writerow([field.name for field in fields])
-                    for instance in model.objects.all():
+                    for instance in model.objects.all().order_by('year', 'month'):
                         row = []
                         for field in fields:
                             value = getattr(instance, field.name)
