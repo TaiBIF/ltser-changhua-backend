@@ -2,11 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganismData, \
     CrabData, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, InterviewTag3, \
-    InterviewTag2, InterviewStakeholder, InterviewPeople, WaterQualityManualData
+    InterviewTag2, InterviewStakeholder, InterviewPeople, WaterQualityManualData, Staff
 from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
     WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, LiteratureSerializer, \
     NewsTagSerializer, NewsSerializer, ResearchTagSerializer, ResearchSerializer, InterviewContentSerializer, \
-    WaterQualityManualSerializer, InterviewTag2Serializer, InterviewTag3Serializer
+    WaterQualityManualSerializer, InterviewTag2Serializer, InterviewTag3Serializer, StaffSerializer
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
@@ -20,7 +20,8 @@ import os
 from user.models import DownloadRecord
 from django.http import FileResponse
 import calendar
-from django.db.models import Q, Case, When, IntegerField, Count, Value, Sum, F
+from django.db.models import Q
+from rest_framework.exceptions import ValidationError
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
@@ -340,9 +341,11 @@ class InterviewSingleAPIView(APIView):
 class InterviewMultipleAPIView(APIView):
     @staticmethod
     def get_contents_with_scores(request):
+        stakeholder_values = request.query_params.get('stakeholder', None)
+        if not stakeholder_values:
+            raise ValidationError({'error': '請傳入受訪對象'})
         tag2_values = request.query_params.get('tag2', None)
         tag3_values = request.query_params.get('tag3', None)
-        stakeholder_values = request.query_params.get('stakeholder', None)
 
         tag2_list = list(map(int, tag2_values.split(','))) if tag2_values else []
         tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
@@ -373,7 +376,10 @@ class InterviewMultipleAPIView(APIView):
         return contents_with_scores
 
     def get(self, request, *args, **kwargs):
-        contents_with_scores = self.get_contents_with_scores(request)
+        try:
+            contents_with_scores = self.get_contents_with_scores(request)
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset([content[0] for content in contents_with_scores], request)
@@ -638,3 +644,10 @@ class DownloadInterviewMultipleAPIView(APIView):
         DownloadRecord.objects.create(filename=f'{filename}.csv', user=user)
 
         return response
+
+
+class StaffAPIView(APIView):
+    def get(self, request):
+        staff = Staff.objects.all()
+        serializer = StaffSerializer(staff, many=True)
+        return Response({'records': serializer.data})

@@ -1,6 +1,6 @@
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganismData, \
     CrabData, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, WaterQualityManualData, \
-    InterviewTag2, InterviewTag3
+    InterviewTag2, InterviewTag3, Staff
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -151,3 +151,8 @@ class InterviewTag3Serializer(serializers.ModelSerializer):
     class Meta:
         model = InterviewTag3
         fields = ['id', 'title']
+
+class StaffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Staff
+        fields = "__all__"

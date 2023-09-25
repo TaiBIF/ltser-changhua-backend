@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, InterviewTag1, \
     InterviewTag2, InterviewTag3, InterviewStakeholder, InterviewPeople, InterviewContent, Literature, NewsTag, News,\
-    ResearchTag, Research, WaterQualityManualData, BenthicOrganismData, CrabData
+    ResearchTag, Research, WaterQualityManualData, BenthicOrganismData, CrabData, Staff
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from django.template.defaultfilters import truncatechars
@@ -34,6 +34,9 @@ class BenthicOrganismDataAdmin(ImportExportModelAdmin):
 
 class CrabSiteAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'latitude', 'longitude']
+
+class StaffAdmin(admin.ModelAdmin):
+    list_display = ['id', 'title', 'name', 'duty', 'email']
 
 
 class WaterQualityManualSiteAdmin(admin.ModelAdmin):
@@ -205,6 +208,7 @@ class CrabDataAdmin(ImportExportModelAdmin):
         'Mv', 'Charybids_sp', 'Mt'
     )
 
+
 admin.site.register(HomepagePhoto, HomepagePhotoAdmin)
 admin.site.register(LatestEventTag, LatestEventTagAdmin)
 admin.site.register(LatestEvent, LatestEventAdmin)
@@ -224,3 +228,4 @@ admin.site.register(ResearchTag, ResearchTagAdmin)
 admin.site.register(Research, ResearchAdmin)
 admin.site.register(WaterQualityManualData, WaterQualityManualDataAdmin)
 admin.site.register(BenthicOrganismData, BenthicOrganismDataAdmin)
+admin.site.register(Staff, StaffAdmin)

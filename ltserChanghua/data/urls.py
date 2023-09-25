@@ -3,7 +3,7 @@ from .views import HomepagePhotoAPIView, LatestEventTagAPIView, LatestEventAPIVi
     WaterQualityManualSiteAPIView, BenthicOrganismAPIView, CrabAPIView, \
     LiteratureAPIView, NewsAPIView, ResearchAPIView, DownloadWaterQualityManyalAPIView, DownloadCrabAPIView, \
     InterviewSingleAPIView, InterviewMultipleAPIView, WaterQualityManualsAPIView, InterviewTag2ListAPIView, \
-    InterviewTag3ListAPIView, DownloadInterviewSingleAPIView, DownloadInterviewMultipleAPIView
+    InterviewTag3ListAPIView, DownloadInterviewSingleAPIView, DownloadInterviewMultipleAPIView, StaffAPIView
 
 urlpatterns = [
     path("getHomepagePhotos", HomepagePhotoAPIView.as_view(), name="getHomepagePhotos"),
@@ -32,5 +32,6 @@ urlpatterns = [
     path('download/interview-single/', DownloadInterviewSingleAPIView.as_view(), name='download-interview-single'),
     path('download/interview-multiple/', DownloadInterviewMultipleAPIView.as_view(),
          name='download-interview-multiple'),
+    path("staff/", StaffAPIView.as_view(), name="get_staff"),
 
 ]
