@@ -13,6 +13,7 @@ class MyUserAdmin(admin.ModelAdmin):
     list_display = ('id', 'get_email', 'get_name', 'get_verified', 'get_last_login')
     inlines = [UserProfileInline]
     readonly_fields = ('email', 'username')
+    search_fields = ['email']
     def get_email(self, obj):
         return obj.email
 
