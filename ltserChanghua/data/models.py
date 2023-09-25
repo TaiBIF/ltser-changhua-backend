@@ -282,3 +282,19 @@ class Research(models.Model):
         db_table = 'Research'
         verbose_name = '相關研究-內容'
         verbose_name_plural = '相關研究-內容'
+
+
+class Staff(models.Model):
+    title = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    duty = models.CharField(max_length=255)
+    email = models.EmailField()
+    image = models.ImageField(upload_to='images', blank=False, null=False)
+
+    def __str__(self):
+        return f"{self.name}"
+
+    class Meta:
+        db_table = 'Staff'
+        verbose_name = '人員職務'
+        verbose_name_plural = '人員職務'
