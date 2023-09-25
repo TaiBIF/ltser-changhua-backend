@@ -149,6 +149,8 @@ class InterviewTag1(models.Model):
 
     class Meta:
         db_table = 'InterviewTag1'
+        verbose_name = '訪談資料-標籤1'
+        verbose_name_plural = '訪談資料-標籤1'
 
 
 class InterviewTag2(models.Model):
@@ -161,6 +163,8 @@ class InterviewTag2(models.Model):
 
     class Meta:
         db_table = 'InterviewTag2'
+        verbose_name = '訪談資料-標籤2'
+        verbose_name_plural = '訪談資料-標籤2'
 
 class InterviewTag3(models.Model):
     title = models.CharField(max_length=200)
@@ -172,6 +176,8 @@ class InterviewTag3(models.Model):
 
     class Meta:
         db_table = 'InterviewTag3'
+        verbose_name = '訪談資料-標籤3'
+        verbose_name_plural = '訪談資料-標籤3'
 
 class InterviewStakeholder(models.Model):
     title = models.CharField(max_length=200)
@@ -183,6 +189,8 @@ class InterviewStakeholder(models.Model):
 
     class Meta:
         db_table = 'InterviewStakeholder'
+        verbose_name = '訪談資料-受訪對象'
+        verbose_name_plural = '訪談資料-受訪對象'
 
 class InterviewPeople(models.Model):
     title = models.CharField(max_length=200)
@@ -195,6 +203,8 @@ class InterviewPeople(models.Model):
 
     class Meta:
         db_table = 'InterviewPeople'
+        verbose_name = '訪談資料-受訪者'
+        verbose_name_plural = '訪談資料-受訪者'
 
 class InterviewContent(models.Model):
     content = models.TextField()
@@ -203,14 +213,14 @@ class InterviewContent(models.Model):
     interview_date = models.DateField()
     interview_people = models.ManyToManyField(InterviewPeople)
     interview_stakeholder = models.ManyToManyField(InterviewStakeholder)
-    # created_at = models.DateTimeField(auto_now_add=True)
-    # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.content}"
 
     class Meta:
         db_table = 'InterviewContent'
+        verbose_name = '訪談資料-內容'
+        verbose_name_plural = '訪談資料-內容'
 
 
 class Literature(models.Model):
@@ -288,7 +298,7 @@ class Staff(models.Model):
     title = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     duty = models.CharField(max_length=255)
-    email = models.EmailField()
+    email = models.EmailField(null=True, blank=True)
     image = models.ImageField(upload_to='images', blank=False, null=False)
 
     def __str__(self):

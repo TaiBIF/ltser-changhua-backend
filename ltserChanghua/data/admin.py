@@ -98,7 +98,8 @@ class LiteratureResource(resources.ModelResource):
 
 class LiteratureAdmin(ImportExportModelAdmin):
     resource_class = LiteratureResource
-    list_display = ('truncated_title', 'truncated_author', 'publisher', 'date', 'refID', 'truncated_link', 'is_ebook', 'views')
+    list_display = ('id', 'truncated_title', 'truncated_author', 'publisher', 'date', 'refID', 'truncated_link',
+                    'is_ebook', 'views')
 
     # 定义其他的设置 ...
 
@@ -146,7 +147,7 @@ class NewsResource(resources.ModelResource):
 
 class NewsAdmin(ImportExportModelAdmin):
     resource_class = NewsResource
-    list_display = ('title', 'reference', 'reporter', 'photographer', 'date', 'link', 'views', 'display_tags')
+    list_display = ('id', 'title', 'reference', 'reporter', 'photographer', 'date', 'link', 'views', 'display_tags')
 
     def display_tags(self, obj):
         return ", ".join([tag.title for tag in obj.tags.all()])
@@ -177,7 +178,8 @@ class ResearchResource(resources.ModelResource):
 
 class ResearchAdmin(ImportExportModelAdmin):
     resource_class = ResearchResource
-    list_display = ('truncated_title', 'author', 'year', 'truncated_reference', 'truncated_link', 'views', 'display_tags')
+    list_display = ('id', 'truncated_title', 'author', 'year', 'truncated_reference', 'truncated_link', 'views',
+    'display_tags')
 
     def truncated_title(self, obj):
         return truncatechars(obj.title, 10)
