@@ -352,20 +352,22 @@ class InterviewMultipleAPIView(APIView):
         if (tag2_values or tag3_values) and not stakeholder_values:
             raise ValidationError({'error': '請傳入受訪對象'})
 
-        tag2_list = list(map(int, tag2_values.split(','))) if tag2_values else []
-        tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
-        stakeholder_list = list(map(int, stakeholder_values.split(',')) )if stakeholder_values else []
-
-        tag2_q = Q(interview_tag2__id__in=tag2_list)
-        tag3_q = Q(interview_tag3__id__in=tag3_list)
+        stakeholder_list = list(map(int, stakeholder_values.split(','))) if stakeholder_values else []
         stakeholder_q = Q(interview_stakeholder__id__in=stakeholder_list)
 
-        matched_contents = (
-            InterviewContent.objects
-            .filter(tag2_q | tag3_q | stakeholder_q)
-            .distinct()
-            .prefetch_related('interview_tag2', 'interview_tag3', 'interview_stakeholder')
-        )
+        matched_contents = InterviewContent.objects.filter(stakeholder_q).distinct()
+
+        if tag2_values or tag3_values:
+            tag2_list = list(map(int, tag2_values.split(','))) if tag2_values else []
+            tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
+
+            tag2_q = Q(interview_tag2__id__in=tag2_list)
+            tag3_q = Q(interview_tag3__id__in=tag3_list)
+
+            matched_contents = matched_contents.filter(tag2_q | tag3_q).distinct()
+
+        matched_contents = matched_contents.prefetch_related('interview_tag2', 'interview_tag3',
+                                                             'interview_stakeholder')
 
         def calculate_score(content):
             score = sum(tag2.id in tag2_list for tag2 in content.interview_tag2.all())
