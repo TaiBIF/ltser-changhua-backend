@@ -2,12 +2,13 @@ from django.contrib import admin
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, InterviewTag1, \
     InterviewTag2, InterviewTag3, InterviewStakeholder, InterviewPeople, InterviewContent, Literature, NewsTag, News,\
     ResearchTag, Research, WaterQualityManualData, BenthicOrganismData, CrabData, Staff
-from import_export import resources
+from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
 from django.template.defaultfilters import truncatechars
-from import_export import fields
 from import_export.widgets import ManyToManyWidget
 from datetime import datetime
+from import_export.widgets import DateWidget
+from django.core.exceptions import ObjectDoesNotExist
 
 class HomepagePhotoAdmin(admin.ModelAdmin):
     list_display = ('order', 'image', 'display')
@@ -75,20 +76,72 @@ class InterviewPeopleAdmin(admin.ModelAdmin):
     def interview_stakeholder(self, obj):
         return obj.interview_stakeholder.title
 
-class InterviewContentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'content', 'display_interview_tag2', 'display_interview_tag3', 'display_interview_people', 'display_interview_stakeholder']
 
-    def display_interview_tag2(self, obj):
-        return ', '.join([tag.title for tag in obj.interview_tag2.all()])
+class InterviewContentResource(resources.ModelResource):
+    interview_tag2 = fields.Field(
+        column_name='interview_tag2',
+        attribute='interview_tag2',
+        widget=ManyToManyWidget(InterviewTag2, separator=',', field='title')
+    )
+    interview_tag3 = fields.Field(
+        column_name='interview_tag3',
+        attribute='interview_tag3',
+        widget=ManyToManyWidget(InterviewTag3, separator=',', field='title')
+    )
+    interview_people = fields.Field(
+        column_name='interview_people',
+        attribute='interview_people',
+        widget=ManyToManyWidget(InterviewPeople, ',', 'title')
+    )
+    interview_stakeholder = fields.Field(
+        column_name='interview_stakeholder',
+        attribute='interview_stakeholder',
+        widget=ManyToManyWidget(InterviewStakeholder, ',', 'title')
+    )
 
-    def display_interview_tag3(self, obj):
-        return ', '.join([tag.title for tag in obj.interview_tag3.all()])
+    class Meta:
+        model = InterviewContent
+        fields = ('content', 'interview_tag2', 'interview_tag3', 'interview_date', 'interview_people', 'interview_stakeholder')
+        import_id_fields = []
 
-    def display_interview_people(self, obj):
-        return ', '.join([person.title for person in obj.interview_people.all()])
+    def before_import_row(self, row, **kwargs):
+        date_str = row.get('interview_date')
+        if date_str:
+            date_obj = datetime.strptime(date_str, '%Y/%m/%d').date()
+            row['interview_date'] = date_obj.isoformat()
 
-    def display_interview_stakeholder(self, obj):
-        return ', '.join([stakeholder.title for stakeholder in obj.interview_stakeholder.all()])
+        interview_tag2 = row.get('interview_tag2')
+        if interview_tag2:
+            tag_list = [tag.strip() for tag in interview_tag2.split(',')]
+            for tag_title in tag_list:
+                InterviewTag2.objects.get_or_create(title=tag_title)
+
+        interview_tag3 = row.get('interview_tag3')
+        if interview_tag3:
+            tag_list = [tag.strip() for tag in interview_tag3.split(',')]
+            for tag_title in tag_list:
+                InterviewTag3.objects.get_or_create(title=tag_title)
+
+
+class InterviewContentAdmin(ImportExportModelAdmin):
+    resource_class = InterviewContentResource
+    list_display = ('id', 'content', 'interview_date', 'display_tag2_titles', 'display_tag3_titles', 'display_people_names', 'display_stakeholder_names')
+
+    def display_tag2_titles(self, obj):
+        return ", ".join(tag.title for tag in obj.interview_tag2.all())
+    display_tag2_titles.short_description = 'Tag2 Titles'
+
+    def display_tag3_titles(self, obj):
+        return ", ".join(tag.title for tag in obj.interview_tag3.all())
+    display_tag3_titles.short_description = 'Tag3 Titles'
+
+    def display_people_names(self, obj):
+        return ", ".join(people.title for people in obj.interview_people.all())
+    display_people_names.short_description = 'People Names'
+
+    def display_stakeholder_names(self, obj):
+        return ", ".join(stakeholder.title for stakeholder in obj.interview_stakeholder.all())
+    display_stakeholder_names.short_description = 'Stakeholder Names'
 
 
 class LiteratureResource(resources.ModelResource):

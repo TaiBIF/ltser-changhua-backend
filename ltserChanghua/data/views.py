@@ -631,15 +631,23 @@ class DownloadInterviewMultipleAPIView(APIView):
             csv_io = io.StringIO()
             writer = csv.writer(csv_io)
 
-            writer.writerow(['訪談內容', '相關分類', '訪談日期', '受訪者代碼', '類別'])
-            for content, _ in contents_with_scores:  # Note that get_contents_with_scores returns a tuple
+            writer.writerow(['id', '類別', '受訪者代碼', '訪談內容', '相關分類', '訪談日期'])
+            for content, _ in contents_with_scores:
+                tag2_str = '\n'.join(str(tag) for tag in content.interview_tag2.all())
+                tag3_str = '\n'.join(str(tag) for tag in content.interview_tag3.all())
+                tags_combined_str = tag2_str
+                if tag2_str and tag3_str:
+                    tags_combined_str += ',\n' + tag3_str
+                elif tag3_str:
+                    tags_combined_str = tag3_str
+
                 row = [
-                    content.content,
-                    ", ".join(str(tag) for tag in content.interview_tag2.all()) + ", " +
-                    ", ".join(str(tag) for tag in content.interview_tag3.all()),
-                    content.interview_date,
-                    ", ".join(str(people) for people in content.interview_people.all()),
+                    content.id,
                     ", ".join(str(stakeholder) for stakeholder in content.interview_stakeholder.all()),
+                    ", ".join(str(people) for people in content.interview_people.all()),
+                    content.content,
+                    tags_combined_str,
+                    content.interview_date,
                 ]
                 writer.writerow(row)
 
