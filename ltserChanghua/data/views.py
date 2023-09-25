@@ -104,7 +104,7 @@ class BenthicOrganismAPIView(APIView):
     def get(self, request):
         site = request.query_params.get('site', None)
         if site is not None:
-            bo = BenthicOrganismData.objects.filter(site=site)
+            bo = BenthicOrganismData.objects.filter(site=site).order_by('year', 'month')
             serializer = BenthicOrganismSerializer(bo, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
@@ -114,7 +114,7 @@ class CrabAPIView(APIView):
     def get(self, request):
         site = request.query_params.get('site', None)
         if site is not None:
-            crabs = CrabData.objects.filter(site=site)
+            crabs = CrabData.objects.filter(site=site).order_by('year', 'month')
             serializer = CrabSerializer(crabs, many=True)
             list_of_objects = serializer.data
             res = []
@@ -135,7 +135,7 @@ class CrabAPIView(APIView):
 class WaterQualityManualsAPIView(APIView):
     def get(self, request, *args, **kwargs):
         site = request.query_params.get('site', None)
-        wq = WaterQualityManualData.objects.filter(site=site)
+        wq = WaterQualityManualData.objects.filter(site=site).order_by('year', 'month')
         serializer = WaterQualityManualSerializer(wq, many=True)
         list_of_objects = serializer.data
         res = []
