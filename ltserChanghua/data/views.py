@@ -342,10 +342,15 @@ class InterviewMultipleAPIView(APIView):
     @staticmethod
     def get_contents_with_scores(request):
         stakeholder_values = request.query_params.get('stakeholder', None)
-        if not stakeholder_values:
-            raise ValidationError({'error': '請傳入受訪對象'})
         tag2_values = request.query_params.get('tag2', None)
         tag3_values = request.query_params.get('tag3', None)
+
+        # 没有传任何参数
+        if not any([stakeholder_values, tag2_values, tag3_values]):
+            return []
+
+        if (tag2_values or tag3_values) and not stakeholder_values:
+            raise ValidationError({'error': '請傳入受訪對象'})
 
         tag2_list = list(map(int, tag2_values.split(','))) if tag2_values else []
         tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
@@ -365,7 +370,6 @@ class InterviewMultipleAPIView(APIView):
         def calculate_score(content):
             score = sum(tag2.id in tag2_list for tag2 in content.interview_tag2.all())
             score += sum(tag3.id in tag3_list for tag3 in content.interview_tag3.all())
-            score += sum(stakeholder.id in stakeholder_list for stakeholder in content.interview_stakeholder.all())
 
             return score
 
