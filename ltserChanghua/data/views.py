@@ -352,6 +352,9 @@ class InterviewMultipleAPIView(APIView):
         if (tag2_values or tag3_values) and not stakeholder_values:
             raise ValidationError({'error': '請傳入受訪對象'})
 
+        if stakeholder_values and not tag2_values and not tag3_values:
+            raise ValidationError({'error': '請選擇 1-7 進行搜尋'})
+
         stakeholder_list = list(map(int, stakeholder_values.split(','))) if stakeholder_values else []
         stakeholder_q = Q(interview_stakeholder__id__in=stakeholder_list)
 
