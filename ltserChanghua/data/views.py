@@ -267,8 +267,8 @@ class InterviewSingleAPIView(APIView):
         people = request.GET.get('people')
         tag3_id = request.GET.get('tag3')
 
-        if not self._validate_parameters(d1_str, d2_str, people, tag3_id):
-            return Response({"error": "Invalid parameters."}, status=400)
+        if not any([d1_str, d2_str, people, tag3_id]):
+            return []
 
         try:
             if d1_str and d2_str:
@@ -306,13 +306,6 @@ class InterviewSingleAPIView(APIView):
 
         return Response(response_data, status=status.HTTP_200_OK)
 
-    def _validate_parameters(self, d1_str, d2_str, people, tag3_id):
-        valid_combinations = [
-            (d1_str and d2_str and not people and not tag3_id),
-            (people and not d1_str and not d2_str and not tag3_id),
-            (tag3_id and not d1_str and not d2_str and not people)
-        ]
-        return any(valid_combinations)
 
     def _filter_by_date(self, d1_str, d2_str):
         d1_year, d1_month = map(int, d1_str.split('-'))
