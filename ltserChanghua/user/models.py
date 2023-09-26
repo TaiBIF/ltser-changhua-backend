@@ -86,3 +86,5 @@ class DownloadRecord(models.Model):
         return f"{self.filename}"
     class Meta:
         db_table = 'DownloadRecord'
+        verbose_name = '下載紀錄'
+        verbose_name_plural = '下載紀錄'
