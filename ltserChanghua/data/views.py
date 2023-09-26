@@ -491,9 +491,9 @@ class InterviewTag2ListAPIView(APIView):
         categoryId = request.query_params.get('categoryId', None)
 
         if categoryId:
-            interviewtag2_list = InterviewTag2.objects.filter(interview_tag1_id=categoryId)
+            interviewtag2_list = InterviewTag2.objects.filter(interview_tag1_id=categoryId).order_by('id')
         else:
-            interviewtag2_list = InterviewTag2.objects.all()
+            interviewtag2_list = InterviewTag2.objects.all().order_by('id')
 
         serializer = InterviewTag2Serializer(interviewtag2_list, many=True)
 
