@@ -289,6 +289,9 @@ class InterviewSingleAPIView(APIView):
         if isinstance(interview_contents, Response):
             return interview_contents
 
+        if not interview_contents:
+            return Response([], status=status.HTTP_200_OK)
+
         interview_contents = interview_contents.order_by('-interview_date')
 
         paginator = CustomPageNumberPagination()
