@@ -210,8 +210,8 @@ class InterviewPeople(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     order = models.IntegerField(blank=True, null=True, unique=True)
-    search_volume = models.IntegerField(blank=True, null=True, default=0)
-    download_volume = models.IntegerField(blank=True, null=True, default=0)
+    search_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
+    download_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
     interview_stakeholder = models.ForeignKey(InterviewStakeholder, on_delete=models.CASCADE,
                                               related_name='interviewpeople_set')
     def __str__(self):
@@ -229,8 +229,8 @@ class InterviewContent(models.Model):
     interview_date = models.DateField()
     interview_people = models.ManyToManyField(InterviewPeople)
     interview_stakeholder = models.ManyToManyField(InterviewStakeholder)
-    search_volume = models.IntegerField(blank=True, null=True, default=0)
-    download_volume = models.IntegerField(blank=True, null=True, default=0)
+    search_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
+    download_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
 
     def __str__(self):
         return f"{self.content}"

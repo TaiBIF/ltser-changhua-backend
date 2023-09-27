@@ -266,9 +266,9 @@ class InterviewSingleAPIView(APIView):
         d1_str = request.GET.get('d1')
         d2_str = request.GET.get('d2')
         people = request.GET.get('people')
-        tag3_id = request.GET.get('tag3')
+        tag3_values = request.query_params.get('tag3', None)
 
-        if not any([d1_str, d2_str, people, tag3_id]):
+        if not any([d1_str, d2_str, people, tag3_values]):
             return []
 
         try:
@@ -276,8 +276,9 @@ class InterviewSingleAPIView(APIView):
                 interview_contents = self._filter_by_date(d1_str, d2_str)
             elif people:
                 interview_contents = self._filter_by_people(people)
-            elif tag3_id:
-                interview_contents = self._filter_by_tag3(tag3_id)
+            elif tag3_values:
+                tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
+                interview_contents = self._filter_by_tag3(tag3_list)
             else:
                 return Response({"error": "No filter provided."}, status=400)
         except ValueError as ve:
@@ -291,7 +292,7 @@ class InterviewSingleAPIView(APIView):
             return interview_contents
 
         if not interview_contents:
-            return Response([], status=status.HTTP_200_OK)
+            return Response({"records":[]}, status=status.HTTP_200_OK)
 
         interview_contents = interview_contents.order_by('-interview_date')
 
@@ -328,13 +329,13 @@ class InterviewSingleAPIView(APIView):
         except InterviewPeople.DoesNotExist:
             raise ValueError("Invalid person ID.")
 
-    def _filter_by_tag3(self, tag3_id):
+    def _filter_by_tag3(self, tag3_list):
         try:
-            tag_id = int(tag3_id)
-            tag = InterviewTag3.objects.get(id=tag_id)
-            return InterviewContent.objects.filter(interview_tag3=tag)
-        except (ValueError, InterviewTag3.DoesNotExist):
-            raise ValueError("Invalid tag3 ID.")
+            tag3_q = Q(interview_tag3__id__in=tag3_list)
+            interview_contents = InterviewContent.objects.filter(tag3_q)
+            return interview_contents
+        except ValueError as e:
+            raise ValueError(str(e))
 
 
 class InterviewMultipleAPIView(APIView):
