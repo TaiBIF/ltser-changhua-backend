@@ -2,11 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganismData, \
     CrabData, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, InterviewTag3, \
-    InterviewTag2, InterviewStakeholder, InterviewPeople, WaterQualityManualData, Staff
+    InterviewTag2, InterviewStakeholder, InterviewPeople, WaterQualityManualData, Staff, InterviewTag1
 from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
     WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, LiteratureSerializer, \
     NewsTagSerializer, NewsSerializer, ResearchTagSerializer, ResearchSerializer, InterviewContentSerializer, \
-    WaterQualityManualSerializer, InterviewTag2Serializer, InterviewTag3Serializer, StaffSerializer, InterviewStakeholderSerializer
+    WaterQualityManualSerializer, InterviewTag2Serializer, InterviewTag3Serializer, StaffSerializer, \
+    InterviewStakeholderSerializer, InterviewTag1Serializer
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
@@ -478,6 +479,12 @@ class InterviewStakeholderListAPIView(APIView):
     def get(self, request):
         interviewstakeholder_list = InterviewStakeholder.objects.all().order_by('order')
         serializer = InterviewStakeholderSerializer(interviewstakeholder_list, many=True)
+        return Response({'records': serializer.data})
+
+class InterviewTag1ListAPIView(APIView):
+    def get(self, request):
+        interviewtag1_list = InterviewTag1.objects.all().order_by('order')
+        serializer = InterviewTag1Serializer(interviewtag1_list, many=True)
         return Response({'records': serializer.data})
 
 class InterviewTag2ListAPIView(APIView):

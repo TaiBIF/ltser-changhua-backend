@@ -144,8 +144,8 @@ class InterviewTag1(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     order = models.IntegerField(blank=True, null=True, unique=True)
-    search_volume = models.IntegerField(blank=True, null=True, default=0)
-    download_volume = models.IntegerField(blank=True, null=True, default=0)
+    search_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
+    download_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
 
     def __str__(self):
         return f"{self.title}"
