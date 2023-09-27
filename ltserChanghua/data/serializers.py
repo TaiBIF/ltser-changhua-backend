@@ -170,7 +170,7 @@ class InterviewStakeholderSerializer(serializers.ModelSerializer):
         return None
 
     def get_people(self, obj):
-        people_titles = InterviewPeople.objects.filter(interview_stakeholder=obj).values_list('title', flat=True)
+        people_titles = InterviewPeople.objects.filter(interview_stakeholder=obj).order_by('order').values_list('title', flat=True)
         return list(people_titles)
 
 class InterviewTag1Serializer(serializers.ModelSerializer):
