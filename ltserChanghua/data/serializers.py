@@ -157,11 +157,11 @@ class InterviewStakeholderSerializer(serializers.ModelSerializer):
     stakeholder = serializers.IntegerField(source='id')
     categoryId = serializers.SerializerMethodField()
     groupId = serializers.SerializerMethodField()
-    people_list = serializers.SerializerMethodField()
+    people = serializers.SerializerMethodField()
 
     class Meta:
         model = InterviewStakeholder
-        fields = ['stakeholder', 'categoryId', 'groupId', 'optionId', 'title', 'people_list']
+        fields = ['stakeholder', 'categoryId', 'groupId', 'optionId', 'title', 'people']
 
     def get_categoryId(self, obj):
         return '0'
@@ -169,7 +169,7 @@ class InterviewStakeholderSerializer(serializers.ModelSerializer):
     def get_groupId(self, obj):
         return None
 
-    def get_people_list(self, obj):
+    def get_people(self, obj):
         people_titles = InterviewPeople.objects.filter(interview_stakeholder=obj).values_list('title', flat=True)
         return list(people_titles)
 
