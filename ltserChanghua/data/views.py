@@ -316,6 +316,8 @@ class InterviewSingleAPIView(APIView):
         d1_start = datetime(d1_year, d1_month, 1).date()
         last_day_d2 = calendar.monthrange(d2_year, d2_month)[1]
         d2_end = datetime(d2_year, d2_month, last_day_d2).date()
+        if d2_end < d1_start:
+            raise ValueError("起始時間不能大於結束時間")
         return InterviewContent.objects.filter(interview_date__range=(d1_start, d2_end))
 
     def _filter_by_people(self, people):
