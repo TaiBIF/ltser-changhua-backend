@@ -267,6 +267,7 @@ class InterviewSingleAPIView(APIView):
         d2_str = request.GET.get('d2')
         people = request.GET.get('people')
         tag3_values = request.query_params.get('tag3', None)
+        print(people)
 
         if not any([d1_str, d2_str, people, tag3_values]):
             return []
@@ -276,9 +277,16 @@ class InterviewSingleAPIView(APIView):
                 interview_contents = self._filter_by_date(d1_str, d2_str)
             elif people:
                 interview_contents = self._filter_by_people(people)
+                people_instance = InterviewPeople.objects.get(title=people)
+                people_instance.search_volume += 1
+                people_instance.save()
             elif tag3_values:
                 tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
                 interview_contents = self._filter_by_tag3(tag3_list)
+                tag3_instances = InterviewTag3.objects.filter(id__in=tag3_list)
+                for tag3_instance in tag3_instances:
+                    tag3_instance.search_volume += 1
+                    tag3_instance.save()
             else:
                 return Response({"error": "No filter provided."}, status=400)
         except ValueError as ve:
@@ -332,7 +340,7 @@ class InterviewSingleAPIView(APIView):
     def _filter_by_tag3(self, tag3_list):
         try:
             tag3_q = Q(interview_tag3__id__in=tag3_list)
-            interview_contents = InterviewContent.objects.filter(tag3_q)
+            interview_contents = InterviewContent.objects.filter(tag3_q).distinct()
             return interview_contents
         except ValueError as e:
             raise ValueError(str(e))

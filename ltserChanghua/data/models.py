@@ -229,8 +229,6 @@ class InterviewContent(models.Model):
     interview_date = models.DateField()
     interview_people = models.ManyToManyField(InterviewPeople)
     interview_stakeholder = models.ManyToManyField(InterviewStakeholder)
-    search_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
-    download_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
 
     def __str__(self):
         return f"{self.content}"

@@ -126,7 +126,7 @@ class InterviewContentResource(resources.ModelResource):
 class InterviewContentAdmin(ImportExportModelAdmin):
     resource_class = InterviewContentResource
     list_display = ('id', 'content', 'interview_date', 'display_tag2_titles', 'display_tag3_titles',
-                    'display_people_names', 'display_stakeholder_names',  'search_volume', 'download_volume')
+                    'display_people_names', 'display_stakeholder_names')
 
     def display_tag2_titles(self, obj):
         return ", ".join(tag.title for tag in obj.interview_tag2.all())
