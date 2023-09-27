@@ -501,10 +501,11 @@ class InterviewTag2ListAPIView(APIView):
         categoryId = request.query_params.get('categoryId', None)
 
         if categoryId:
-            interviewtag2_list = InterviewTag2.objects.filter(interview_tag1_id=categoryId).order_by('id')
+            interviewtag2_list = InterviewTag2.objects.filter(
+                interview_tag1__title__startswith=str(categoryId)
+            ).order_by('order')
         else:
-            interviewtag2_list = InterviewTag2.objects.all().order_by('id')
-
+            interviewtag2_list = InterviewTag2.objects.all().order_by('order')
         serializer = InterviewTag2Serializer(interviewtag2_list, many=True)
 
         # Constructing the response data
@@ -543,15 +544,12 @@ class InterviewTag3ListAPIView(APIView):
     def get(self, request):
         categoryId = request.query_params.get('categoryId', None)
         groupId = request.query_params.get('groupId', None)
-        print(categoryId, groupId)
         if categoryId and groupId:
-            # We fetch the InterviewTag2 instance matching the groupId (by title) and the categoryId
             tag2_instance = InterviewTag2.objects.filter(title__startswith=f"{categoryId}.{groupId} ",interview_tag1__title__startswith=str(categoryId)).first()
             if not tag2_instance:
                 return Response({'error': 'No matching InterviewTag2 found'}, status=400)
             interviewtag3_list = InterviewTag3.objects.filter(interview_tag2=tag2_instance)
         else:
-            # Fetch all InterviewTag3 instances
             interviewtag3_list = InterviewTag3.objects.all()
 
         serializer = InterviewTag3Serializer(interviewtag3_list, many=True)
