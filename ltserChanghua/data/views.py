@@ -21,7 +21,7 @@ import os
 from user.models import DownloadRecord
 from django.http import FileResponse
 import calendar
-from django.db.models import Q
+from django.db.models import Q, F
 from rest_framework.exceptions import ValidationError
 
 class CustomPageNumberPagination(PageNumberPagination):
@@ -371,6 +371,11 @@ class InterviewMultipleAPIView(APIView):
         if tag2_values or tag3_values:
             tag2_list = list(map(int, tag2_values.split(','))) if tag2_values else []
             tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
+
+            if tag2_list:
+                InterviewTag2.objects.filter(id__in=tag2_list).update(search_volume=F('search_volume') + 1)
+            if tag3_list:
+                InterviewTag3.objects.filter(id__in=tag3_list).update(search_volume=F('search_volume') + 1)
 
             tag2_q = Q(interview_tag2__id__in=tag2_list)
             tag3_q = Q(interview_tag3__id__in=tag3_list)

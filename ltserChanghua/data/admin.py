@@ -9,6 +9,8 @@ from import_export.widgets import ManyToManyWidget
 from datetime import datetime
 from import_export.widgets import DateWidget
 from django.core.exceptions import ObjectDoesNotExist
+import csv
+from django.http import HttpResponse
 
 class HomepagePhotoAdmin(admin.ModelAdmin):
     list_display = ('order', 'image', 'display')
@@ -55,7 +57,7 @@ class WaterQualityManualDataAdmin(ImportExportModelAdmin):
     )
 
 class InterviewTag1Admin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'order', 'search_volume', 'download_volume']
+    list_display = ['id', 'title', 'order']
 
 class InterviewTag2Admin(admin.ModelAdmin):
     list_display = ['id', 'title', 'interview_tag1', 'order', 'search_volume', 'download_volume']
@@ -68,10 +70,10 @@ class InterviewTag3Admin(admin.ModelAdmin):
         return obj.interview_tag2.title
 
 class InterviewStakeholderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'order', 'search_volume', 'download_volume', 'optionId']
+    list_display = ['id', 'title', 'order', 'optionId']
 
 class InterviewPeopleAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'interview_stakeholder', 'order', 'search_volume', 'download_volume']
+    list_display = ['id', 'title', 'interview_stakeholder', 'order']
 
     def interview_stakeholder(self, obj):
         return obj.interview_stakeholder.title
