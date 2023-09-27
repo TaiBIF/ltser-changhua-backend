@@ -155,3 +155,4 @@ class DownloadRecordAdmin(admin.ModelAdmin):
 
 admin.site.register(MyUser, MyUserAdmin)
 admin.site.register(DownloadRecord, DownloadRecordAdmin)
+admin.site.index_template = 'custom_admin_template.html'

@@ -6,6 +6,7 @@ from .views import RegisterAPIView, VerifyEmailAPIView, ResendEmailVerifyAPIView
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
+from .views import export_all_models
 
 urlpatterns = [
     path('signUp/', RegisterAPIView.as_view(), name='sign-up'),
@@ -19,5 +20,6 @@ urlpatterns = [
     path('request-rest-email/', RequestPasswordResetEmailAPIView.as_view(), name='request-rest-email'),
     path('password-reset/<uidb64>/<token>/', PasswordTokenCheckAPIView.as_view(), name='password-reset-confirm'),
     path('password-reset-complete/', SetNewPasswordAPIView.as_view(), name='password-reset-complete'),
-    path('download-record/', DownloadRecordAPIView.as_view(), name='download-record')
+    path('download-record/', DownloadRecordAPIView.as_view(), name='download-record'),
+    path('export/', export_all_models, name='export_all_models'),
 ]

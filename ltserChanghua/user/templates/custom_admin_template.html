@@ -1,0 +1,6 @@
+{% extends 'admin/base_site.html' %}
+
+{% block content %}
+    <a href="{% url 'export_all_models' %}" class="button">導出所有模型</a>
+    {{ block.super }}
+{% endblock %}

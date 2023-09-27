@@ -15,6 +15,12 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import smart_bytes, smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.pagination import PageNumberPagination
+from django.apps import apps
+from django.http import HttpResponse
+import csv
+import os
+import zipfile
+import shutil
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
 
@@ -203,3 +209,51 @@ class DownloadRecordAPIView(APIView):
             'totalRecords': paginator.page.paginator.count,
             'records': serializer.data
         }, status=status.HTTP_200_OK)
+
+
+import csv
+import os
+import zipfile
+from django.apps import apps
+from django.http import HttpResponse
+
+
+def export_all_models(request):
+    # 創建臨時目錄來保存 CSV 文件
+    temp_dir = 'temp_csv'
+    os.makedirs(temp_dir, exist_ok=True)
+
+    # 獲取所有模型
+    models = apps.get_models()
+
+    for model in models:
+        model_name = model.__name__
+        with open(f'{temp_dir}/{model_name}.csv', 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+
+            # 寫入字段名稱作為表頭
+            fields = [field.name for field in model._meta.fields]
+            writer.writerow(fields)
+
+            # 寫入每個對象的數據，使用 utf-8 編碼
+            for obj in model.objects.all():
+                writer.writerow(
+                    [str(getattr(obj, field)).encode('utf-8', 'ignore').decode('utf-8') for field in fields])
+
+    # 創建 ZIP 文件
+    zip_filename = 'all_models.zip'
+    with zipfile.ZipFile(zip_filename, 'w') as zipf:
+        for root, dirs, files in os.walk(temp_dir):
+            for file in files:
+                zipf.write(os.path.join(root, file), file)
+
+    # 讀取 ZIP 文件內容並將其作為響應返回
+    with open(zip_filename, 'rb') as zipf:
+        response = HttpResponse(zipf.read(), content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename={zip_filename}'
+
+
+    shutil.rmtree(temp_dir)
+    os.remove(zip_filename)
+
+    return response
