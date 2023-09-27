@@ -267,7 +267,6 @@ class InterviewSingleAPIView(APIView):
         d2_str = request.GET.get('d2')
         people = request.GET.get('people')
         tag3_values = request.query_params.get('tag3', None)
-        print(people)
 
         if not any([d1_str, d2_str, people, tag3_values]):
             return []
@@ -277,9 +276,6 @@ class InterviewSingleAPIView(APIView):
                 interview_contents = self._filter_by_date(d1_str, d2_str)
             elif people:
                 interview_contents = self._filter_by_people(people)
-                people_instance = InterviewPeople.objects.get(title=people)
-                people_instance.search_volume += 1
-                people_instance.save()
             elif tag3_values:
                 tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
                 interview_contents = self._filter_by_tag3(tag3_list)
@@ -594,7 +590,6 @@ class DownloadInterviewSingleAPIView(APIView):
 
         interview_view = InterviewSingleAPIView()
         interview_contents = interview_view.get_interview_contents(request)
-
         if isinstance(interview_contents, Response):
             return interview_contents
 
