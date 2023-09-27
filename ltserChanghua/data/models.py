@@ -300,6 +300,7 @@ class Staff(models.Model):
     duty = models.CharField(max_length=255)
     email = models.EmailField(null=True, blank=True)
     image = models.ImageField(upload_to='images', blank=False, null=False)
+    order = models.IntegerField(blank=True, null=True, unique=True)
 
     def __str__(self):
         return f"{self.name}"

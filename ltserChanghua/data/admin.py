@@ -37,7 +37,7 @@ class CrabSiteAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'latitude', 'longitude']
 
 class StaffAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'name', 'duty', 'email']
+    list_display = ['id', 'title', 'name', 'duty', 'email', 'order']
 
 
 class WaterQualityManualSiteAdmin(admin.ModelAdmin):

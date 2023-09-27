@@ -30,6 +30,8 @@ class MyUserAdmin(admin.ModelAdmin):
     def get_verified(self, obj):
         return obj.is_verified
 
+    get_verified.admin_order_field = 'is_verified'
+
     def get_name(self, obj):
         return obj.last_name + obj.first_name
 

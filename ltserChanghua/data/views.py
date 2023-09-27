@@ -661,6 +661,6 @@ class DownloadInterviewMultipleAPIView(APIView):
 
 class StaffAPIView(APIView):
     def get(self, request):
-        staff = Staff.objects.all()
+        staff = Staff.objects.all().order_by('order')
         serializer = StaffSerializer(staff, many=True)
         return Response({'records': serializer.data})
