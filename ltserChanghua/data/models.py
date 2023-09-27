@@ -143,6 +143,9 @@ class InterviewTag1(models.Model):
     title = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    order = models.IntegerField(blank=True, null=True, unique=True)
+    search_volume = models.IntegerField(blank=True, null=True, default=0)
+    download_volume = models.IntegerField(blank=True, null=True, default=0)
 
     def __str__(self):
         return f"{self.title}"
@@ -157,6 +160,9 @@ class InterviewTag2(models.Model):
     title = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    order = models.IntegerField(blank=True, null=True, unique=True)
+    search_volume = models.IntegerField(blank=True, null=True, default=0)
+    download_volume = models.IntegerField(blank=True, null=True, default=0)
     interview_tag1 = models.ForeignKey(InterviewTag1, on_delete=models.CASCADE, related_name='interviewtag2_set')
     def __str__(self):
         return f"{self.title}"
@@ -170,6 +176,9 @@ class InterviewTag3(models.Model):
     title = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    order = models.IntegerField(blank=True, null=True, unique=True)
+    search_volume = models.IntegerField(blank=True, null=True, default=0)
+    download_volume = models.IntegerField(blank=True, null=True, default=0)
     interview_tag2 = models.ForeignKey(InterviewTag2, on_delete=models.CASCADE, related_name='interviewtag3_set')
     def __str__(self):
         return f"{self.title}"
@@ -183,6 +192,9 @@ class InterviewStakeholder(models.Model):
     title = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    order = models.IntegerField(blank=True, null=True, unique=True)
+    search_volume = models.IntegerField(blank=True, null=True, default=0)
+    download_volume = models.IntegerField(blank=True, null=True, default=0)
 
     def __str__(self):
         return f"{self.title}"
@@ -196,6 +208,9 @@ class InterviewPeople(models.Model):
     title = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    order = models.IntegerField(blank=True, null=True, unique=True)
+    search_volume = models.IntegerField(blank=True, null=True, default=0)
+    download_volume = models.IntegerField(blank=True, null=True, default=0)
     interview_stakeholder = models.ForeignKey(InterviewStakeholder, on_delete=models.CASCADE,
                                               related_name='interviewpeople_set')
     def __str__(self):
@@ -213,6 +228,8 @@ class InterviewContent(models.Model):
     interview_date = models.DateField()
     interview_people = models.ManyToManyField(InterviewPeople)
     interview_stakeholder = models.ManyToManyField(InterviewStakeholder)
+    search_volume = models.IntegerField(blank=True, null=True, default=0)
+    download_volume = models.IntegerField(blank=True, null=True, default=0)
 
     def __str__(self):
         return f"{self.content}"

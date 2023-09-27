@@ -531,10 +531,10 @@ class InterviewTag3ListAPIView(APIView):
     def get(self, request):
         categoryId = request.query_params.get('categoryId', None)
         groupId = request.query_params.get('groupId', None)
-
+        print(categoryId, groupId)
         if categoryId and groupId:
             # We fetch the InterviewTag2 instance matching the groupId (by title) and the categoryId
-            tag2_instance = InterviewTag2.objects.filter(title__startswith=f"{categoryId}.{groupId} ", interview_tag1_id=categoryId).first()
+            tag2_instance = InterviewTag2.objects.filter(title__startswith=f"{categoryId}.{groupId} ",interview_tag1__title__startswith=str(categoryId)).first()
             if not tag2_instance:
                 return Response({'error': 'No matching InterviewTag2 found'}, status=400)
             interviewtag3_list = InterviewTag3.objects.filter(interview_tag2=tag2_instance)

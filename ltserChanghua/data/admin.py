@@ -55,23 +55,23 @@ class WaterQualityManualDataAdmin(ImportExportModelAdmin):
     )
 
 class InterviewTag1Admin(admin.ModelAdmin):
-    list_display = ['id', 'title']
+    list_display = ['id', 'title', 'order', 'search_volume', 'download_volume']
 
 class InterviewTag2Admin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'interview_tag1']
+    list_display = ['id', 'title', 'interview_tag1', 'order', 'search_volume', 'download_volume']
     def interview_tag1(self, obj):
         return obj.interview_tag1.title
 
 class InterviewTag3Admin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'interview_tag2']
+    list_display = ['id', 'title', 'interview_tag2', 'order', 'search_volume', 'download_volume']
     def interview_tag2(self, obj):
         return obj.interview_tag2.title
 
 class InterviewStakeholderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title']
+    list_display = ['id', 'title', 'order', 'search_volume', 'download_volume']
 
 class InterviewPeopleAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'interview_stakeholder']
+    list_display = ['id', 'title', 'interview_stakeholder', 'order', 'search_volume', 'download_volume']
 
     def interview_stakeholder(self, obj):
         return obj.interview_stakeholder.title
@@ -125,7 +125,8 @@ class InterviewContentResource(resources.ModelResource):
 
 class InterviewContentAdmin(ImportExportModelAdmin):
     resource_class = InterviewContentResource
-    list_display = ('id', 'content', 'interview_date', 'display_tag2_titles', 'display_tag3_titles', 'display_people_names', 'display_stakeholder_names')
+    list_display = ('id', 'content', 'interview_date', 'display_tag2_titles', 'display_tag3_titles',
+                    'display_people_names', 'display_stakeholder_names',  'search_volume', 'download_volume')
 
     def display_tag2_titles(self, obj):
         return ", ".join(tag.title for tag in obj.interview_tag2.all())
