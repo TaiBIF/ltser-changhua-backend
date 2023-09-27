@@ -262,7 +262,7 @@ class ResearchAPIView(APIView):
 
 class InterviewSingleAPIView(APIView):
 
-    def get_interview_contents(self, request):
+    def get_interview_contents(self, request, update_type='search'):
         d1_str = request.GET.get('d1')
         d2_str = request.GET.get('d2')
         people = request.GET.get('people')
@@ -280,9 +280,14 @@ class InterviewSingleAPIView(APIView):
                 tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
                 interview_contents = self._filter_by_tag3(tag3_list)
                 tag3_instances = InterviewTag3.objects.filter(id__in=tag3_list)
-                for tag3_instance in tag3_instances:
-                    tag3_instance.search_volume += 1
-                    tag3_instance.save()
+                if update_type == 'search':
+                    for tag3_instance in tag3_instances:
+                        tag3_instance.search_volume += 1
+                        tag3_instance.save()
+                elif update_type == 'download':
+                    for tag3_instance in tag3_instances:
+                        tag3_instance.download_volume += 1
+                        tag3_instance.save()
             else:
                 return Response({"error": "No filter provided."}, status=400)
         except ValueError as ve:
@@ -291,7 +296,7 @@ class InterviewSingleAPIView(APIView):
         return interview_contents
 
     def get(self, request):
-        interview_contents = self.get_interview_contents(request)
+        interview_contents = self.get_interview_contents(request, update_type='search')
         if isinstance(interview_contents, Response):
             return interview_contents
 
@@ -344,7 +349,7 @@ class InterviewSingleAPIView(APIView):
 
 class InterviewMultipleAPIView(APIView):
     @staticmethod
-    def get_contents_with_scores(request):
+    def get_contents_with_scores(request, update_type='search'):
         stakeholder_values = request.query_params.get('stakeholder', None)
         tag2_values = request.query_params.get('tag2', None)
         tag3_values = request.query_params.get('tag3', None)
@@ -368,10 +373,16 @@ class InterviewMultipleAPIView(APIView):
             tag2_list = list(map(int, tag2_values.split(','))) if tag2_values else []
             tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
 
-            if tag2_list:
-                InterviewTag2.objects.filter(id__in=tag2_list).update(search_volume=F('search_volume') + 1)
-            if tag3_list:
-                InterviewTag3.objects.filter(id__in=tag3_list).update(search_volume=F('search_volume') + 1)
+            if update_type == 'search':
+                if tag2_list:
+                    InterviewTag2.objects.filter(id__in=tag2_list).update(search_volume=F('search_volume') + 1)
+                if tag3_list:
+                    InterviewTag3.objects.filter(id__in=tag3_list).update(search_volume=F('search_volume') + 1)
+            elif update_type == 'download':
+                if tag2_list:
+                    InterviewTag2.objects.filter(id__in=tag2_list).update(download_volume=F('download_volume') + 1)
+                if tag3_list:
+                    InterviewTag3.objects.filter(id__in=tag3_list).update(download_volume=F('download_volume') + 1)
 
             tag2_q = Q(interview_tag2__id__in=tag2_list)
             tag3_q = Q(interview_tag3__id__in=tag3_list)
@@ -395,7 +406,7 @@ class InterviewMultipleAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            contents_with_scores = self.get_contents_with_scores(request)
+            contents_with_scores = self.get_contents_with_scores(request, update_type='search')
         except ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
@@ -589,7 +600,7 @@ class DownloadInterviewSingleAPIView(APIView):
             return Response({'detail': "權限不足，請填寫申請表格"}, status=status.HTTP_403_FORBIDDEN)
 
         interview_view = InterviewSingleAPIView()
-        interview_contents = interview_view.get_interview_contents(request)
+        interview_contents = interview_view.get_interview_contents(request, update_type='download')
         if isinstance(interview_contents, Response):
             return interview_contents
 
@@ -636,7 +647,7 @@ class DownloadInterviewMultipleAPIView(APIView):
         if not (user.is_staff or user.is_superuser or getattr(user, 'is_applied', False)):
             return Response({'detail': "權限不足，請填寫申請表格"}, status=status.HTTP_403_FORBIDDEN)
 
-        contents_with_scores = InterviewMultipleAPIView.get_contents_with_scores(request)
+        contents_with_scores = InterviewMultipleAPIView.get_contents_with_scores(request,  update_type='download')
 
         zip_io = io.BytesIO()
         now = datetime.now()
