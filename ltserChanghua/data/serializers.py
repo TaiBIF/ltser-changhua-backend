@@ -1,6 +1,6 @@
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganismData, \
     CrabData, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, WaterQualityManualData, \
-    InterviewTag2, InterviewTag3, Staff, InterviewStakeholder, InterviewTag1
+    InterviewTag2, InterviewTag3, Staff, InterviewStakeholder, InterviewTag1, InterviewPeople
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -157,16 +157,21 @@ class InterviewStakeholderSerializer(serializers.ModelSerializer):
     stakeholder = serializers.IntegerField(source='id')
     categoryId = serializers.SerializerMethodField()
     groupId = serializers.SerializerMethodField()
+    people_list = serializers.SerializerMethodField()
 
     class Meta:
         model = InterviewStakeholder
-        fields = ['stakeholder', 'categoryId', 'groupId', 'optionId', 'title']
+        fields = ['stakeholder', 'categoryId', 'groupId', 'optionId', 'title', 'people_list']
 
     def get_categoryId(self, obj):
         return '0'
 
     def get_groupId(self, obj):
         return None
+
+    def get_people_list(self, obj):
+        people_titles = InterviewPeople.objects.filter(interview_stakeholder=obj).values_list('title', flat=True)
+        return list(people_titles)
 
 class InterviewTag1Serializer(serializers.ModelSerializer):
     class Meta:
