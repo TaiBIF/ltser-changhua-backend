@@ -6,7 +6,7 @@ from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQ
 from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
     WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, LiteratureSerializer, \
     NewsTagSerializer, NewsSerializer, ResearchTagSerializer, ResearchSerializer, InterviewContentSerializer, \
-    WaterQualityManualSerializer, InterviewTag2Serializer, InterviewTag3Serializer, StaffSerializer
+    WaterQualityManualSerializer, InterviewTag2Serializer, InterviewTag3Serializer, StaffSerializer, InterviewStakeholderSerializer
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
@@ -474,6 +474,11 @@ class DownloadCrabAPIView(APIView):
         response = FileResponse(zip_io, as_attachment=True, filename=f'LTSER Changhua_底棲生物資料_{now.strftime("%Y-%m-%d")}.zip')
         return response
 
+class InterviewStakeholderListAPIView(APIView):
+    def get(self, request):
+        interviewstakeholder_list = InterviewStakeholder.objects.all().order_by('order')
+        serializer = InterviewStakeholderSerializer(interviewstakeholder_list, many=True)
+        return Response({'records': serializer.data})
 
 class InterviewTag2ListAPIView(APIView):
 

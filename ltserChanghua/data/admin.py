@@ -68,7 +68,7 @@ class InterviewTag3Admin(admin.ModelAdmin):
         return obj.interview_tag2.title
 
 class InterviewStakeholderAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'order', 'search_volume', 'download_volume']
+    list_display = ['id', 'title', 'order', 'search_volume', 'download_volume', 'optionId']
 
 class InterviewPeopleAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'interview_stakeholder', 'order', 'search_volume', 'download_volume']
