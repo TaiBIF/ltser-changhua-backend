@@ -60,6 +60,11 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
         self.last_login = timezone.now()
         self.save(update_fields=['last_login'])
 
+    class Meta:
+        permissions = [
+            ("can_export_all_models", "Can export all models"),
+        ]
+
 class UserProfile(models.Model):
     user = models.OneToOneField(MyUser, on_delete=models.CASCADE)
     school = models.CharField(max_length=100, null=True, blank=True, editable=True)

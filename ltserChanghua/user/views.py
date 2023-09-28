@@ -21,6 +21,7 @@ import csv
 import os
 import zipfile
 import shutil
+from django.contrib.auth.decorators import permission_required
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
 
@@ -217,7 +218,7 @@ import zipfile
 from django.apps import apps
 from django.http import HttpResponse
 
-
+@permission_required('user.can_export_all_models')
 def export_all_models(request):
     # 創建臨時目錄來保存 CSV 文件
     temp_dir = 'temp_csv'
