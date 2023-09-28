@@ -1,6 +1,7 @@
 from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQualityManualSite, BenthicOrganismData, \
     CrabData, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, WaterQualityManualData, \
     InterviewTag2, InterviewTag3, Staff, InterviewStakeholder, InterviewTag1, InterviewPeople
+import re
 from rest_framework import serializers
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
@@ -143,10 +144,26 @@ class InterviewContentSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        request = self.context.get('request')
+        searched_tags = request.query_params.get('tag3', '').split(',')
 
-        # 對 tag3 的表示進行排序
-        representation['tag3'] = sorted(representation['tag3'], key=lambda tag: tag.startswith('0.1.'))
-        # 如果 tag 開始於 '0.1.'，將返回 True，所以它將被放在列表的末尾。
+        # 获取 tag2 和 tag3 列表并将其合并
+        tag2 = representation.pop('tag2', [])
+        tag3 = representation.pop('tag3', [])
+        combined_tags = tag2 + tag3
+
+        def sort_key(tag):
+            if tag in searched_tags:
+                return (0,)  # 搜索的标签在前
+            if tag.startswith('0.1.'):
+                return (2,)  # '0.1.x' 类型的标签在后
+
+            # 从标签中提取数字部分并分割
+            numbers = re.findall(r'\d+', tag)
+            return (1,) + tuple(map(int, numbers))  # 对数字部分进行逐段比较
+
+        # 对合并的标签列表进行排序
+        representation['combined_tags'] = sorted(combined_tags, key=sort_key)
 
         return representation
 
