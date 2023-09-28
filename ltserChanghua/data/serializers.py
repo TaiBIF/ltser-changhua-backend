@@ -3,6 +3,7 @@ from .models import HomepagePhoto, LatestEvent, LatestEventTag, CrabSite, WaterQ
     InterviewTag2, InterviewTag3, Staff, InterviewStakeholder, InterviewTag1, InterviewPeople
 import re
 from rest_framework import serializers
+from collections import OrderedDict
 
 class HomepagePhotoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -147,24 +148,32 @@ class InterviewContentSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         searched_tags = request.query_params.get('tag3', '').split(',')
 
-        # 获取 tag2 和 tag3 列表并将其合并
-        tag2 = representation.pop('tag2', [])
-        tag3 = representation.pop('tag3', [])
-        combined_tags = tag2 + tag3
+        tag2_objects = [{'tag_type': 'tag2', 'id': obj.id, 'title': obj.title}
+                        for obj in instance.interview_tag2.all()]
+        tag3_objects = [{'tag_type': 'tag3', 'id': obj.id, 'title': obj.title}
+                        for obj in instance.interview_tag3.all()]
+        combined_tags = tag2_objects + tag3_objects
 
         def sort_key(tag):
-            if tag in searched_tags:
-                return (0,)  # 搜索的标签在前
-            if tag.startswith('0.1.'):
-                return (2,)  # '0.1.x' 类型的标签在后
+            title = tag['title']
+            if title in searched_tags:
+                return (0,)
+            if title.startswith('0.1.'):
+                return (2,)
 
-            # 从标签中提取数字部分并分割
-            numbers = re.findall(r'\d+', tag)
-            return (1,) + tuple(map(int, numbers))  # 对数字部分进行逐段比较
+            numbers = re.findall(r'\d+', title)
+            return (1,) + tuple(map(int, numbers))
 
-        # 对合并的标签列表进行排序
         representation['combined_tags'] = sorted(combined_tags, key=sort_key)
 
+
+        representation['combined_tags'] = [
+            {tag['tag_type']: tag['id'], 'title': tag['title']}
+            for tag in representation['combined_tags']
+        ]
+
+        del representation['tag2']
+        del representation['tag3']
         return representation
 
 
