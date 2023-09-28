@@ -121,6 +121,7 @@ class ResearchSerializer(serializers.ModelSerializer):
         model = Research
         fields = ('id', 'title', 'research', 'link', 'tags', 'views')
 
+
 class InterviewContentSerializer(serializers.ModelSerializer):
     content = serializers.SerializerMethodField()
     date = serializers.DateField(source='interview_date')
@@ -139,6 +140,15 @@ class InterviewContentSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
             return obj.content
         return obj.content[:20] + '......'
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        # 對 tag3 的表示進行排序
+        representation['tag3'] = sorted(representation['tag3'], key=lambda tag: tag.startswith('0.1.'))
+        # 如果 tag 開始於 '0.1.'，將返回 True，所以它將被放在列表的末尾。
+
+        return representation
 
 
 class InterviewTag2Serializer(serializers.ModelSerializer):
