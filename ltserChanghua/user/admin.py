@@ -4,6 +4,10 @@ from django import forms
 from datetime import timedelta
 import csv
 from django.http import HttpResponse
+from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
+from django.contrib.auth.models import Group
+from django.utils.html import format_html_join
+from django.utils.safestring import mark_safe
 
 class MyUserForm(forms.ModelForm):
     class Meta:
@@ -17,7 +21,7 @@ class UserProfileInline(admin.StackedInline):
 class MyUserAdmin(admin.ModelAdmin):
     form = MyUserForm
     list_display = (
-    'id', 'get_email', 'get_name', 'get_verified', 'get_last_login', 'get_school', 'get_location', 'get_department',
+    'id', 'get_email', 'get_name', 'get_verified', 'get_groups', 'get_school', 'get_location', 'get_department',
     'get_title', 'get_category', 'get_application', 'get_attention')
     inlines = [UserProfileInline]
     readonly_fields = ('email', 'username')
@@ -32,11 +36,12 @@ class MyUserAdmin(admin.ModelAdmin):
 
     get_verified.admin_order_field = 'is_verified'
 
+    def get_groups(self, obj):
+        return ", ".join([group.name for group in obj.groups.all()])
+
     def get_name(self, obj):
         return obj.last_name + obj.first_name
 
-    def get_last_login(self, obj):
-        return obj.last_login
 
     def get_school(self, obj):
         if hasattr(obj, 'userprofile'):
@@ -74,15 +79,15 @@ class MyUserAdmin(admin.ModelAdmin):
         return ''
 
     def export_as_csv(self, request, queryset):
-        fields = ['id', 'email', 'get_name', 'is_verified', 'last_login',
+        fields = ['id', 'email', 'get_name', 'is_verified', 'get_groups'
                   'school', 'location', 'department', 'title', 'category',
-                  'application', 'attention']
+                  'application', 'attention', ]
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="user.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(['ID', 'Email', 'Name', 'Is Verified', 'Last Login',
+        writer.writerow(['ID', 'Email', 'Name', 'Is Verified', 'Groups',
                          'School', 'Location', 'Department', 'Title', 'Category',
                          'Application', 'Attention'])
 
@@ -108,7 +113,8 @@ class MyUserAdmin(admin.ModelAdmin):
     get_email.short_description = 'email'
     get_verified.short_description = 'verified'
     get_name.short_description = 'name'
-    get_last_login.short_description = 'last login'
+    get_groups.short_description = 'groups'
+    #get_last_login.short_description = 'last login'
     get_school.short_description = 'school'
     get_location.short_description = 'location'
     get_department.short_description = 'department'
