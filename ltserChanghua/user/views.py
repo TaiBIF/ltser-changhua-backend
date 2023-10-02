@@ -15,13 +15,15 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import smart_bytes, smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.pagination import PageNumberPagination
-from django.apps import apps
-from django.http import HttpResponse
+import shutil
+from django.contrib.auth.decorators import permission_required
+from django.utils import timezone
 import csv
 import os
 import zipfile
-import shutil
-from django.contrib.auth.decorators import permission_required
+from django.apps import apps
+from django.http import HttpResponse
+from datetime import timedelta
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
 
@@ -93,6 +95,9 @@ class LoginAPIView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data
+        user.last_login = timezone.now() + timedelta(hours=8)
+        user.save(update_fields=['last_login'])
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class UserProfileAPIView(APIView):
@@ -212,11 +217,7 @@ class DownloadRecordAPIView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-import csv
-import os
-import zipfile
-from django.apps import apps
-from django.http import HttpResponse
+
 
 @permission_required('user.can_export_all_models')
 def export_all_models(request):

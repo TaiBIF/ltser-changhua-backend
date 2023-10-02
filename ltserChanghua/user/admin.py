@@ -21,8 +21,8 @@ class UserProfileInline(admin.StackedInline):
 class MyUserAdmin(admin.ModelAdmin):
     form = MyUserForm
     list_display = (
-    'id', 'get_email', 'get_name', 'get_verified', 'get_groups', 'get_school', 'get_location', 'get_department',
-    'get_title', 'get_category', 'get_application', 'get_attention')
+    'id', 'get_email', 'get_name', 'get_verified', 'get_groups', 'get_last_login', 'get_school', 'get_location',
+    'get_department', 'get_title', 'get_category', 'get_application', 'get_attention')
     inlines = [UserProfileInline]
     readonly_fields = ('email', 'username')
     search_fields = ['email']
@@ -37,7 +37,10 @@ class MyUserAdmin(admin.ModelAdmin):
     get_verified.admin_order_field = 'is_verified'
 
     def get_groups(self, obj):
-        return ", ".join([group.name for group in obj.groups.all()])
+        return ", ".join(sorted([group.name for group in obj.groups.all()]))
+
+    def get_last_login(self, obj):
+        return obj.last_login.strftime('%Y-%m-%d %H:%M:%S') if obj.last_login else None
 
     def get_name(self, obj):
         return obj.last_name + obj.first_name
@@ -87,7 +90,7 @@ class MyUserAdmin(admin.ModelAdmin):
         response['Content-Disposition'] = 'attachment; filename="user.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(['ID', 'Email', 'Name', 'Is Verified', 'Groups',
+        writer.writerow(['ID', 'Email', 'Name', 'Is Verified', 'Groups', 'Last Login',
                          'School', 'Location', 'Department', 'Title', 'Category',
                          'Application', 'Attention'])
 
@@ -114,7 +117,7 @@ class MyUserAdmin(admin.ModelAdmin):
     get_verified.short_description = 'verified'
     get_name.short_description = 'name'
     get_groups.short_description = 'groups'
-    #get_last_login.short_description = 'last login'
+    get_last_login.short_description = 'last login'
     get_school.short_description = 'school'
     get_location.short_description = 'location'
     get_department.short_description = 'department'
@@ -122,6 +125,8 @@ class MyUserAdmin(admin.ModelAdmin):
     get_category.short_description = 'category'
     get_application.short_description = 'application'
     get_attention.short_description = 'attention'
+    get_groups.admin_order_field = 'groups__name'
+    get_last_login.admin_order_field = 'last_login'
 
 
 class DownloadRecordAdmin(admin.ModelAdmin):
