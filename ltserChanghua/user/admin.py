@@ -4,10 +4,10 @@ from django import forms
 from datetime import timedelta
 import csv
 from django.http import HttpResponse
-from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
-from django.contrib.auth.models import Group
-from django.utils.html import format_html_join
-from django.utils.safestring import mark_safe
+from django.db import models
+from django.contrib.admin.models import LogEntry
+from django.utils.html import format_html
+from django.utils import timezone
 
 class MyUserForm(forms.ModelForm):
     class Meta:
@@ -164,6 +164,65 @@ class DownloadRecordAdmin(admin.ModelAdmin):
     export_as_csv.short_description = "輸出下載紀錄"
     display_created_at.short_description = 'Created At'
 
+class UserHistory(LogEntry):
+    class Meta:
+        proxy = True
+        verbose_name_plural = '編輯歷程'
+
+class UserHistoryAdmin(admin.ModelAdmin):
+    list_display = ('formatted_action_time', 'user', 'content_type', 'object_repr', 'action_flag', 'change_message')
+    readonly_fields = ['action_time', 'user', 'content_type', 'object_repr', 'action_flag', 'change_message']
+
+    def get_queryset(self, request):
+        return LogEntry.objects.all().select_related('user', 'content_type').order_by('-action_time')
+
+    def formatted_action_time(self, obj):
+        adjusted_time = obj.action_time + timedelta(hours=8)
+        return adjusted_time.strftime('%Y-%m-%d %H:%M')
+
+    formatted_action_time.admin_order_field = 'action_time'  # Allow sorting by 'action_time'
+    formatted_action_time.short_description = 'Action Time'  # Set column header
+    def user(self, obj):
+        return obj.user
+
+    user.admin_order_field = 'user'
+    user.short_description = 'User'
+
+    def content_type(self, obj):
+        return obj.content_type
+
+    content_type.admin_order_field = 'content_type'
+    content_type.short_description = 'Content Type'
+
+    def object_repr(self, obj):
+        return obj.object_repr
+
+    object_repr.admin_order_field = 'object_repr'
+    object_repr.short_description = 'Object'
+
+    def action_flag(self, obj):
+        return obj.get_action_flag_display()
+
+    action_flag.admin_order_field = 'action_flag'
+    action_flag.short_description = 'Action'
+
+    def change_message(self, obj):
+        return format_html(obj.change_message)  # 使用format_html来正确展示HTML消息
+
+    change_message.admin_order_field = 'change_message'
+    change_message.short_description = 'Change Message'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+admin.site.index_template = 'custom_admin_template.html'
+admin.site.register(UserHistory, UserHistoryAdmin)
 admin.site.register(MyUser, MyUserAdmin)
 admin.site.register(DownloadRecord, DownloadRecordAdmin)
-admin.site.index_template = 'custom_admin_template.html'
