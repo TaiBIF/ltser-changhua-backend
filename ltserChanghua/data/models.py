@@ -114,6 +114,7 @@ class CrabData(models.Model):
     Mv = models.IntegerField(blank=True, null=True, default=0)
     Charybids_sp = models.IntegerField(blank=True, null=True, default=0)
     Mt = models.IntegerField(blank=True, null=True, default=0)
+    Pb = models.IntegerField(blank=True, null=True, default=0)
     class Meta:
         db_table = 'Crab'
         verbose_name = '底棲生物-人工數據-螃蟹資料'
