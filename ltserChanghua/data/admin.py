@@ -263,7 +263,7 @@ class CrabDataAdmin(ImportExportModelAdmin):
     list_display = (
         'year', 'site', 'month', 'Mbr', 'Mb', 'Ma', 'Hf', 'Hd', 'Hp', 'Me', 'Sb',
         'Sl', 'It', 'Oc', 'Al', 'Ta', 'Gb', 'Xf', 'Pa', 'Pp', 'Tc', 'Ppi',
-        'Mv', 'Charybids_sp', 'Mt'
+        'Mv', 'Charybids_sp', 'Mt', 'Pb'
     )
 
 
