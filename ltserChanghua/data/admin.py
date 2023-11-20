@@ -14,9 +14,11 @@ from django.http import HttpResponse
 
 class HomepagePhotoAdmin(admin.ModelAdmin):
     list_display = ('order', 'image', 'display')
+    search_fields = ['image']
 
 class LatestEventTagAdmin(admin.ModelAdmin):
     list_display = ['title']
+    search_fields = ['title']
 
 class LatestEventAdmin(admin.ModelAdmin):
     list_display = ['id','title', 'url', 'organizer', 'activityTime', 'display']
@@ -37,13 +39,16 @@ class BenthicOrganismDataAdmin(ImportExportModelAdmin):
 
 class CrabSiteAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'latitude', 'longitude']
+    search_fields = ['title']
 
 class StaffAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'name', 'duty', 'email', 'order']
+    search_fields = ['title']
 
 
 class WaterQualityManualSiteAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'latitude', 'longitude']
+    search_fields = ['title']
 
 class WaterQualityManualDataResource(resources.ModelResource):
     class Meta:
@@ -58,22 +63,27 @@ class WaterQualityManualDataAdmin(ImportExportModelAdmin):
 
 class InterviewTag1Admin(admin.ModelAdmin):
     list_display = ['id', 'title', 'order']
+    search_fields = ['title']
 
 class InterviewTag2Admin(admin.ModelAdmin):
     list_display = ['id', 'title', 'interview_tag1', 'order', 'search_volume', 'download_volume']
+    search_fields = ['title']
     def interview_tag1(self, obj):
         return obj.interview_tag1.title
 
 class InterviewTag3Admin(admin.ModelAdmin):
     list_display = ['id', 'title', 'interview_tag2', 'order', 'search_volume', 'download_volume']
+    search_fields = ['title']
     def interview_tag2(self, obj):
         return obj.interview_tag2.title
 
 class InterviewStakeholderAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'order', 'optionId']
+    search_fields = ['title']
 
 class InterviewPeopleAdmin(admin.ModelAdmin):
     list_display = ['id', 'title', 'interview_stakeholder', 'order']
+    search_fields = ['title']
 
     def interview_stakeholder(self, obj):
         return obj.interview_stakeholder.title
@@ -129,6 +139,7 @@ class InterviewContentAdmin(ImportExportModelAdmin):
     resource_class = InterviewContentResource
     list_display = ('id', 'content', 'interview_date', 'display_tag2_titles', 'display_tag3_titles',
                     'display_people_names', 'display_stakeholder_names')
+    search_fields = ['content', 'interview_date']
 
     def display_tag2_titles(self, obj):
         return ", ".join(tag.title for tag in obj.interview_tag2.all())
@@ -157,7 +168,7 @@ class LiteratureAdmin(ImportExportModelAdmin):
     list_display = ('id', 'truncated_title', 'truncated_author', 'publisher', 'date', 'refID', 'truncated_link',
                     'is_ebook', 'views')
 
-    # 定义其他的设置 ...
+    search_fields = ['title', 'author', 'publisher', 'date']
 
     def truncated_title(self, obj):
         return truncatechars(obj.title, 10)
@@ -204,6 +215,7 @@ class NewsResource(resources.ModelResource):
 class NewsAdmin(ImportExportModelAdmin):
     resource_class = NewsResource
     list_display = ('id', 'title', 'reference', 'reporter', 'photographer', 'date', 'link', 'views', 'display_tags')
+    search_fields = ['title', 'reference', 'reporter', 'photographer']
 
     def display_tags(self, obj):
         return ", ".join([tag.title for tag in obj.tags.all()])
@@ -236,6 +248,7 @@ class ResearchAdmin(ImportExportModelAdmin):
     resource_class = ResearchResource
     list_display = ('id', 'truncated_title', 'author', 'year', 'truncated_reference', 'truncated_link', 'views',
     'display_tags')
+    search_fields = ['title', 'author', 'year', 'reference']
 
     def truncated_title(self, obj):
         return truncatechars(obj.title, 10)

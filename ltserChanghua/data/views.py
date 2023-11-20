@@ -620,11 +620,11 @@ class DownloadInterviewSingleAPIView(APIView):
             for content in interview_contents:
                 row = [
                     content.content,  # 訪談內容
-                    ", ".join(str(tag) for tag in content.interview_tag2.all()) + ", " + ", ".join(
+                    " ".join(str(tag) for tag in content.interview_tag2.all()) + " " + " ".join(
                         str(tag) for tag in content.interview_tag3.all()),  # 相關分類
                     content.interview_date,  # 訪談日期
-                    ", ".join(str(people) for people in content.interview_people.all()),  # 受訪者代碼
-                    ", ".join(str(stakeholder) for stakeholder in content.interview_stakeholder.all()),  # 類別
+                    " ".join(str(people) for people in content.interview_people.all()),  # 受訪者代碼
+                    " ".join(str(stakeholder) for stakeholder in content.interview_stakeholder.all()),  # 類別
                 ]
                 writer.writerow(row)
 
@@ -670,8 +670,8 @@ class DownloadInterviewMultipleAPIView(APIView):
 
                 row = [
                     content.id,
-                    ", ".join(str(stakeholder) for stakeholder in content.interview_stakeholder.all()),
-                    ", ".join(str(people) for people in content.interview_people.all()),
+                    " ".join(str(stakeholder) for stakeholder in content.interview_stakeholder.all()),
+                    " ".join(str(people) for people in content.interview_people.all()),
                     content.content,
                     tags_combined_str,
                     content.interview_date,
