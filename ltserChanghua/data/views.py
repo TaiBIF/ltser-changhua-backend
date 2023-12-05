@@ -23,6 +23,8 @@ from django.http import FileResponse
 import calendar
 from django.db.models import Q, F
 from rest_framework.exceptions import ValidationError
+from django.db.models import IntegerField
+from django.db.models.functions import Cast
 
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
@@ -137,7 +139,11 @@ class CrabAPIView(APIView):
 class WaterQualityManualsAPIView(APIView):
     def get(self, request, *args, **kwargs):
         site = request.query_params.get('site', None)
-        wq = WaterQualityManualData.objects.filter(site=site).order_by('year', 'month')
+        wq = WaterQualityManualData.objects.filter(site=site)
+        wq = wq.annotate(
+            year_int=Cast('year', IntegerField()),
+            month_int=Cast('month', IntegerField())
+        ).order_by('year_int', 'month_int')
         serializer = WaterQualityManualSerializer(wq, many=True)
         list_of_objects = serializer.data
         res = []
