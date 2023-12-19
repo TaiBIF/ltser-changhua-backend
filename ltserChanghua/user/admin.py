@@ -82,9 +82,9 @@ class MyUserAdmin(admin.ModelAdmin):
         return ''
 
     def export_as_csv(self, request, queryset):
-        fields = ['id', 'email', 'get_name', 'is_verified', 'get_groups'
-                  'school', 'location', 'department', 'title', 'category',
-                  'application', 'attention', ]
+        fields = ['id', 'email', 'get_name', 'is_verified', 'get_groups',
+                  'get_last_login', 'get_school', 'get_location', 'get_department',
+                  'get_title', 'get_category', 'get_application', 'get_attention']
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="user.csv"'
@@ -97,16 +97,14 @@ class MyUserAdmin(admin.ModelAdmin):
         for obj in queryset:
             row = []
             for field in fields:
-                if field in ['school', 'location', 'department', 'title',
-                             'category', 'application', 'attention']:
-                    if hasattr(obj, 'userprofile'):
-                        row.append(getattr(obj.userprofile, field) or '')
-                    else:
-                        row.append('')
-                elif hasattr(obj, field):
-                    row.append(getattr(obj, field) or '')
+                if hasattr(obj, 'userprofile') and field in ['get_school', 'get_location', 'get_department',
+                                                             'get_title', 'get_category', 'get_application',
+                                                             'get_attention']:
+                    row.append(getattr(obj.userprofile, field[4:]) or '')
                 elif hasattr(self, field):  # 检查是否是方法
                     row.append(getattr(self, field)(obj) or '')
+                elif hasattr(obj, field):
+                    row.append(getattr(obj, field) or '')
                 else:
                     row.append('')
             writer.writerow(row)
