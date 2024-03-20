@@ -139,8 +139,7 @@ class InterviewContentSerializer(serializers.ModelSerializer):
 
     def get_content(self, obj):
         request = self.context.get('request')
-        if request and request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser
-                                                          or request.user.is_applied):
+        if request and request.user.is_authenticated and (request.user.is_superuser or request.user.is_applied):
             return obj.content
         return obj.content[:20] + '......'
 

@@ -602,7 +602,7 @@ class DownloadInterviewSingleAPIView(APIView):
     def get(self, request, *args, **kwargs):
         user = request.user
 
-        if not (user.is_staff or user.is_superuser or getattr(user, 'is_applied', False)):
+        if not (user.is_superuser or getattr(user, 'is_applied', False)):
             return Response({'detail': "權限不足，請填寫申請表格"}, status=status.HTTP_403_FORBIDDEN)
 
         interview_view = InterviewSingleAPIView()
@@ -650,7 +650,7 @@ class DownloadInterviewMultipleAPIView(APIView):
     def get(self, request, *args, **kwargs):
         user = request.user
 
-        if not (user.is_staff or user.is_superuser or getattr(user, 'is_applied', False)):
+        if not (user.is_superuser or getattr(user, 'is_applied', False)):
             return Response({'detail': "權限不足，請填寫申請表格"}, status=status.HTTP_403_FORBIDDEN)
 
         contents_with_scores = InterviewMultipleAPIView.get_contents_with_scores(request,  update_type='download')
