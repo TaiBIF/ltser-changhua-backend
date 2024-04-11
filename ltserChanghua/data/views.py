@@ -478,8 +478,8 @@ class DownloadCrabAPIView(APIView):
 
         zip_io = io.BytesIO()
         now = datetime.now()
-        filename1 = "LTSER Changhua_底質資料" + now.strftime("%Y-%m-%d")
-        filename2 = "LTSER Changhua_螃蟹資料" + now.strftime("%Y-%m-%d")
+        filename1 = "LTSER Changhua_底質資料_" + now.strftime("%Y-%m-%d")
+        filename2 = "LTSER Changhua_螃蟹資料_" + now.strftime("%Y-%m-%d")
 
         with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for filename, model in [(filename1, BenthicOrganismData), (filename2, CrabData)]:
