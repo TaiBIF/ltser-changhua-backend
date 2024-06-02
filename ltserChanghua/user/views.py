@@ -37,14 +37,14 @@ class RegisterAPIView(APIView):
             userData = serializer.data
             user = MyUser.objects.get(email=userData['user']['email'])
             token = RefreshToken.for_user(user).access_token
-            absurl = f'https://www.ltsertwchanghua.org/mail-verification/?token={str(token)}'
-            data = {
-                'url': absurl,
-                'toEmail': user.email,
-                'emailSubject': 'LTSER 彰化站會員註冊驗證信',
-                'username': f'{user.last_name}{user.first_name}'
-            }
-            Util.send_mail("email_template.html", data)
+            # absurl = f'https://www.ltsertwchanghua.org/mail-verification/?token={str(token)}'
+            # data = {
+            #     'url': absurl,
+            #     'toEmail': user.email,
+            #     'emailSubject': 'LTSER 彰化站會員註冊驗證信',
+            #     'username': f'{user.last_name}{user.first_name}'
+            # }
+            # Util.send_mail("email_template.html", data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -9,18 +9,21 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_str
 from django.utils import timezone
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
         required=True,
         validators=[UniqueValidator(queryset=MyUser.objects.all())]
     )
     password = serializers.CharField(write_only=True, required=True,
-                                     validators=[RegexValidator(regex=r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d\!\@\#\$\%\^\&\*\(\)\-\_\+\=\{\}\[\]\:\;\.\,]{8,}$'
-,message="密碼長度至少8位，並且包含至少一個英文字母和一個數字")])
+                                     validators=[RegexValidator(
+                                         regex=r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d\!\@\#\$\%\^\&\*\(\)\-\_\+\=\{\}\['
+                                               r'\]\:\;\.\,]{8,}$'
+                                         , message="密碼長度至少8位，並且包含至少一個英文字母和一個數字")])
     password2 = serializers.CharField(write_only=True, required=True)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
-
 
     class Meta:
         model = MyUser
@@ -38,11 +41,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
+            is_verified=True
         )
         user.set_password(validated_data['password'])
         user.save()
         return user
-
 
 
 class EmailVerificationSerializer(serializers.ModelSerializer):
@@ -51,6 +54,7 @@ class EmailVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyUser
         fields = ['token']
+
 
 class ResendEmailVerifySerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -65,6 +69,7 @@ class ResendEmailVerifySerializer(serializers.Serializer):
             raise serializers.ValidationError('提供的郵件地址不存在。')
 
         return attrs
+
 
 class LoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=255, min_length=3)
@@ -101,6 +106,7 @@ class LoginSerializer(serializers.ModelSerializer):
         token = self.get_token(instance)
         return token
 
+
 class UserProfileSerializer(serializers.ModelSerializer):
     user = RegisterSerializer(required=True, many=False)
     school = serializers.CharField(required=True)
@@ -119,19 +125,23 @@ class UserProfileSerializer(serializers.ModelSerializer):
         userProfile = UserProfile.objects.create(user=user, **validated_data)
         return userProfile
 
+
 class UpdatePasswordSerializer(serializers.ModelSerializer):
     newPassword = serializers.CharField(write_only=True, required=True)
     newPassword2 = serializers.CharField(write_only=True, required=True)
-    oldPassword= serializers.CharField(write_only=True, required=True)
+    oldPassword = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = MyUser
         fields = ('newPassword', 'newPassword2', 'oldPassword')
 
+
 class ResetPasswordEmailRequestSerializer(serializers.Serializer):
     email = serializers.EmailField(min_length=2)
+
     class Meta:
         fields = ['email']
+
 
 class SetNewPasswordSerializer(serializers.ModelSerializer):
     password = serializers.CharField(min_length=8, max_length=68, write_only=True)
@@ -149,7 +159,7 @@ class SetNewPasswordSerializer(serializers.ModelSerializer):
             uidb64 = attrs.get('uidb64')
 
             id = force_str(urlsafe_base64_decode(uidb64))
-            user = MyUser.objects.get(id = id)
+            user = MyUser.objects.get(id=id)
 
             if not PasswordResetTokenGenerator().check_token(user, token):
                 raise AuthenticationFailed('The reset link is invalid', 401)
@@ -159,8 +169,10 @@ class SetNewPasswordSerializer(serializers.ModelSerializer):
         except Exception as e:
             raise AuthenticationFailed('The rest link is invalid', 401)
 
+
 class DownloadRecordSerializer(serializers.ModelSerializer):
     time = serializers.SerializerMethodField()
+
     class Meta:
         model = DownloadRecord
         fields = ['filename', 'time']
