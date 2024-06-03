@@ -149,7 +149,7 @@ class UpdateUserPasswordAPIView(APIView):
                 'emailSubject': 'LTSER 彰化站會員更新密碼',
                 'username': f'{user.last_name}{user.first_name}'
             }
-            Util.send_mail("password_update_template.html", data)
+            #Util.send_mail("password_update_template.html", data)
             response = {
                 'status': 'success',
                 'code': status.HTTP_200_OK,
