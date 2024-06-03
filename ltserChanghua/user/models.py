@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
+
+
 class MyUserManager(BaseUserManager):
 
     def create_user(self, username, email, password=None, **extra_fields):
@@ -26,6 +28,7 @@ class MyUserManager(BaseUserManager):
         user.is_applied = True
         user.save()
         return user
+
 
 class MyUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=255, unique=True)
@@ -65,6 +68,7 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
             ("can_export_all_models", "Can export all models"),
         ]
 
+
 class UserProfile(models.Model):
     user = models.OneToOneField(MyUser, on_delete=models.CASCADE)
     school = models.CharField(max_length=100, null=True, blank=True, editable=True)
@@ -74,11 +78,14 @@ class UserProfile(models.Model):
     category = models.CharField(max_length=100, null=True, blank=True, editable=True)
     application = models.CharField(max_length=100, null=True, blank=True, editable=True)
     attention = models.CharField(max_length=100, null=True, blank=True, editable=True)
+    securityQuestion = models.CharField(max_length=100, null=True, blank=True, editable=True)
+    is_changeSecurityQuestion = models.BooleanField(null=True, blank=True, default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.user.username
+
 
 class DownloadRecord(models.Model):
     filename = models.CharField(max_length=200)
@@ -89,6 +96,7 @@ class DownloadRecord(models.Model):
 
     def __str__(self):
         return f"{self.filename}"
+
     class Meta:
         db_table = 'DownloadRecord'
         verbose_name = '下載紀錄'

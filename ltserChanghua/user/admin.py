@@ -81,6 +81,7 @@ class MyUserAdmin(admin.ModelAdmin):
             return obj.userprofile.attention
         return ''
 
+
     def export_as_csv(self, request, queryset):
         fields = ['id', 'email', 'get_name', 'is_verified', 'get_groups',
                   'get_last_login', 'get_school', 'get_location', 'get_department',

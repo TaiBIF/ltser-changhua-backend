@@ -124,6 +124,9 @@ class UserProfileUpdateAPIView(APIView):
             userProfile.category = data.get('category', userProfile.category)
             userProfile.application = data.get('application', userProfile.application)
             userProfile.attention = data.get('attention', userProfile.attention)
+            if 'securityQuestion' in data:
+                userProfile.securityQuestion = data['securityQuestion']
+                userProfile.is_changeSecurityQuestion = True
             userProfile.save()
             return Response({"message": "會員資料更新成功"}, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:

@@ -114,6 +114,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     department = serializers.CharField(required=True)
     title = serializers.CharField(required=True)
     category = serializers.CharField(required=True)
+    securityQuestion = serializers.CharField(required=True)
 
     class Meta:
         model = UserProfile
@@ -125,6 +126,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
         userProfile = UserProfile.objects.create(user=user, **validated_data)
         return userProfile
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation.pop('is_changeSecurityQuestion', None)
+        if instance.is_changeSecurityQuestion:
+            representation.pop('securityQuestion', None)
+        return representation
 
 class UpdatePasswordSerializer(serializers.ModelSerializer):
     newPassword = serializers.CharField(write_only=True, required=True)
