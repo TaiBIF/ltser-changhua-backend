@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 class MyUserManager(BaseUserManager):
@@ -67,6 +69,19 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
         permissions = [
             ("can_export_all_models", "Can export all models"),
         ]
+    
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            user = MyUser.objects.get(id=self.id)
+            if not user.is_verified and self.is_verified:
+                channel_layer = get_channel_layer()
+                async_to_sync(channel_layer.group_send)(
+                    self.username, {
+                        'type': 'user_message',
+                        'message': f'MyUser model for user {self.username} is verified'
+                    }
+                )
+        super().save(*args, **kwargs)
 
 
 class UserProfile(models.Model):
