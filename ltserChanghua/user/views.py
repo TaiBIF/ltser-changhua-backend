@@ -106,11 +106,17 @@ class UserProfileAPIView(APIView):
     def get(self, request):
         user = request.user
         if not user.is_verified:
-            return Response({"message": "請等候工作人員開通帳號"}, status=status.HTTP_200_OK)
+            return Response({
+                "firstname": user.first_name,
+                "lastname": user.last_name,
+                "is_verified": False
+            }, status=status.HTTP_200_OK)
         try:
             userProfile = UserProfile.objects.get(user_id=user.id)
             serializer = UserProfileSerializer(userProfile)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            data = serializer.data
+            data['is_verified'] = True
+            return Response(data, status=status.HTTP_200_OK)
         except UserProfile.DoesNotExist:
             return Response({"error": "User profile does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
