@@ -76,7 +76,7 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
             if not user.is_verified and self.is_verified:
                 channel_layer = get_channel_layer()
                 async_to_sync(channel_layer.group_send)(
-                    self.username, {
+                    self.email.replace('@', 'A'), {
                         'type': 'user_message',
                         'message': f'MyUser model for user {self.username} is verified'
                     }
