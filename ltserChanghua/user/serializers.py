@@ -129,13 +129,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         user = instance.user
+        user_data = {
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name
+        }
         if not user.is_verified:
-            limited_representation = {
-                "firstname": user.first_name,
-                "lastname": user.last_name,
+            return {
+                "user": user_data,
                 "is_verified": False
             }
-            return limited_representation
+        representation["user"] = user_data
+        representation["is_verified"] = True
         representation.pop('is_changeSecurityQuestion', None)
         if instance.is_changeSecurityQuestion:
             representation.pop('securityQuestion', None)
