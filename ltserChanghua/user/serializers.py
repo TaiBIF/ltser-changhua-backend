@@ -41,7 +41,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
-            is_verified=True
         )
         user.set_password(validated_data['password'])
         user.save()
@@ -96,8 +95,8 @@ class LoginSerializer(serializers.ModelSerializer):
         if not user:
             raise AuthenticationFailed('無效的帳號或密碼')
 
-        if not user.is_verified:
-            raise AuthenticationFailed('尚未確認驗證信')
+        # if not user.is_verified:
+        #     raise AuthenticationFailed('尚未確認驗證信')
 
         return user
 

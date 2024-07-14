@@ -105,9 +105,14 @@ class UserProfileAPIView(APIView):
 
     def get(self, request):
         user = request.user
-        userProfile = UserProfile.objects.get(user_id=user.id)
-        serializer = UserProfileSerializer(userProfile)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if not user.is_verified:
+            return Response({"message": "請等候工作人員開通帳號"}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            userProfile = UserProfile.objects.get(user_id=user.id)
+            serializer = UserProfileSerializer(userProfile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
 class UserProfileUpdateAPIView(APIView):
     permission_classes = [IsAuthenticated]
