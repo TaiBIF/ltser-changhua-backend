@@ -106,7 +106,7 @@ class UserProfileAPIView(APIView):
     def get(self, request):
         user = request.user
         if not user.is_verified:
-            return Response({"message": "請等候工作人員開通帳號"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"message": "請等候工作人員開通帳號"}, status=status.HTTP_200_OK)
         try:
             userProfile = UserProfile.objects.get(user_id=user.id)
             serializer = UserProfileSerializer(userProfile)
