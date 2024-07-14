@@ -4,11 +4,13 @@ from channels.generic.websocket import WebsocketConsumer
 
 class MyUserConsumer(WebsocketConsumer):
 	def connect(self):
-		self.username = self.scope['url_route']['kwargs']['username']
+		self.email_prefix = self.scope['url_route']['kwargs']['email_prefix']
+		self.email_suffix = self.scope['url_route']['kwargs']['email_suffix']
+		self.email = f'{self.email_prefix}A{self.email_suffix}'
 
 		# Join room group
 		async_to_sync(self.channel_layer.group_add)(
-			self.username, self.channel_name
+			self.email, self.channel_name
 		)
 
 		self.accept()
@@ -16,7 +18,7 @@ class MyUserConsumer(WebsocketConsumer):
 	def disconnect(self, close_code):
 		# Leave room group
 		async_to_sync(self.channel_layer.group_discard)(
-			self.username, self.channel_name
+			self.email, self.channel_name
 		)
 
 	# Receive message from WebSocket
@@ -26,7 +28,7 @@ class MyUserConsumer(WebsocketConsumer):
 
 		# Send message to room group
 		async_to_sync(self.channel_layer.group_send)(
-			self.username, {
+			self.email, {
 				'type': 'user_message',
 				'message': message
 			}
