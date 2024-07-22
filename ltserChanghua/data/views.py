@@ -108,11 +108,15 @@ class BenthicOrganismAPIView(APIView):
     def get(self, request):
         site = request.query_params.get('site', None)
         if site is not None:
-            bo = BenthicOrganismData.objects.filter(site=site).order_by('year', 'month')
+            bo = BenthicOrganismData.objects.filter(site=site).annotate(
+                year_int=Cast('year', IntegerField()),
+                month_int=Cast('month', IntegerField())
+            ).order_by('year_int', 'month_int')
+
             serializer = BenthicOrganismSerializer(bo, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({"error": "No site parameter provided."}, status=status.HTTP_200_OK)
+            return Response({"error": "No site parameter provided."}, status=status.HTTP_400_BAD_REQUEST)
 
 class CrabAPIView(APIView):
     def get(self, request):
