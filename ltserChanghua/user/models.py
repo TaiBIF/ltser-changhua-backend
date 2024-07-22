@@ -78,7 +78,7 @@ class MyUser(AbstractBaseUser, PermissionsMixin):
                 async_to_sync(channel_layer.group_send)(
                     self.email.replace('@', 'A'), {
                         'type': 'user_message',
-                        'message': f'MyUser model for user {self.username} is verified'
+                        'message': f'{self.username} 驗證已通過'
                     }
                 )
         super().save(*args, **kwargs)
