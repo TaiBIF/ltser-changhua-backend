@@ -118,9 +118,14 @@ class CrabAPIView(APIView):
     def get(self, request):
         site = request.query_params.get('site', None)
         if site is not None:
-            crabs = CrabData.objects.filter(site=site).order_by('year', 'month')
+            crabs = CrabData.objects.filter(site=site).annotate(
+                year_int=Cast('year', IntegerField()),
+                month_int=Cast('month', IntegerField())
+            ).order_by('year_int', 'month_int')
+
             serializer = CrabSerializer(crabs, many=True)
             list_of_objects = serializer.data
+
             res = []
             for dic in list_of_objects:
                 obj = {}
@@ -132,10 +137,10 @@ class CrabAPIView(APIView):
                         species[key] = value
                 obj["species"] = species
                 res.append(obj)
+
             return Response(res)
         else:
             return Response({"error": "No site parameter provided."}, status=status.HTTP_400_BAD_REQUEST)
-
 class WaterQualityManualsAPIView(APIView):
     def get(self, request, *args, **kwargs):
         site = request.query_params.get('site', None)
