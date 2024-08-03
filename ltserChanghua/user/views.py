@@ -1,5 +1,5 @@
 from .serializers import UserProfileSerializer, EmailVerificationSerializer, ResendEmailVerifySerializer, \
-    LoginSerializer, UpdatePasswordSerializer, ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer, DownloadRecordSerializer
+    LoginSerializer, UpdatePasswordSerializer, ResetPasswordEmailRequestSerializer, SetNewPasswordSerializer, DownloadRecordSerializer, SecurityQuestionSerializer
 from .models import UserProfile, MyUser, DownloadRecord
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -166,25 +166,60 @@ class UpdateUserPasswordAPIView(APIView):
 
             return Response(response)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-class RequestPasswordResetEmailAPIView(APIView):
+class ValidateEmailAPIView(APIView):
     serializer_class = ResetPasswordEmailRequestSerializer
+
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        email = request.data['email']
-        if MyUser.objects.filter(email=email).exists():
-            user = MyUser.objects.get(email=email)
-            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
-            token = PasswordResetTokenGenerator().make_token(user)
-            absurl = f'https://www.ltsertwchanghua.org/login/forgot-password/?uidb64={str(uidb64)}&token={str(token)}'
-            data = {
-                'url': absurl,
-                'toEmail': user.email,
-                'emailSubject': 'LTSER 彰化站會員重置密碼',
-                'username': f'{user.last_name}{user.first_name}'
-            }
-            Util.send_mail("password_reset_template.html", data)
-        return Response({'status': 'success', 'message': '已經寄出連結，請使用連結重置密碼'}, status=status.HTTP_200_OK)
+        if serializer.is_valid():
+            email = request.data['email']
+            if MyUser.objects.filter(email=email).exists():
+                return Response({
+                    'status': 'success',
+                    'message': '此電子郵件已註冊'
+                }, status=status.HTTP_200_OK)
+            return Response({
+                'status': 'error',
+                'message': '此電子郵件地址未註冊'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'status': 'error',
+            'message': '無效的數據'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
+
+class VerifySecurityQuestionAPIView(APIView):
+    serializer_class = SecurityQuestionSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            email = request.data['email']
+            security_question = request.data['securityQuestion']
+            if MyUser.objects.filter(email=email).exists():
+                user = MyUser.objects.get(email=email)
+                user_profile = UserProfile.objects.get(user=user)
+                if user_profile.securityQuestion == security_question:
+                    uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+                    token = PasswordResetTokenGenerator().make_token(user)
+                    absurl = f'https://www.ltsertwchanghua.org/login/forgot-password/?uidb64={str(uidb64)}&token={str(token)}'
+                    return Response({
+                        'status': 'success',
+                        'message': '安全性問題驗證成功',
+                        'url': absurl
+                    }, status=status.HTTP_200_OK)
+                return Response({
+                    'status': 'error',
+                    'message': '安全性問題錯誤'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'status': 'error',
+                'message': '此電子郵件地址未註冊'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'status': 'error',
+            'message': '無效的數據'
+        }, status=status.HTTP_400_BAD_REQUEST)
 class PasswordTokenCheckAPIView(APIView):
     def get(self, request, uidb64, token):
         try:

@@ -185,3 +185,8 @@ class DownloadRecordSerializer(serializers.ModelSerializer):
 
     def get_time(self, obj):
         return (obj.time + timezone.timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+
+
+class SecurityQuestionSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    securityQuestion = serializers.CharField(max_length=100)
