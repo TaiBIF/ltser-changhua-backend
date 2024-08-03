@@ -114,6 +114,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
     category = serializers.CharField(required=True)
     securityQuestion = serializers.CharField(required=True)
+    is_verified = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = UserProfile
@@ -127,6 +128,20 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        user = instance.user
+        user_data = {
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name
+        }
+        if not user.is_verified:
+            return {
+                "user": user_data,
+                "is_verified": False
+            }
+        representation["user"] = user_data
+        representation["is_verified"] = True
         representation.pop('is_changeSecurityQuestion', None)
         if instance.is_changeSecurityQuestion:
             representation.pop('securityQuestion', None)
