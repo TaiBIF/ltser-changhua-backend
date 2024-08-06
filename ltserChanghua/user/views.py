@@ -130,6 +130,7 @@ class UserProfileUpdateAPIView(APIView):
             userProfile.category = data.get('category', userProfile.category)
             userProfile.application = data.get('application', userProfile.application)
             userProfile.attention = data.get('attention', userProfile.attention)
+            userProfile.has_verified_code = data.get('has_verified_code', userProfile.has_verified_code)
             if 'securityQuestion' in data:
                 userProfile.securityQuestion = data['securityQuestion']
                 userProfile.is_changeSecurityQuestion = True

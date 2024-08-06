@@ -21,8 +21,8 @@ class UserProfileInline(admin.StackedInline):
 class MyUserAdmin(admin.ModelAdmin):
     form = MyUserForm
     list_display = (
-    'id', 'get_email', 'get_name', 'get_verified', 'get_groups', 'get_last_login', 'get_school', 'get_location',
-    'get_department', 'get_title', 'get_category', 'get_application', 'get_attention')
+        'id', 'get_email', 'get_name', 'get_verified', 'get_groups', 'get_last_login', 'get_school', 'get_location',
+        'get_department', 'get_title', 'get_category', 'get_application', 'get_attention')
     inlines = [UserProfileInline]
     readonly_fields = ('email', 'username')
     search_fields = ['email']
@@ -32,7 +32,11 @@ class MyUserAdmin(admin.ModelAdmin):
         return obj.email
 
     def get_verified(self, obj):
-        return obj.is_verified
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            'red' if not obj.is_verified else 'green',
+            '未驗證' if not obj.is_verified else '已驗證'
+        )
 
     get_verified.admin_order_field = 'is_verified'
 
@@ -44,7 +48,6 @@ class MyUserAdmin(admin.ModelAdmin):
 
     def get_name(self, obj):
         return obj.last_name + obj.first_name
-
 
     def get_school(self, obj):
         if hasattr(obj, 'userprofile'):
@@ -81,7 +84,6 @@ class MyUserAdmin(admin.ModelAdmin):
             return obj.userprofile.attention
         return ''
 
-
     def export_as_csv(self, request, queryset):
         fields = ['id', 'email', 'get_name', 'is_verified', 'get_groups',
                   'get_last_login', 'get_school', 'get_location', 'get_department',
@@ -102,7 +104,7 @@ class MyUserAdmin(admin.ModelAdmin):
                                                              'get_title', 'get_category', 'get_application',
                                                              'get_attention']:
                     row.append(getattr(obj.userprofile, field[4:]) or '')
-                elif hasattr(self, field):  # 检查是否是方法
+                elif hasattr(self, field):
                     row.append(getattr(self, field)(obj) or '')
                 elif hasattr(obj, field):
                     row.append(getattr(obj, field) or '')
@@ -126,6 +128,13 @@ class MyUserAdmin(admin.ModelAdmin):
     get_attention.short_description = 'attention'
     get_groups.admin_order_field = 'groups__name'
     get_last_login.admin_order_field = 'last_login'
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['verified_count'] = MyUser.objects.filter(is_verified=True).count()
+        extra_context['unverified_count'] = MyUser.objects.filter(is_verified=False).count()
+        return super(MyUserAdmin, self).changelist_view(request, extra_context=extra_context)
+
 
 
 class DownloadRecordAdmin(admin.ModelAdmin):

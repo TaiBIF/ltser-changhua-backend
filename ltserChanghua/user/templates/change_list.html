@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+{% block content %}
+    <div class="app-myuser">
+        <div class="module" id="unverified-users">
+            <h2>未驗證用戶 <span style="color: red;">({{ unverified_count }})</span></h2>
+            {{ block.super }}
+        </div>
+        <div class="module" id="verified-users">
+            <h2>已驗證用戶 <span style="color: green;">({{ verified_count }})</span></h2>
+            {{ block.super }}
+        </div>
+    </div>
+{% endblock %}
