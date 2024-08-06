@@ -27,6 +27,7 @@ class MyUserAdmin(admin.ModelAdmin):
     readonly_fields = ('email', 'username')
     search_fields = ['email']
     actions = ['export_as_csv']
+    ordering = ['is_verified', '-id']
 
     def get_email(self, obj):
         return obj.email

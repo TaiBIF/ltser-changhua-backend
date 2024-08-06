@@ -95,7 +95,7 @@ class UserProfile(models.Model):
     attention = models.CharField(max_length=100, null=True, blank=True, editable=True)
     securityQuestion = models.CharField(max_length=100, null=True, blank=True, editable=True)
     is_changeSecurityQuestion = models.BooleanField(null=True, blank=True, default=True)
-    has_verified_code = models.BooleanField(null=True, blank=True, default=None)
+    has_viewed_verification = models.BooleanField(null=True, blank=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
