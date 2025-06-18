@@ -1,13 +1,50 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import HomepagePhoto, LatestEventTag, LatestEvent, CrabSite, WaterQualityManualSite, BenthicOrganismData, \
-    CrabData, Literature, NewsTag, News, ResearchTag, Research, InterviewContent, InterviewTag3, \
-    InterviewTag2, InterviewStakeholder, InterviewPeople, WaterQualityManualData, Staff, InterviewTag1
-from .serializers import HomepagePhotoSerializer, LatestEventTagSerializer, LatestEventSerializer, CrabSiteSerializer, \
-    WaterQualityManualSiteSerializer, BenthicOrganismSerializer, CrabSerializer, LiteratureSerializer, \
-    NewsTagSerializer, NewsSerializer, ResearchTagSerializer, ResearchSerializer, InterviewContentSerializer, \
-    WaterQualityManualSerializer, InterviewTag2Serializer, InterviewTag3Serializer, StaffSerializer, \
-    InterviewStakeholderSerializer, InterviewTag1Serializer
+from .models import (
+    HomepagePhoto,
+    LatestEventTag,
+    LatestEvent,
+    CrabSite,
+    WaterQualityManualSite,
+    BenthicOrganismData,
+    CrabData,
+    Literature,
+    NewsTag,
+    News,
+    ResearchTag,
+    Research,
+    InterviewContent,
+    InterviewTag3,
+    InterviewTag2,
+    InterviewStakeholder,
+    InterviewPeople,
+    WaterQualityManualData,
+    Staff,
+    InterviewTag1,
+    ResearchesIssue,
+)
+from .serializers import (
+    HomepagePhotoSerializer,
+    LatestEventTagSerializer,
+    LatestEventSerializer,
+    CrabSiteSerializer,
+    WaterQualityManualSiteSerializer,
+    BenthicOrganismSerializer,
+    CrabSerializer,
+    LiteratureSerializer,
+    NewsTagSerializer,
+    NewsSerializer,
+    ResearchTagSerializer,
+    ResearchSerializer,
+    InterviewContentSerializer,
+    WaterQualityManualSerializer,
+    InterviewTag2Serializer,
+    InterviewTag3Serializer,
+    StaffSerializer,
+    InterviewStakeholderSerializer,
+    InterviewTag1Serializer,
+    ResearchesIssueSerializer,
+)
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
@@ -26,14 +63,17 @@ from rest_framework.exceptions import ValidationError
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
 
+
 class CustomPageNumberPagination(PageNumberPagination):
     page_size = 10
+
 
 class HomepagePhotoAPIView(APIView):
     def get(self, request):
         homepagePhotos = HomepagePhoto.objects.filter(display=True)
         serializer = HomepagePhotoSerializer(homepagePhotos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class LatestEventTagAPIView(APIView):
     def get(self, request):
@@ -58,11 +98,11 @@ class LatestEventAPIView(APIView):
         serializer = LatestEventSerializer(result_page, many=True)
 
         response_data = {
-            'currentPage': paginator.page.number,
-            'recordsPerPage': paginator.page_size,
-            'totalPages': paginator.page.paginator.num_pages,
-            'totalRecords': paginator.page.paginator.count,
-            'records': serializer.data
+            "currentPage": paginator.page.number,
+            "recordsPerPage": paginator.page_size,
+            "totalPages": paginator.page.paginator.num_pages,
+            "totalRecords": paginator.page.paginator.count,
+            "records": serializer.data,
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
@@ -74,8 +114,8 @@ class LatestEventAPIView(APIView):
         return Response({"message": "更新觀看數成功"}, status=status.HTTP_200_OK)
 
     def get_queryset(self, request):
-        tag_id = request.GET.get('tag')
-        sort_order = request.query_params.get('sort', None)
+        tag_id = request.GET.get("tag")
+        sort_order = request.query_params.get("sort", None)
 
         if tag_id:
             queryset = LatestEvent.objects.filter(display=True, tags__id=tag_id)
@@ -86,10 +126,9 @@ class LatestEventAPIView(APIView):
         if sort_field:
             queryset = queryset.order_by(sort_field)
         else:
-            queryset = queryset.order_by('-id')
+            queryset = queryset.order_by("-id")
 
         return queryset
-
 
 
 class CrabSiteAPIView(APIView):
@@ -98,34 +137,50 @@ class CrabSiteAPIView(APIView):
         serializer = CrabSiteSerializer(crabSites, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class WaterQualityManualSiteAPIView(APIView):
     def get(self, request):
         waterQualityManualSites = WaterQualityManualSite.objects.all()
-        serializer = WaterQualityManualSiteSerializer(waterQualityManualSites, many=True)
+        serializer = WaterQualityManualSiteSerializer(
+            waterQualityManualSites, many=True
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class BenthicOrganismAPIView(APIView):
     def get(self, request):
-        site = request.query_params.get('site', None)
+        site = request.query_params.get("site", None)
         if site is not None:
-            bo = BenthicOrganismData.objects.filter(site=site).annotate(
-                year_int=Cast('year', IntegerField()),
-                month_int=Cast('month', IntegerField())
-            ).order_by('year_int', 'month_int')
+            bo = (
+                BenthicOrganismData.objects.filter(site=site)
+                .annotate(
+                    year_int=Cast("year", IntegerField()),
+                    month_int=Cast("month", IntegerField()),
+                )
+                .order_by("year_int", "month_int")
+            )
 
             serializer = BenthicOrganismSerializer(bo, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({"error": "No site parameter provided."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "No site parameter provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
 
 class CrabAPIView(APIView):
     def get(self, request):
-        site = request.query_params.get('site', None)
+        site = request.query_params.get("site", None)
         if site is not None:
-            crabs = CrabData.objects.filter(site=site).annotate(
-                year_int=Cast('year', IntegerField()),
-                month_int=Cast('month', IntegerField())
-            ).order_by('year_int', 'month_int')
+            crabs = (
+                CrabData.objects.filter(site=site)
+                .annotate(
+                    year_int=Cast("year", IntegerField()),
+                    month_int=Cast("month", IntegerField()),
+                )
+                .order_by("year_int", "month_int")
+            )
 
             serializer = CrabSerializer(crabs, many=True)
             list_of_objects = serializer.data
@@ -144,15 +199,20 @@ class CrabAPIView(APIView):
 
             return Response(res)
         else:
-            return Response({"error": "No site parameter provided."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "No site parameter provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
 class WaterQualityManualsAPIView(APIView):
     def get(self, request, *args, **kwargs):
-        site = request.query_params.get('site', None)
+        site = request.query_params.get("site", None)
         wq = WaterQualityManualData.objects.filter(site=site)
         wq = wq.annotate(
-            year_int=Cast('year', IntegerField()),
-            month_int=Cast('month', IntegerField())
-        ).order_by('year_int', 'month_int')
+            year_int=Cast("year", IntegerField()),
+            month_int=Cast("month", IntegerField()),
+        ).order_by("year_int", "month_int")
         serializer = WaterQualityManualSerializer(wq, many=True)
         list_of_objects = serializer.data
         res = []
@@ -167,31 +227,40 @@ class WaterQualityManualsAPIView(APIView):
             obj["data"] = data
             res.append(obj)
         return Response(res, status=status.HTTP_200_OK)
+
+
 class LiteratureAPIView(APIView):
     def get(self, request):
-        keyword = request.GET.get('keyword')
+        keyword = request.GET.get("keyword")
 
         if keyword:
-            literature = Literature.objects.filter(Q(title__icontains=keyword)).order_by('-id')
+            literature = Literature.objects.filter(
+                Q(title__icontains=keyword)
+            ).order_by("-id")
         else:
-            literature = Literature.objects.all().order_by('-id')
+            literature = Literature.objects.all().order_by("-id")
 
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset(literature, request)
         serializer = LiteratureSerializer(result_page, many=True)
 
-        return Response({
-            'currentPage': paginator.page.number,
-            'recordsPerPage': paginator.page_size,
-            'totalPages': paginator.page.paginator.num_pages,
-            'totalRecords': paginator.page.paginator.count,
-            'records': serializer.data
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "currentPage": paginator.page.number,
+                "recordsPerPage": paginator.page_size,
+                "totalPages": paginator.page.paginator.num_pages,
+                "totalRecords": paginator.page.paginator.count,
+                "records": serializer.data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
     def patch(self, request, pk):
         literature = Literature.objects.get(id=pk)
         literature.views += 1
         literature.save()
         return Response({"message": "更新文獻觀看數成功"}, status=status.HTTP_200_OK)
+
 
 class NewsTagsAPIView(APIView):
     def get(self, request):
@@ -202,17 +271,17 @@ class NewsTagsAPIView(APIView):
 
 class NewsAPIView(APIView):
     def get(self, request):
-        keyword = request.GET.get('keyword')
-        tag_id = request.GET.get('tag')
+        keyword = request.GET.get("keyword")
+        tag_id = request.GET.get("tag")
 
         if keyword:
-            news = News.objects.filter(Q(title__icontains=keyword)).order_by('-date')
+            news = News.objects.filter(Q(title__icontains=keyword)).order_by("-date")
         elif tag_id:
-            news = News.objects.filter(tags__id=tag_id).order_by('-date')
+            news = News.objects.filter(tags__id=tag_id).order_by("-date")
         else:
             # 如果沒有 keyword 和 tag_id，找出離現在最新的兩個月日期
             two_months_ago = datetime.now() - timedelta(days=60)
-            news = News.objects.filter(date__gte=two_months_ago).order_by('-date')
+            news = News.objects.filter(date__gte=two_months_ago).order_by("-date")
 
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset(news, request)
@@ -229,7 +298,7 @@ class NewsAPIView(APIView):
             "totalPages": paginator.page.paginator.num_pages,
             "totalRecords": paginator.page.paginator.count,
             "tags": tag_serializer.data,
-            "records": serializer.data
+            "records": serializer.data,
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
@@ -240,17 +309,20 @@ class NewsAPIView(APIView):
         news.save()
         return Response({"message": "更新新聞觀看數成功"}, status=status.HTTP_200_OK)
 
+
 class ResearchAPIView(APIView):
     def get(self, request):
-        keyword = request.GET.get('keyword')
-        tag_id = request.GET.get('tag')
+        keyword = request.GET.get("keyword")
+        tag_id = request.GET.get("tag")
 
         if keyword:
-            research = Research.objects.filter(Q(title__icontains=keyword)).order_by('-year')
+            research = Research.objects.filter(Q(title__icontains=keyword)).order_by(
+                "-year"
+            )
         elif tag_id:
-            research = Research.objects.filter(tags__id=tag_id).order_by('-year')
+            research = Research.objects.filter(tags__id=tag_id).order_by("-year")
         else:
-            research = Research.objects.all().order_by('-year')
+            research = Research.objects.all().order_by("-year")
 
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset(research, request)
@@ -265,23 +337,27 @@ class ResearchAPIView(APIView):
             "totalPages": paginator.page.paginator.num_pages,
             "totalRecords": paginator.page.paginator.count,
             "tags": tag_serializer.data,
-            "records": serializer.data
+            "records": serializer.data,
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
     def patch(self, request, pk):
         research = Research.objects.get(id=pk)
         research.views += 1
         research.save()
-        return Response({"message": "更新相關研究觀看數成功"}, status=status.HTTP_200_OK)
+        return Response(
+            {"message": "更新相關研究觀看數成功"}, status=status.HTTP_200_OK
+        )
+
 
 class InterviewSingleAPIView(APIView):
 
-    def get_interview_contents(self, request, update_type='search'):
-        d1_str = request.GET.get('d1')
-        d2_str = request.GET.get('d2')
-        people = request.GET.get('people')
-        tag3_values = request.query_params.get('tag3', None)
+    def get_interview_contents(self, request, update_type="search"):
+        d1_str = request.GET.get("d1")
+        d2_str = request.GET.get("d2")
+        people = request.GET.get("people")
+        tag3_values = request.query_params.get("tag3", None)
 
         if not any([d1_str, d2_str, people, tag3_values]):
             return []
@@ -292,14 +368,16 @@ class InterviewSingleAPIView(APIView):
             elif people:
                 interview_contents = self._filter_by_people(people)
             elif tag3_values:
-                tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
+                tag3_list = (
+                    list(map(int, tag3_values.split(","))) if tag3_values else []
+                )
                 interview_contents = self._filter_by_tag3(tag3_list)
                 tag3_instances = InterviewTag3.objects.filter(id__in=tag3_list)
-                if update_type == 'search':
+                if update_type == "search":
                     for tag3_instance in tag3_instances:
                         tag3_instance.search_volume += 1
                         tag3_instance.save()
-                elif update_type == 'download':
+                elif update_type == "download":
                     for tag3_instance in tag3_instances:
                         tag3_instance.download_volume += 1
                         tag3_instance.save()
@@ -311,34 +389,35 @@ class InterviewSingleAPIView(APIView):
         return interview_contents
 
     def get(self, request):
-        interview_contents = self.get_interview_contents(request, update_type='search')
+        interview_contents = self.get_interview_contents(request, update_type="search")
         if isinstance(interview_contents, Response):
             return interview_contents
 
         if not interview_contents:
-            return Response({"records":[]}, status=status.HTTP_200_OK)
+            return Response({"records": []}, status=status.HTTP_200_OK)
 
-        interview_contents = interview_contents.order_by('-interview_date')
+        interview_contents = interview_contents.order_by("-interview_date")
 
         paginator = CustomPageNumberPagination()
         result_page = paginator.paginate_queryset(interview_contents, request)
 
-        serializer = InterviewContentSerializer(result_page, many=True, context={'request': request})
+        serializer = InterviewContentSerializer(
+            result_page, many=True, context={"request": request}
+        )
 
         response_data = {
             "currentPage": paginator.page.number,
             "recordsPerPage": paginator.page_size,
             "totalPages": paginator.page.paginator.num_pages,
             "totalRecords": paginator.page.paginator.count,
-            "records": serializer.data
+            "records": serializer.data,
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
 
-
     def _filter_by_date(self, d1_str, d2_str):
-        d1_year, d1_month = map(int, d1_str.split('-'))
-        d2_year, d2_month = map(int, d2_str.split('-'))
+        d1_year, d1_month = map(int, d1_str.split("-"))
+        d2_year, d2_month = map(int, d2_str.split("-"))
         d1_start = datetime(d1_year, d1_month, 1).date()
         last_day_d2 = calendar.monthrange(d2_year, d2_month)[1]
         d2_end = datetime(d2_year, d2_month, last_day_d2).date()
@@ -364,48 +443,59 @@ class InterviewSingleAPIView(APIView):
 
 class InterviewMultipleAPIView(APIView):
     @staticmethod
-    def get_contents_with_scores(request, update_type='search'):
-        stakeholder_values = request.query_params.get('stakeholder', None)
-        tag2_values = request.query_params.get('tag2', None)
-        tag3_values = request.query_params.get('tag3', None)
+    def get_contents_with_scores(request, update_type="search"):
+        stakeholder_values = request.query_params.get("stakeholder", None)
+        tag2_values = request.query_params.get("tag2", None)
+        tag3_values = request.query_params.get("tag3", None)
 
         # 没有传任何参数
         if not any([stakeholder_values, tag2_values, tag3_values]):
             return []
 
         if (tag2_values or tag3_values) and not stakeholder_values:
-            raise ValidationError({'error': '請傳入受訪對象'})
+            raise ValidationError({"error": "請傳入受訪對象"})
 
         if stakeholder_values and not tag2_values and not tag3_values:
-            raise ValidationError({'error': '請選擇 1-7 進行搜尋'})
+            raise ValidationError({"error": "請選擇 1-7 進行搜尋"})
 
-        stakeholder_list = list(map(int, stakeholder_values.split(','))) if stakeholder_values else []
+        stakeholder_list = (
+            list(map(int, stakeholder_values.split(","))) if stakeholder_values else []
+        )
         stakeholder_q = Q(interview_stakeholder__id__in=stakeholder_list)
 
         matched_contents = InterviewContent.objects.filter(stakeholder_q).distinct()
 
         if tag2_values or tag3_values:
-            tag2_list = list(map(int, tag2_values.split(','))) if tag2_values else []
-            tag3_list = list(map(int, tag3_values.split(','))) if tag3_values else []
+            tag2_list = list(map(int, tag2_values.split(","))) if tag2_values else []
+            tag3_list = list(map(int, tag3_values.split(","))) if tag3_values else []
 
-            if update_type == 'search':
+            if update_type == "search":
                 if tag2_list:
-                    InterviewTag2.objects.filter(id__in=tag2_list).update(search_volume=F('search_volume') + 1)
+                    InterviewTag2.objects.filter(id__in=tag2_list).update(
+                        search_volume=F("search_volume") + 1
+                    )
                 if tag3_list:
-                    InterviewTag3.objects.filter(id__in=tag3_list).update(search_volume=F('search_volume') + 1)
-            elif update_type == 'download':
+                    InterviewTag3.objects.filter(id__in=tag3_list).update(
+                        search_volume=F("search_volume") + 1
+                    )
+            elif update_type == "download":
                 if tag2_list:
-                    InterviewTag2.objects.filter(id__in=tag2_list).update(download_volume=F('download_volume') + 1)
+                    InterviewTag2.objects.filter(id__in=tag2_list).update(
+                        download_volume=F("download_volume") + 1
+                    )
                 if tag3_list:
-                    InterviewTag3.objects.filter(id__in=tag3_list).update(download_volume=F('download_volume') + 1)
+                    InterviewTag3.objects.filter(id__in=tag3_list).update(
+                        download_volume=F("download_volume") + 1
+                    )
 
             tag2_q = Q(interview_tag2__id__in=tag2_list)
             tag3_q = Q(interview_tag3__id__in=tag3_list)
 
             matched_contents = matched_contents.filter(tag2_q | tag3_q).distinct()
 
-        matched_contents = matched_contents.prefetch_related('interview_tag2', 'interview_tag3',
-                                                             'interview_stakeholder')
+        matched_contents = matched_contents.prefetch_related(
+            "interview_tag2", "interview_tag3", "interview_stakeholder"
+        )
 
         def calculate_score(content):
             score = sum(tag2.id in tag2_list for tag2 in content.interview_tag2.all())
@@ -413,33 +503,42 @@ class InterviewMultipleAPIView(APIView):
 
             return score
 
-        contents_with_scores = [(content, calculate_score(content)) for content in matched_contents]
+        contents_with_scores = [
+            (content, calculate_score(content)) for content in matched_contents
+        ]
 
-        contents_with_scores.sort(key=lambda x: (x[1], x[0].interview_date), reverse=True)
+        contents_with_scores.sort(
+            key=lambda x: (x[1], x[0].interview_date), reverse=True
+        )
 
         return contents_with_scores
 
     def get(self, request, *args, **kwargs):
         try:
-            contents_with_scores = self.get_contents_with_scores(request, update_type='search')
+            contents_with_scores = self.get_contents_with_scores(
+                request, update_type="search"
+            )
         except ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
         paginator = CustomPageNumberPagination()
-        result_page = paginator.paginate_queryset([content[0] for content in contents_with_scores], request)
+        result_page = paginator.paginate_queryset(
+            [content[0] for content in contents_with_scores], request
+        )
 
-        serializer = InterviewContentSerializer(result_page, many=True, context={'request': request})
+        serializer = InterviewContentSerializer(
+            result_page, many=True, context={"request": request}
+        )
 
         response_data = {
             "currentPage": paginator.page.number,
             "recordsPerPage": paginator.page_size,
             "totalPages": paginator.page.paginator.num_pages,
             "totalRecords": paginator.page.paginator.count,
-            "records": serializer.data
+            "records": serializer.data,
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
-
 
 
 class DownloadWaterQualityManyalAPIView(APIView):
@@ -449,20 +548,26 @@ class DownloadWaterQualityManyalAPIView(APIView):
         try:
             user = request.user
         except:
-            raise PermissionDenied('No permission. Please login as a member.')
+            raise PermissionDenied("No permission. Please login as a member.")
 
         zip_io = io.BytesIO()
         now = datetime.now()
         filename = "LTSER Changhua_水質觀測資料_" + now.strftime("%Y-%m-%d")
-        with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            csv_file = f'{filename}.csv'
-            with open(csv_file, 'w', newline='') as f:
+        with zipfile.ZipFile(zip_io, "w", zipfile.ZIP_DEFLATED) as zipf:
+            csv_file = f"{filename}.csv"
+            with open(csv_file, "w", newline="") as f:
                 writer = csv.writer(f)
-                fields = [field for field in WaterQualityManualData._meta.fields if field.name != 'id']
+                fields = [
+                    field
+                    for field in WaterQualityManualData._meta.fields
+                    if field.name != "id"
+                ]
                 writer.writerow([field.name for field in fields])
-                for instance in WaterQualityManualData.objects.all().order_by('year', 'month'):
+                for instance in WaterQualityManualData.objects.all().order_by(
+                    "year", "month"
+                ):
                     row = []
-                    for field in fields :
+                    for field in fields:
                         value = getattr(instance, field.name)
                         row.append(value)
                     writer.writerow(row)
@@ -470,9 +575,9 @@ class DownloadWaterQualityManyalAPIView(APIView):
             zipf.write(csv_file)
             os.remove(csv_file)
 
-        DownloadRecord.objects.create(filename=f'{filename}.csv', user=user)
+        DownloadRecord.objects.create(filename=f"{filename}.csv", user=user)
         zip_io.seek(0)
-        response = FileResponse(zip_io, as_attachment=True, filename=f'{filename}.zip')
+        response = FileResponse(zip_io, as_attachment=True, filename=f"{filename}.zip")
         return response
 
 
@@ -483,21 +588,26 @@ class DownloadCrabAPIView(APIView):
         try:
             user = request.user
         except:
-            raise PermissionDenied('No permission. Please login as a member.')
+            raise PermissionDenied("No permission. Please login as a member.")
 
         zip_io = io.BytesIO()
         now = datetime.now()
         filename1 = "LTSER Changhua_底質資料_" + now.strftime("%Y-%m-%d")
         filename2 = "LTSER Changhua_螃蟹資料_" + now.strftime("%Y-%m-%d")
 
-        with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for filename, model in [(filename1, BenthicOrganismData), (filename2, CrabData)]:
-                csv_file = f'{filename}.csv'
-                with open(csv_file, 'w', newline='') as f:
+        with zipfile.ZipFile(zip_io, "w", zipfile.ZIP_DEFLATED) as zipf:
+            for filename, model in [
+                (filename1, BenthicOrganismData),
+                (filename2, CrabData),
+            ]:
+                csv_file = f"{filename}.csv"
+                with open(csv_file, "w", newline="") as f:
                     writer = csv.writer(f)
-                    fields = [field for field in model._meta.fields if field.name != 'id']
+                    fields = [
+                        field for field in model._meta.fields if field.name != "id"
+                    ]
                     writer.writerow([field.name for field in fields])
-                    for instance in model.objects.all().order_by('year', 'month'):
+                    for instance in model.objects.all().order_by("year", "month"):
                         row = []
                         for field in fields:
                             value = getattr(instance, field.name)
@@ -505,104 +615,123 @@ class DownloadCrabAPIView(APIView):
                         writer.writerow(row)
 
                 zipf.write(csv_file)
-                DownloadRecord.objects.create(filename=f'{filename}.csv', user=user)
+                DownloadRecord.objects.create(filename=f"{filename}.csv", user=user)
                 os.remove(csv_file)
         zip_io.seek(0)
-        response = FileResponse(zip_io, as_attachment=True, filename=f'LTSER Changhua_底棲生物資料_{now.strftime("%Y-%m-%d")}.zip')
+        response = FileResponse(
+            zip_io,
+            as_attachment=True,
+            filename=f'LTSER Changhua_底棲生物資料_{now.strftime("%Y-%m-%d")}.zip',
+        )
         return response
+
 
 class InterviewStakeholderListAPIView(APIView):
     def get(self, request):
-        interviewstakeholder_list = InterviewStakeholder.objects.all().order_by('order')
-        serializer = InterviewStakeholderSerializer(interviewstakeholder_list, many=True)
-        return Response({'records': serializer.data})
+        interviewstakeholder_list = InterviewStakeholder.objects.all().order_by("order")
+        serializer = InterviewStakeholderSerializer(
+            interviewstakeholder_list, many=True
+        )
+        return Response({"records": serializer.data})
+
 
 class InterviewTag1ListAPIView(APIView):
     def get(self, request):
-        interviewtag1_list = InterviewTag1.objects.all().order_by('order')
+        interviewtag1_list = InterviewTag1.objects.all().order_by("order")
         serializer = InterviewTag1Serializer(interviewtag1_list, many=True)
-        return Response({'records': serializer.data})
+        return Response({"records": serializer.data})
+
 
 class InterviewTag2ListAPIView(APIView):
 
     @staticmethod
     def extract_option_id(title):
-        return title.split('.')[-1][0]
+        return title.split(".")[-1][0]
 
     @staticmethod
     def extract_category_id(title):
-        return title.split('.')[0]
+        return title.split(".")[0]
 
     def get(self, request):
-        categoryId = request.query_params.get('categoryId', None)
+        categoryId = request.query_params.get("categoryId", None)
 
         if categoryId:
             interviewtag2_list = InterviewTag2.objects.filter(
                 interview_tag1__title__startswith=str(categoryId)
-            ).order_by('order')
+            ).order_by("order")
         else:
-            interviewtag2_list = InterviewTag2.objects.all().order_by('order')
+            interviewtag2_list = InterviewTag2.objects.all().order_by("order")
         serializer = InterviewTag2Serializer(interviewtag2_list, many=True)
 
         # Constructing the response data
         records = []
         for item in serializer.data:
-            has_child_tags = InterviewTag3.objects.filter(interview_tag2_id=item['id']).exists()
+            has_child_tags = InterviewTag3.objects.filter(
+                interview_tag2_id=item["id"]
+            ).exists()
 
-            option_id_from_title = self.extract_option_id(item['title'])
-            category_id_from_title = self.extract_category_id(item['title'])
+            option_id_from_title = self.extract_option_id(item["title"])
+            category_id_from_title = self.extract_category_id(item["title"])
 
             optionId = option_id_from_title if not has_child_tags else None
             groupId = option_id_from_title if has_child_tags else None
 
             data = {
-                'tag2': item['id'],
-                'categoryId': category_id_from_title,
-                'optionId': optionId,
-                'groupId': groupId,
-                'title': item['title'].split(' ')[-1]
+                "tag2": item["id"],
+                "categoryId": category_id_from_title,
+                "optionId": optionId,
+                "groupId": groupId,
+                "title": item["title"].split(" ")[-1],
             }
             records.append(data)
 
-        return Response({'records': records})
+        return Response({"records": records})
 
 
 class InterviewTag3ListAPIView(APIView):
 
     @staticmethod
     def extract_ids_from_title(title):
-        parts = title.split('.')
+        parts = title.split(".")
         categoryId = parts[0] if len(parts) > 0 else None
         groupId = parts[1] if len(parts) > 1 else None
         optionId = parts[2][0] if len(parts) > 2 else None
         return categoryId, groupId, optionId
 
     def get(self, request):
-        categoryId = request.query_params.get('categoryId', None)
-        groupId = request.query_params.get('groupId', None)
+        categoryId = request.query_params.get("categoryId", None)
+        groupId = request.query_params.get("groupId", None)
         if categoryId and groupId:
-            tag2_instance = InterviewTag2.objects.filter(title__startswith=f"{categoryId}.{groupId} ",
-                                                         interview_tag1__title__startswith=str(categoryId)).first()
+            tag2_instance = InterviewTag2.objects.filter(
+                title__startswith=f"{categoryId}.{groupId} ",
+                interview_tag1__title__startswith=str(categoryId),
+            ).first()
             if not tag2_instance:
-                return Response({'error': 'No matching InterviewTag2 found'}, status=400)
-            interviewtag3_list = InterviewTag3.objects.filter(interview_tag2=tag2_instance).order_by('order')
+                return Response(
+                    {"error": "No matching InterviewTag2 found"}, status=400
+                )
+            interviewtag3_list = InterviewTag3.objects.filter(
+                interview_tag2=tag2_instance
+            ).order_by("order")
         else:
-            interviewtag3_list = InterviewTag3.objects.all().order_by('order')
+            interviewtag3_list = InterviewTag3.objects.all().order_by("order")
         serializer = InterviewTag3Serializer(interviewtag3_list, many=True)
 
         records = []
         for item in serializer.data:
-            catId, grpId, optionId = self.extract_ids_from_title(item['title'])
+            catId, grpId, optionId = self.extract_ids_from_title(item["title"])
             data = {
-                'tag3': item['id'],
-                'categoryId': catId,
-                'groupId': grpId,
-                'optionId': optionId,
-                'title': item['title'].split(' ')[-1]  # Assuming title format remains consistent
+                "tag3": item["id"],
+                "categoryId": catId,
+                "groupId": grpId,
+                "optionId": optionId,
+                "title": item["title"].split(" ")[
+                    -1
+                ],  # Assuming title format remains consistent
             }
             records.append(data)
 
-        return Response({'records': records})
+        return Response({"records": records})
 
 
 class DownloadInterviewSingleAPIView(APIView):
@@ -611,11 +740,15 @@ class DownloadInterviewSingleAPIView(APIView):
     def get(self, request, *args, **kwargs):
         user = request.user
 
-        if not (user.is_superuser or getattr(user, 'is_applied', False)):
-            return Response({'detail': "權限不足，請填寫申請表格"}, status=status.HTTP_403_FORBIDDEN)
+        if not (user.is_superuser or getattr(user, "is_applied", False)):
+            return Response(
+                {"detail": "權限不足，請填寫申請表格"}, status=status.HTTP_403_FORBIDDEN
+            )
 
         interview_view = InterviewSingleAPIView()
-        interview_contents = interview_view.get_interview_contents(request, update_type='download')
+        interview_contents = interview_view.get_interview_contents(
+            request, update_type="download"
+        )
         if isinstance(interview_contents, Response):
             return interview_contents
 
@@ -623,35 +756,46 @@ class DownloadInterviewSingleAPIView(APIView):
         now = datetime.now()
         filename = "LTSER Changhua_訪談資料_" + now.strftime("%Y-%m-%d")
 
-        with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            csv_file_name = f'{filename}.csv'
+        with zipfile.ZipFile(zip_io, "w", zipfile.ZIP_DEFLATED) as zipf:
+            csv_file_name = f"{filename}.csv"
             csv_io = io.StringIO()
 
             writer = csv.writer(csv_io)
             # 改变 header
-            writer.writerow(['訪談內容', '相關分類', '訪談日期', '受訪者代碼', '類別'])
+            writer.writerow(["訪談內容", "相關分類", "訪談日期", "受訪者代碼", "類別"])
 
             # 在 loop 中，按照新的 header 对应地重新排列 row 的内容
             for content in interview_contents:
                 row = [
                     content.content,  # 訪談內容
-                    " ".join(str(tag) for tag in content.interview_tag2.all()) + " " + " ".join(
-                        str(tag) for tag in content.interview_tag3.all()),  # 相關分類
+                    " ".join(str(tag) for tag in content.interview_tag2.all())
+                    + " "
+                    + " ".join(
+                        str(tag) for tag in content.interview_tag3.all()
+                    ),  # 相關分類
                     content.interview_date,  # 訪談日期
-                    " ".join(str(people) for people in content.interview_people.all()),  # 受訪者代碼
-                    " ".join(str(stakeholder) for stakeholder in content.interview_stakeholder.all()),  # 類別
+                    " ".join(
+                        str(people) for people in content.interview_people.all()
+                    ),  # 受訪者代碼
+                    " ".join(
+                        str(stakeholder)
+                        for stakeholder in content.interview_stakeholder.all()
+                    ),  # 類別
                 ]
                 writer.writerow(row)
 
             csv_io.seek(0)  # reset the stream position to the beginning
-            zipf.writestr(csv_file_name, csv_io.getvalue())  # write the in-memory text stream to the zip file
+            zipf.writestr(
+                csv_file_name, csv_io.getvalue()
+            )  # write the in-memory text stream to the zip file
 
         zip_io.seek(0)
-        response = FileResponse(zip_io, as_attachment=True, filename=f'{filename}.zip')
+        response = FileResponse(zip_io, as_attachment=True, filename=f"{filename}.zip")
 
-        DownloadRecord.objects.create(filename=f'{filename}.csv', user=user)
+        DownloadRecord.objects.create(filename=f"{filename}.csv", user=user)
 
         return response
+
 
 class DownloadInterviewMultipleAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -659,33 +803,42 @@ class DownloadInterviewMultipleAPIView(APIView):
     def get(self, request, *args, **kwargs):
         user = request.user
 
-        if not (user.is_superuser or getattr(user, 'is_applied', False)):
-            return Response({'detail': "權限不足，請填寫申請表格"}, status=status.HTTP_403_FORBIDDEN)
+        if not (user.is_superuser or getattr(user, "is_applied", False)):
+            return Response(
+                {"detail": "權限不足，請填寫申請表格"}, status=status.HTTP_403_FORBIDDEN
+            )
 
-        contents_with_scores = InterviewMultipleAPIView.get_contents_with_scores(request,  update_type='download')
+        contents_with_scores = InterviewMultipleAPIView.get_contents_with_scores(
+            request, update_type="download"
+        )
 
         zip_io = io.BytesIO()
         now = datetime.now()
         filename = "LTSER Changhua_訪談資料_" + now.strftime("%Y-%m-%d")
 
-        with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            csv_file_name = f'{filename}.csv'
+        with zipfile.ZipFile(zip_io, "w", zipfile.ZIP_DEFLATED) as zipf:
+            csv_file_name = f"{filename}.csv"
             csv_io = io.StringIO()
             writer = csv.writer(csv_io)
 
-            writer.writerow(['id', '類別', '受訪者代碼', '訪談內容', '相關分類', '訪談日期'])
+            writer.writerow(
+                ["id", "類別", "受訪者代碼", "訪談內容", "相關分類", "訪談日期"]
+            )
             for content, _ in contents_with_scores:
-                tag2_str = '\n'.join(str(tag) for tag in content.interview_tag2.all())
-                tag3_str = '\n'.join(str(tag) for tag in content.interview_tag3.all())
+                tag2_str = "\n".join(str(tag) for tag in content.interview_tag2.all())
+                tag3_str = "\n".join(str(tag) for tag in content.interview_tag3.all())
                 tags_combined_str = tag2_str
                 if tag2_str and tag3_str:
-                    tags_combined_str += ',\n' + tag3_str
+                    tags_combined_str += ",\n" + tag3_str
                 elif tag3_str:
                     tags_combined_str = tag3_str
 
                 row = [
                     content.id,
-                    " ".join(str(stakeholder) for stakeholder in content.interview_stakeholder.all()),
+                    " ".join(
+                        str(stakeholder)
+                        for stakeholder in content.interview_stakeholder.all()
+                    ),
                     " ".join(str(people) for people in content.interview_people.all()),
                     content.content,
                     tags_combined_str,
@@ -697,16 +850,23 @@ class DownloadInterviewMultipleAPIView(APIView):
             zipf.writestr(csv_file_name, csv_io.getvalue())
 
         zip_io.seek(0)
-        response = FileResponse(zip_io, as_attachment=True, filename=f'{filename}.zip')
+        response = FileResponse(zip_io, as_attachment=True, filename=f"{filename}.zip")
 
         # Create a DownloadRecord after successfully creating the zip file.
-        DownloadRecord.objects.create(filename=f'{filename}.csv', user=user)
+        DownloadRecord.objects.create(filename=f"{filename}.csv", user=user)
 
         return response
 
 
 class StaffAPIView(APIView):
     def get(self, request):
-        staff = Staff.objects.all().order_by('order')
+        staff = Staff.objects.all().order_by("order")
         serializer = StaffSerializer(staff, many=True)
-        return Response({'records': serializer.data})
+        return Response({"records": serializer.data})
+
+
+class ResearchesIssueAPIView(APIView):
+    def get(self, request):
+        issue = ResearchesIssue.objects.all().order_by("id")
+        serializer = ResearchesIssueSerializer(issue, many=True)
+        return Response({"records": serializer.data})

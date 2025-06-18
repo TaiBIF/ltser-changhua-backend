@@ -1,27 +1,35 @@
 from django.db import models
 
+
 class HomepagePhoto(models.Model):
-    image = models.ImageField(upload_to='images', blank=False, null=False)
+    image = models.ImageField(upload_to="images", blank=False, null=False)
     display = models.BooleanField(default=False)
-    order = models.IntegerField(blank=False, null=False, editable=True, unique=True, default=1)
+    order = models.IntegerField(
+        blank=False, null=False, editable=True, unique=True, default=1
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"發表照片: {self.image}"
+
     class Meta:
-        db_table = 'HomepagePhoto'
-        verbose_name = '首頁照片'
-        verbose_name_plural = '首頁照片'
+        db_table = "HomepagePhoto"
+        verbose_name = "首頁照片"
+        verbose_name_plural = "首頁照片"
+
 
 class LatestEventTag(models.Model):
     title = models.CharField(max_length=200)
+
     def __str__(self):
         return f"標籤: {self.title}"
+
     class Meta:
-        db_table = 'LatestEventTag'
-        verbose_name = '最新消息-標籤'
-        verbose_name_plural = '最新消息-標籤'
+        db_table = "LatestEventTag"
+        verbose_name = "最新消息-標籤"
+        verbose_name_plural = "最新消息-標籤"
+
 
 class LatestEvent(models.Model):
     title = models.CharField(max_length=200)
@@ -36,57 +44,70 @@ class LatestEvent(models.Model):
 
     def __str__(self):
         return f"活動主題: {self.title}"
+
     class Meta:
-        db_table = 'LatestEvent'
-        verbose_name = '最新消息-內容'
-        verbose_name_plural = '最新消息-內容'
+        db_table = "LatestEvent"
+        verbose_name = "最新消息-內容"
+        verbose_name_plural = "最新消息-內容"
+
 
 class CrabSite(models.Model):
     title = models.CharField(max_length=200)
     latitude = models.FloatField(null=True, blank=True)
-    longitude =  models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+
     def __str__(self):
         return f"螃蟹觀測點位: {self.title}"
+
     class Meta:
-        db_table = 'CrabSite'
-        verbose_name = '底棲生物-人工點位'
-        verbose_name_plural = '底棲生物-人工點位'
+        db_table = "CrabSite"
+        verbose_name = "底棲生物-人工點位"
+        verbose_name_plural = "底棲生物-人工點位"
+
 
 class WaterQualityManualSite(models.Model):
     title = models.CharField(max_length=200)
-    latitude = models.DecimalField(max_digits=15, decimal_places=8, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=15, decimal_places=8, null=True, blank=True)
+    latitude = models.DecimalField(
+        max_digits=15, decimal_places=8, null=True, blank=True
+    )
+    longitude = models.DecimalField(
+        max_digits=15, decimal_places=8, null=True, blank=True
+    )
+
     def __str__(self):
         return f"水質人工觀測點位: {self.title}"
+
     class Meta:
-        db_table = 'WaterQualityManualSite'
-        verbose_name = '水質觀測-人工點位'
-        verbose_name_plural = '水質觀測-人工點位'
+        db_table = "WaterQualityManualSite"
+        verbose_name = "水質觀測-人工點位"
+        verbose_name_plural = "水質觀測-人工點位"
+
 
 class BenthicOrganismData(models.Model):
     year = models.CharField(max_length=6)
     site = models.CharField(max_length=10)
     month = models.CharField(max_length=6)
-    cw = models.FloatField(null=True,blank=True)
-    mm = models.FloatField(null=True,blank=True)
-    sc = models.FloatField(null=True,blank=True)
-    co = models.FloatField(null=True,blank=True)
-    s_temp = models.FloatField(null=True,blank=True)
-    t_sal = models.FloatField(null=True,blank=True)
-    s_ph = models.FloatField(null=True,blank=True)
-    w_temp = models.FloatField(null=True,blank=True)
-    w_ph = models.FloatField(null=True,blank=True)
-    cond = models.FloatField(null=True,blank=True)
-    do = models.FloatField(null=True,blank=True)
-    w_sal = models.FloatField(null=True,blank=True)
-    tds = models.FloatField(null=True,blank=True)
-    turb = models.FloatField(null=True,blank=True)
-    orp = models.FloatField(null=True,blank=True)
+    cw = models.FloatField(null=True, blank=True)
+    mm = models.FloatField(null=True, blank=True)
+    sc = models.FloatField(null=True, blank=True)
+    co = models.FloatField(null=True, blank=True)
+    s_temp = models.FloatField(null=True, blank=True)
+    t_sal = models.FloatField(null=True, blank=True)
+    s_ph = models.FloatField(null=True, blank=True)
+    w_temp = models.FloatField(null=True, blank=True)
+    w_ph = models.FloatField(null=True, blank=True)
+    cond = models.FloatField(null=True, blank=True)
+    do = models.FloatField(null=True, blank=True)
+    w_sal = models.FloatField(null=True, blank=True)
+    tds = models.FloatField(null=True, blank=True)
+    turb = models.FloatField(null=True, blank=True)
+    orp = models.FloatField(null=True, blank=True)
 
     class Meta:
-        db_table = 'BenthicOrganismData'
-        verbose_name = '底棲生物-人工數據-底質資料'
-        verbose_name_plural = '底棲生物-人工數據-底質資料'
+        db_table = "BenthicOrganismData"
+        verbose_name = "底棲生物-人工數據-底質資料"
+        verbose_name_plural = "底棲生物-人工數據-底質資料"
+
 
 class CrabData(models.Model):
     year = models.CharField(max_length=6)
@@ -116,10 +137,12 @@ class CrabData(models.Model):
     Mt = models.IntegerField(blank=True, null=True, default=0)
     Pb = models.IntegerField(blank=True, null=True, default=0)
     Mth = models.IntegerField(blank=True, null=True, default=0)
+
     class Meta:
-        db_table = 'Crab'
-        verbose_name = '底棲生物-人工數據-螃蟹資料'
-        verbose_name_plural = '底棲生物-人工數據-螃蟹資料'
+        db_table = "Crab"
+        verbose_name = "底棲生物-人工數據-螃蟹資料"
+        verbose_name_plural = "底棲生物-人工數據-螃蟹資料"
+
 
 class WaterQualityManualData(models.Model):
     year = models.CharField(max_length=6)
@@ -137,9 +160,10 @@ class WaterQualityManualData(models.Model):
     sg = models.FloatField(blank=True, null=True)
 
     class Meta:
-        db_table = 'WaterQualityManualData'
-        verbose_name = '水質觀測-人工數據'
-        verbose_name_plural = '水質觀測-人工數據'
+        db_table = "WaterQualityManualData"
+        verbose_name = "水質觀測-人工數據"
+        verbose_name_plural = "水質觀測-人工數據"
+
 
 class InterviewTag1(models.Model):
     title = models.CharField(max_length=200)
@@ -151,9 +175,9 @@ class InterviewTag1(models.Model):
         return f"{self.title}"
 
     class Meta:
-        db_table = 'InterviewTag1'
-        verbose_name = '訪談資料-標籤1'
-        verbose_name_plural = '訪談資料-標籤1'
+        db_table = "InterviewTag1"
+        verbose_name = "訪談資料-標籤1"
+        verbose_name_plural = "訪談資料-標籤1"
 
 
 class InterviewTag2(models.Model):
@@ -161,32 +185,48 @@ class InterviewTag2(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     order = models.IntegerField(blank=True, null=True, unique=True)
-    search_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
-    download_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
-    interview_tag1 = models.ForeignKey(InterviewTag1, on_delete=models.CASCADE, related_name='interviewtag2_set')
+    search_volume = models.IntegerField(
+        blank=True, null=True, default=0, editable=False
+    )
+    download_volume = models.IntegerField(
+        blank=True, null=True, default=0, editable=False
+    )
+    interview_tag1 = models.ForeignKey(
+        InterviewTag1, on_delete=models.CASCADE, related_name="interviewtag2_set"
+    )
+
     def __str__(self):
         return f"{self.title}"
 
     class Meta:
-        db_table = 'InterviewTag2'
-        verbose_name = '訪談資料-標籤2'
-        verbose_name_plural = '訪談資料-標籤2'
+        db_table = "InterviewTag2"
+        verbose_name = "訪談資料-標籤2"
+        verbose_name_plural = "訪談資料-標籤2"
+
 
 class InterviewTag3(models.Model):
     title = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     order = models.IntegerField(blank=True, null=True, unique=True)
-    search_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
-    download_volume = models.IntegerField(blank=True, null=True, default=0, editable=False)
-    interview_tag2 = models.ForeignKey(InterviewTag2, on_delete=models.CASCADE, related_name='interviewtag3_set')
+    search_volume = models.IntegerField(
+        blank=True, null=True, default=0, editable=False
+    )
+    download_volume = models.IntegerField(
+        blank=True, null=True, default=0, editable=False
+    )
+    interview_tag2 = models.ForeignKey(
+        InterviewTag2, on_delete=models.CASCADE, related_name="interviewtag3_set"
+    )
+
     def __str__(self):
         return f"{self.title}"
 
     class Meta:
-        db_table = 'InterviewTag3'
-        verbose_name = '訪談資料-標籤3'
-        verbose_name_plural = '訪談資料-標籤3'
+        db_table = "InterviewTag3"
+        verbose_name = "訪談資料-標籤3"
+        verbose_name_plural = "訪談資料-標籤3"
+
 
 class InterviewStakeholder(models.Model):
     title = models.CharField(max_length=200)
@@ -199,24 +239,30 @@ class InterviewStakeholder(models.Model):
         return f"{self.title}"
 
     class Meta:
-        db_table = 'InterviewStakeholder'
-        verbose_name = '訪談資料-受訪對象'
-        verbose_name_plural = '訪談資料-受訪對象'
+        db_table = "InterviewStakeholder"
+        verbose_name = "訪談資料-受訪對象"
+        verbose_name_plural = "訪談資料-受訪對象"
+
 
 class InterviewPeople(models.Model):
     title = models.CharField(max_length=200)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     order = models.IntegerField(blank=True, null=True, unique=True)
-    interview_stakeholder = models.ForeignKey(InterviewStakeholder, on_delete=models.CASCADE,
-                                              related_name='interviewpeople_set')
+    interview_stakeholder = models.ForeignKey(
+        InterviewStakeholder,
+        on_delete=models.CASCADE,
+        related_name="interviewpeople_set",
+    )
+
     def __str__(self):
         return f"{self.title}"
 
     class Meta:
-        db_table = 'InterviewPeople'
-        verbose_name = '訪談資料-受訪者'
-        verbose_name_plural = '訪談資料-受訪者'
+        db_table = "InterviewPeople"
+        verbose_name = "訪談資料-受訪者"
+        verbose_name_plural = "訪談資料-受訪者"
+
 
 class InterviewContent(models.Model):
     content = models.TextField()
@@ -230,9 +276,9 @@ class InterviewContent(models.Model):
         return f"{self.content}"
 
     class Meta:
-        db_table = 'InterviewContent'
-        verbose_name = '訪談資料-內容'
-        verbose_name_plural = '訪談資料-內容'
+        db_table = "InterviewContent"
+        verbose_name = "訪談資料-內容"
+        verbose_name_plural = "訪談資料-內容"
 
 
 class Literature(models.Model):
@@ -249,18 +295,21 @@ class Literature(models.Model):
         return self.title
 
     class Meta:
-        db_table = 'Literature'
-        verbose_name = '地方文獻'
-        verbose_name_plural = '地方文獻'
+        db_table = "Literature"
+        verbose_name = "地方文獻"
+        verbose_name_plural = "地方文獻"
+
 
 class NewsTag(models.Model):
     title = models.CharField(max_length=200)
+
     def __str__(self):
         return f"標籤: {self.title}"
+
     class Meta:
-        db_table = 'NewsTag'
-        verbose_name = '新聞報導-標籤'
-        verbose_name_plural = '新聞報導-標籤'
+        db_table = "NewsTag"
+        verbose_name = "新聞報導-標籤"
+        verbose_name_plural = "新聞報導-標籤"
 
 
 class News(models.Model):
@@ -271,23 +320,28 @@ class News(models.Model):
     date = models.DateField()
     link = models.URLField()
     views = models.IntegerField(default=0)
-    tags = models.ManyToManyField('NewsTag', related_name='news')
+    tags = models.ManyToManyField("NewsTag", related_name="news")
 
     def __str__(self):
         return f"標籤: {self.title}"
+
     class Meta:
-        db_table = 'News'
-        verbose_name = '新聞報導-內容'
-        verbose_name_plural = '新聞報導-內容'
+        db_table = "News"
+        verbose_name = "新聞報導-內容"
+        verbose_name_plural = "新聞報導-內容"
+
 
 class ResearchTag(models.Model):
     title = models.CharField(max_length=200)
+
     def __str__(self):
         return f"標籤: {self.title}"
+
     class Meta:
-        db_table = 'ResearchTag'
-        verbose_name = '相關研究-標籤'
-        verbose_name_plural = '相關研究-標籤'
+        db_table = "ResearchTag"
+        verbose_name = "相關研究-標籤"
+        verbose_name_plural = "相關研究-標籤"
+
 
 class Research(models.Model):
     title = models.CharField(max_length=255)
@@ -296,14 +350,15 @@ class Research(models.Model):
     reference = models.CharField(max_length=255, null=True, blank=True)
     link = models.URLField(null=True, blank=True)
     views = models.IntegerField(default=0)
-    tags = models.ManyToManyField('ResearchTag', related_name='research')
+    tags = models.ManyToManyField("ResearchTag", related_name="research")
 
     def __str__(self):
         return f"標籤: {self.title}"
+
     class Meta:
-        db_table = 'Research'
-        verbose_name = '相關研究-內容'
-        verbose_name_plural = '相關研究-內容'
+        db_table = "Research"
+        verbose_name = "相關研究-內容"
+        verbose_name_plural = "相關研究-內容"
 
 
 class Staff(models.Model):
@@ -311,13 +366,31 @@ class Staff(models.Model):
     name = models.CharField(max_length=255)
     duty = models.CharField(max_length=255)
     email = models.EmailField(null=True, blank=True)
-    image = models.ImageField(upload_to='images', blank=False, null=False)
+    image = models.ImageField(upload_to="images", blank=False, null=False)
     order = models.IntegerField(blank=True, null=True, unique=True)
 
     def __str__(self):
         return f"{self.name}"
 
     class Meta:
-        db_table = 'Staff'
-        verbose_name = '人員職務'
-        verbose_name_plural = '人員職務'
+        db_table = "Staff"
+        verbose_name = "人員職務"
+        verbose_name_plural = "人員職務"
+
+
+class ResearchesIssue(models.Model):
+    title = models.CharField(max_length=255, verbose_name="問題描述")
+    identity = models.CharField(
+        max_length=255,
+        verbose_name="提問人身份",
+        help_text="例如：治理機關、研究單位、生產者",
+    )
+    link = models.URLField(max_length=500, verbose_name="連結")
+
+    def __str__(self):
+        return f"{self.title}"
+
+    class Meta:
+        db_table = "ResearchesIssue"
+        verbose_name = "聚焦主題"
+        verbose_name_plural = "聚焦主題"
