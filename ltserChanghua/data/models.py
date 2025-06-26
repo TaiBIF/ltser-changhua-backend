@@ -386,6 +386,11 @@ class ResearchesIssue(models.Model):
         help_text="例如：治理機關、研究單位、生產者",
     )
     link = models.URLField(max_length=500, verbose_name="連結")
+    is_display = models.BooleanField(
+        default=True,
+        verbose_name="是否顯示於前端",
+        help_text="（勾選後，該主題將顯示於前端頁面；未勾選則不顯示）",
+    )
 
     def __str__(self):
         return f"{self.title}"
@@ -394,3 +399,42 @@ class ResearchesIssue(models.Model):
         db_table = "ResearchesIssue"
         verbose_name = "聚焦主題"
         verbose_name_plural = "聚焦主題"
+
+
+class PopulationStats(models.Model):
+    year = models.CharField(max_length=4, verbose_name="資料年份")
+    county_code = models.CharField(max_length=10, verbose_name="縣市代碼")
+    county_name = models.CharField(max_length=20, verbose_name="縣市名稱")
+    town_code = models.CharField(max_length=10, verbose_name="鄉鎮市區代碼")
+    town_name = models.CharField(max_length=20, verbose_name="鄉鎮市區名稱")
+    village_code = models.CharField(max_length=20, verbose_name="村里代碼")
+    village_name = models.CharField(max_length=20, verbose_name="村里名稱")
+
+    household_count = models.CharField(max_length=10, verbose_name="戶數")
+    population_total = models.CharField(max_length=10, verbose_name="人口數")
+    population_density = models.CharField(max_length=10, verbose_name="人口密度")
+    sex_ratio = models.CharField(max_length=10, verbose_name="性別比")
+    dependency_ratio = models.CharField(max_length=10, verbose_name="扶養比")
+    child_dependency_ratio = models.CharField(max_length=10, verbose_name="扶幼比")
+    elderly_dependency_ratio = models.CharField(max_length=10, verbose_name="扶老比")
+    aging_index = models.CharField(max_length=10, verbose_name="老化指數")
+
+    crude_birth_rate = models.CharField(max_length=10, verbose_name="粗出生率")
+    crude_death_rate = models.CharField(max_length=10, verbose_name="粗死亡率")
+    natural_increase_rate = models.CharField(max_length=10, verbose_name="自然增加率")
+    social_increase_rate = models.CharField(max_length=10, verbose_name="社會增加率")
+    population_growth_rate = models.CharField(max_length=10, verbose_name="人口增加率")
+
+    age_0_14 = models.CharField(max_length=10, verbose_name="0-14歲人口數")
+    age_15_64 = models.CharField(max_length=10, verbose_name="15-64歲人口數")
+    age_65_up = models.CharField(max_length=10, verbose_name="65歲以上人口數")
+
+    data_collection_time = models.CharField(max_length=20, verbose_name="資料時間")
+
+    def __str__(self):
+        return f"{self.county_name} {self.town_name} {self.village_name}"
+
+    class Meta:
+        db_table = "PopulationStats"
+        verbose_name = "人口統計"
+        verbose_name_plural = "人口統計"

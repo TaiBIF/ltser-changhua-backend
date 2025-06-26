@@ -867,6 +867,6 @@ class StaffAPIView(APIView):
 
 class ResearchesIssueAPIView(APIView):
     def get(self, request):
-        issue = ResearchesIssue.objects.all().order_by("id")
+        issue = ResearchesIssue.objects.all().order_by("id").filter(is_display=True)
         serializer = ResearchesIssueSerializer(issue, many=True)
         return Response({"records": serializer.data})

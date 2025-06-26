@@ -450,7 +450,10 @@ class ResearchesIssueResource(resources.ModelResource):
 
 class ResearchesIssueAdmin(ImportExportModelAdmin):
     resource_class = ResearchesIssueResource
-    list_display = ("id", "title", "identity", "link")
+    list_display = ("id", "title", "identity", "is_display")
+    search_fields = ("title", "identity")
+    list_filter = ("is_display", "identity")
+    ordering = ("id",)
 
 
 admin.site.register(HomepagePhoto, HomepagePhotoAdmin)
