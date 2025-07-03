@@ -391,6 +391,10 @@ class ResearchesIssue(models.Model):
         verbose_name="是否顯示於前端",
         help_text="（勾選後，該主題將顯示於前端頁面；未勾選則不顯示）",
     )
+    hits = models.IntegerField(
+        default=0,
+        verbose_name="點擊數",
+    )
 
     def __str__(self):
         return f"{self.title}"

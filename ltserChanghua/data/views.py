@@ -870,3 +870,19 @@ class ResearchesIssueAPIView(APIView):
         issue = ResearchesIssue.objects.all().order_by("id").filter(is_display=True)
         serializer = ResearchesIssueSerializer(issue, many=True)
         return Response({"records": serializer.data})
+
+
+class IncreaseResearchesIssueHitsAPIView(APIView):
+    def post(self, request, pk):
+        try:
+            issue = ResearchesIssue.objects.get(pk=pk)
+            issue.hits += 1
+            issue.save()
+            return Response(
+                {"message": "Hits increased", "hits": issue.hits},
+                status=status.HTTP_200_OK,
+            )
+        except ResearchesIssue.DoesNotExist:
+            return Response(
+                {"error": "Issue not found"}, status=status.HTTP_404_NOT_FOUND
+            )

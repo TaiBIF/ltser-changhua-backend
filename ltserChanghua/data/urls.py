@@ -23,6 +23,7 @@ from .views import (
     InterviewStakeholderListAPIView,
     InterviewTag1ListAPIView,
     ResearchesIssueAPIView,
+    IncreaseResearchesIssueHitsAPIView,
 )
 
 urlpatterns = [
@@ -109,4 +110,9 @@ urlpatterns = [
     ),
     path("staff/", StaffAPIView.as_view(), name="get_staff"),
     path("researches-issue/", ResearchesIssueAPIView.as_view(), name="get_issue"),
+    path(
+        "researches-issue/hits/<int:pk>",
+        IncreaseResearchesIssueHitsAPIView.as_view(),
+        name="add-hits",
+    ),
 ]
