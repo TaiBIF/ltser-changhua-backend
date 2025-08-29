@@ -425,7 +425,7 @@ def convert_population_data(
 
         if scale == "village":
             v_id = key
-            township_code = v_id.split("-")[0] if "-" in v_id else "-"
+            township_code = v_id
             county_code = 10007
 
             county_name = "彰化縣"
