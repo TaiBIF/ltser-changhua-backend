@@ -24,6 +24,8 @@ from .views import (
     InterviewTag1ListAPIView,
     ResearchesIssueAPIView,
     IncreaseResearchesIssueHitsAPIView,
+    social_economic_population_data,
+    village_pyramid_data,
 )
 
 urlpatterns = [
@@ -114,5 +116,15 @@ urlpatterns = [
         "researches-issue/hits/<int:pk>",
         IncreaseResearchesIssueHitsAPIView.as_view(),
         name="add-hits",
+    ),
+    path(
+        "social-economic-population-data/",
+        social_economic_population_data,
+        name="social-economic-population-data",
+    ),
+    path(
+        "village-pyramid-data/",
+        village_pyramid_data,
+        name="village-pyramid-data",
     ),
 ]

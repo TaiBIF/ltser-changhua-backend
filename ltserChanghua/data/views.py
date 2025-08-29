@@ -1,5 +1,7 @@
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.core.cache import cache
 from .models import (
     HomepagePhoto,
     LatestEventTag,
@@ -62,6 +64,7 @@ from django.db.models import Q, F
 from rest_framework.exceptions import ValidationError
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
+from data.utils.segis_api import *
 
 
 class CustomPageNumberPagination(PageNumberPagination):
@@ -886,3 +889,47 @@ class IncreaseResearchesIssueHitsAPIView(APIView):
             return Response(
                 {"error": "Issue not found"}, status=status.HTTP_404_NOT_FOUND
             )
+
+
+@api_view(["GET"])
+def social_economic_population_data(request):
+    cached_data = cache.get("social_economic_population_data")
+
+    if cached_data:  # 如果 Redis 中已有資料直接回傳
+        return Response(json.loads(cached_data), status=status.HTTP_200_OK)
+
+    scale = request.GET.get("scale", "village")
+
+    if scale not in ["village", "town"]:
+        return Response(
+            {"error": "Invalid scale. Use 'village' or 'town'."}, status=400
+        )
+
+    query_types = ["index", "summary", "dynamics_index", "structure"]
+
+    # 批次抓取最新資料
+    population_data_sets = [
+        get_population_data(
+            scale, get_latest_time_list(scale, query_type=qt), query_type=qt
+        )
+        for qt in query_types
+    ]
+
+    result = convert_population_data(*population_data_sets)
+
+    if len(result) > 0:
+        # 將結果用 redis cache 起來，保存期限為 7 天
+        cache.set("social_economic_population_data", json.dumps(result), timeout=604800)
+
+    return Response(result)
+
+
+@api_view(["GET"])
+def village_pyramid_data(request):
+    latest_time = get_latest_time_list("village", query_type="pyramid")
+    village_population_pyramid = get_population_data(
+        "village", latest_time, query_type="pyramid"
+    )
+    result = covert_pyrimad_data(village_population_pyramid)
+
+    return Response(result)
