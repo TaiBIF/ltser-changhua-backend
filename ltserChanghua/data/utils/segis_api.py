@@ -26,12 +26,14 @@ API_MAPPING = {
         "unit_code": "U01VI",
         "api_name": "GetVillageSTData",
         "id_field": "V_ID",
+        "filter_town": f"<oFilterTowns>{QUERY_PARAMS['oFilterTowns']}</oFilterTowns>",
         "filter_village": f"<oFilterVillages>{QUERY_PARAMS['oFilterVillages']}</oFilterVillages>",
     },
     "town": {
         "unit_code": "U01TO",
         "api_name": "GetTownSTData",
         "id_field": "TOWN_ID",
+        "filter_town": "<oFilterTowns>*</oFilterTowns>",
         "filter_village": "",  # 鄉鎮級查詢不需要村里篩選
     },
 }
@@ -83,6 +85,35 @@ VILLAGE_NAME_MAPPING = {
     "10007230-024": "崙腳村",
     "10007230-025": "新生村",
     "10007230-026": "漢寶村",
+}
+
+TOWN_NAME_MAPPING = {
+    "10007010": "彰化市",
+    "10007020": "鹿港鎮",
+    "10007030": "和美鎮",
+    "10007040": "線西鄉",
+    "10007050": "伸港鄉",
+    "10007060": "福興鄉",
+    "10007070": "秀水鄉",
+    "10007080": "花壇鄉",
+    "10007090": "芬園鄉",
+    "10007100": "員林市",
+    "10007110": "溪湖鎮",
+    "10007120": "田中鎮",
+    "10007130": "大村鄉",
+    "10007140": "埔鹽鄉",
+    "10007150": "埔心鄉",
+    "10007160": "永靖鄉",
+    "10007170": "社頭鄉",
+    "10007180": "二水鄉",
+    "10007190": "北斗鎮",
+    "10007200": "二林鎮",
+    "10007210": "田尾鄉",
+    "10007220": "埤頭鄉",
+    "10007230": "芳苑鄉",
+    "10007240": "大城鄉",
+    "10007250": "竹塘鄉",
+    "10007260": "溪州鄉",
 }
 
 PYRIMAD_KEY_MAPIING = {
@@ -295,7 +326,7 @@ def get_population_data(level, latest_dates, query_type="summary"):
         <oSelectColumns>{selected_columns}</oSelectColumns>
         <oFilterSTTimes>{','.join(latest_dates)}</oFilterSTTimes>
         <oFilterCountys>{QUERY_PARAMS["oFilterCountys"]}</oFilterCountys>
-        <oFilterTowns>{QUERY_PARAMS["oFilterTowns"]}</oFilterTowns>
+        {api_info["filter_town"]}
         {api_info["filter_village"]}
         <oResultDataType>{API_CONFIG["oResultDataType"]}</oResultDataType>
     </{api_info['api_name']}>
@@ -310,7 +341,6 @@ def get_population_data(level, latest_dates, query_type="summary"):
     if not json_data:
         print("API 回傳內容無法解析或格式錯誤")
         return []
-    print(json_data)
 
     row_data = json_data.get("RowDataList", [])
     if not row_data:
@@ -320,9 +350,10 @@ def get_population_data(level, latest_dates, query_type="summary"):
 
 
 def convert_population_data(
-    index_data, summary_data, dynamics_index_data, strcture_data
+    index_data, summary_data, dynamics_index_data, strcture_data, scale="village"
 ):
 
+    # ---- helpers ----
     def minguo_to_ad(minguo_str: str) -> str:
         # '100Y12M' -> '2011'
         year_num = int(minguo_str.split("Y")[0])
@@ -335,7 +366,13 @@ def convert_population_data(
             year_part = info_time.split("Y")[0]  # 只取 Y 前面的數字
         else:
             year_part = None
-        return (year_part, rec.get("V_ID"))
+
+        if scale == "village":
+            return (year_part, rec.get("V_ID"))
+        elif scale == "town":
+            return (year_part, rec.get("TOWN_ID"))
+        else:
+            raise ValueError(f"Unsupported scale: {scale}")
 
     def get(d, key, default="-"):
         return default if d is None else (d.get(key, default))
@@ -369,31 +406,42 @@ def convert_population_data(
     dyn = {key_tuple(r): r for r in (dynamics_index_data or [])}
     struc = {key_tuple(r): r for r in (strcture_data or [])}
 
-    # 收集所有 (INFO_TIME, V_ID)
+    # 收集所有 (INFO_TIME, ID)
     all_keys = set()
     all_keys.update(idx.keys(), summ.keys(), dyn.keys(), struc.keys())
 
     grouped = defaultdict(list)
 
-    for info_time, v_id in sorted(all_keys):
-        if not info_time or not v_id:
+    for info_time, key in sorted(all_keys):
+        if not info_time or not key:
             continue
 
         year = minguo_to_ad(info_time)
 
-        rec_index = idx.get((info_time, v_id))
-        rec_summary = summ.get((info_time, v_id))
-        rec_dyn = dyn.get((info_time, v_id))
-        rec_struc = struc.get((info_time, v_id))
+        rec_index = idx.get((info_time, key))
+        rec_summary = summ.get((info_time, key))
+        rec_dyn = dyn.get((info_time, key))
+        rec_struc = struc.get((info_time, key))
 
-        township_code = v_id.split("-")[0] if "-" in v_id else "-"
-        county_code = township_code[:5] if township_code not in ("", "-") else "-"
+        if scale == "village":
+            v_id = key
+            township_code = v_id.split("-")[0] if "-" in v_id else "-"
+            county_code = 10007
 
-        county_name = "彰化縣"
-        township_name = "芳苑鄉"
-        village_name = VILLAGE_NAME_MAPPING.get(v_id)
+            county_name = "彰化縣"
+            township_name = "芳苑鄉"
+            village_name = VILLAGE_NAME_MAPPING.get(v_id)
 
-        # 人口增加率 = 自然增加率 + 社會增加率
+        elif scale == "town":
+            town_id = key
+            township_code = town_id
+            county_code = 10007
+
+            county_name = "彰化縣"
+            township_name = TOWN_NAME_MAPPING.get(town_id)
+            village_name = "-"  # 鄉鎮層級就不顯示村里
+
+        # dynamics 加總：人口增加率 = 自然增加率 + 社會增加率（可得時）
         nat_inc = to_float_or_none(get(rec_dyn, "NATURE_INC_PER"))
         soc_inc = to_float_or_none(get(rec_dyn, "SOCIAL_INC_PER"))
         if nat_inc is not None and soc_inc is not None:
@@ -406,8 +454,8 @@ def convert_population_data(
             "縣市名稱": as_str_or_dash(county_name),
             "鄉鎮市區代碼": as_str_or_dash(township_code),
             "鄉鎮市區名稱": as_str_or_dash(township_name),
-            "村里代碼": as_str_or_dash(v_id),
-            "村里名稱": as_str_or_dash(village_name),
+            "村里代碼": as_str_or_dash(v_id if scale == "village" else "-"),
+            "村里名稱": as_str_or_dash(village_name if scale == "village" else "-"),
             # summary
             "戶數": as_float_str_or_dash(get(rec_summary, "H_CNT"), decimals=0),
             "人口數": as_float_str_or_dash(get(rec_summary, "P_CNT"), decimals=0),

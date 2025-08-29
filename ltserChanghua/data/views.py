@@ -915,7 +915,7 @@ def social_economic_population_data(request):
         for qt in query_types
     ]
 
-    result = convert_population_data(*population_data_sets)
+    result = convert_population_data(*population_data_sets, scale)
 
     if len(result) > 0:
         # 將結果用 redis cache 起來，保存期限為 7 天
