@@ -893,17 +893,18 @@ class IncreaseResearchesIssueHitsAPIView(APIView):
 
 @api_view(["GET"])
 def social_economic_population_data(request):
-    cached_data = cache.get("social_economic_population_data")
-
-    if cached_data:  # 如果 Redis 中已有資料直接回傳
-        return Response(json.loads(cached_data), status=status.HTTP_200_OK)
-
     scale = request.GET.get("scale", "village")
 
     if scale not in ["village", "town"]:
         return Response(
             {"error": "Invalid scale. Use 'village' or 'town'."}, status=400
         )
+
+    cache_key = f"social_economic_population_data_{scale}"
+    cached_data = cache.get(cache_key)
+
+    if cached_data:  # 如果 Redis 中已有資料直接回傳
+        return Response(json.loads(cached_data), status=status.HTTP_200_OK)
 
     query_types = ["index", "summary", "dynamics_index", "structure"]
 
@@ -919,7 +920,7 @@ def social_economic_population_data(request):
 
     if len(result) > 0:
         # 將結果用 redis cache 起來，保存期限為 7 天
-        cache.set("social_economic_population_data", json.dumps(result), timeout=604800)
+        cache.set(cache_key, json.dumps(result), timeout=604800)
 
     return Response(result)
 
