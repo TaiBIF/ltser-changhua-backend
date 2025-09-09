@@ -934,3 +934,82 @@ def village_pyramid_data(request):
     result = covert_pyrimad_data(village_population_pyramid)
 
     return Response(result)
+
+
+@api_view(["GET"])
+def town_industry_data(request):
+    latest_time = get_latest_time_list("town", query_type="farming")
+    farming_data = get_industry_data("town", latest_time, query_type="farming")
+
+    latest_time = get_latest_time_list("town", query_type="fishing")
+    fishing_data = get_industry_data("town", latest_time, query_type="fishing")
+
+    latest_time = get_latest_time_list("town", query_type="poultry")
+    poultry_data = get_industry_data("town", latest_time, query_type="poultry")
+
+    latest_time = get_latest_time_list("town", query_type="fruit")
+    fruit_data = get_industry_data("town", latest_time, query_type="fruit")
+
+    latest_time = get_latest_time_list("town", query_type="crop")
+    crop_data = get_industry_data("town", latest_time, query_type="crop")
+
+    latest_time = get_latest_time_list("town", query_type="special_crop")
+    special_crop_data = get_industry_data(
+        "town", latest_time, query_type="special_crop"
+    )
+
+    latest_time = get_latest_time_list("town", query_type="vege")
+    vege_data = get_industry_data("town", latest_time, query_type="vege")
+
+    latest_time = get_latest_time_list("town", query_type="rice")
+    rice_data = get_industry_data("town", latest_time, query_type="rice")
+
+    latest_time = get_latest_time_list("town", query_type="livestock")
+    livestock_data = get_industry_data("town", latest_time, query_type="livestock")
+
+    latest_time = get_latest_time_list("town", query_type="industry")
+    industry_data = get_industry_data("town", latest_time, query_type="industry")
+
+    industry_map_data = convert_industry_map_data(
+        farming_data,
+        fishing_data,
+        poultry_data,
+        fruit_data,
+        crop_data,
+        special_crop_data,
+        rice_data,
+        livestock_data,
+        vege_data,
+    )
+
+    agriculture_data = convert_agriculture_data(
+        farming_data,
+        fruit_data,
+        crop_data,
+        special_crop_data,
+        rice_data,
+        vege_data,
+    )
+
+    industry_and_commerce_data = covert_to_dict_format_data(
+        industry_data, INDUSTRY_KEY_MAPPING
+    )
+
+    town_fishing_data = covert_to_dict_format_data(fishing_data, FISHING_KEY_MAPPING)
+
+    town_poultry_data = covert_to_dict_format_data(poultry_data, POULTRY_KEY_MAPPING)
+
+    town_livestock_data = covert_to_dict_format_data(
+        livestock_data, LIVESTOCK_KEY_MAPPING
+    )
+
+    return Response(
+        {
+            "townEconomyAndIndustryMapData": industry_map_data,
+            "townIndustryAndCommerceData": industry_and_commerce_data,
+            "townAgricultureData": agriculture_data,
+            "townFisheryData": town_fishing_data,
+            "townAnimalHusbandaryPoultryData": town_poultry_data,
+            "townAnimalHusbandaryLivestockData": town_livestock_data,
+        }
+    )

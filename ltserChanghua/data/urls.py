@@ -26,6 +26,7 @@ from .views import (
     IncreaseResearchesIssueHitsAPIView,
     social_economic_population_data,
     village_pyramid_data,
+    town_industry_data,
 )
 
 urlpatterns = [
@@ -126,5 +127,10 @@ urlpatterns = [
         "village-pyramid-data/",
         village_pyramid_data,
         name="village-pyramid-data",
+    ),
+    path(
+        "town-industry-data/",
+        town_industry_data,
+        name="town-industry-data",
     ),
 ]
