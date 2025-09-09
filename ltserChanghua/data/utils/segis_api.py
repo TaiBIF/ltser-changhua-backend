@@ -741,6 +741,7 @@ def convert_industry_map_data(
     rice_data,
     livestock_data,
     vege_data,
+    industry_data,
 ):
 
     # ---- helpers ----
@@ -794,6 +795,7 @@ def convert_industry_map_data(
     rice = {key_tuple(r): r for r in (rice_data or [])}
     livestock = {key_tuple(r): r for r in (livestock_data or [])}
     vege = {key_tuple(r): r for r in (vege_data or [])}
+    industry = {key_tuple(r): r for r in (industry_data or [])}
 
     # 收集所有 (INFO_TIME, ID)
     all_keys = set()
@@ -807,6 +809,7 @@ def convert_industry_map_data(
         rice.keys(),
         livestock.keys(),
         vege.keys(),
+        industry.keys(),
     )
 
     grouped = defaultdict(list)
@@ -826,6 +829,7 @@ def convert_industry_map_data(
         rec_rice = rice.get((info_time, key))
         rec_livestock = livestock.get((info_time, key))
         rec_vege = vege.get((info_time, key))
+        rec_industry = industry.get((info_time, key))
 
         town_id = key
         township_code = town_id
@@ -889,6 +893,9 @@ def convert_industry_map_data(
             "家禽數(蛋雞、肉雞、蛋鴨、肉鴨、鵝、火雞)-千隻": as_float_str_or_dash(
                 poultry_count, decimals=2
             ),
+            "工商業總家數": as_float_str_or_dash(
+                get(rec_industry, "C_CNT"), decimals=0
+            ),
         }
 
         grouped[year].append(item)
@@ -898,7 +905,7 @@ def convert_industry_map_data(
     return result
 
 
-def covert_to_dict_format_data(data, mapping):
+def convert_to_dict_format_data(data, mapping):
     """將 list 中的每個 dict key 依照 mapping 轉換"""
 
     def as_float_str_or_dash(value, decimals=0):
