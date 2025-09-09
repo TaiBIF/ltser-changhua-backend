@@ -937,87 +937,173 @@ def village_pyramid_data(request):
     return Response(result)
 
 
+# @api_view(["GET"])
+# def town_industry_data(request):
+#     query_types = {
+#         "farming": None,
+#         "fishing": None,
+#         "poultry": None,
+#         "fruit": None,
+#         "crop": None,
+#         "special_crop": None,
+#         "vege": None,
+#         "rice": None,
+#         "livestock": None,
+#         "industry": None,
+#     }
+
+#     try:
+#         latest_map = {
+#             qt: get_latest_time_list("town", query_type=qt) for qt in query_types.keys()
+#         }
+#     except Exception as e:
+#         # 若最新時間查詢就失敗，直接回應 500
+#         return Response({"error": f"get_latest_time_list failed: {str(e)}"}, status=500)
+
+#     # 3) 用 latest_map 當作 cache key
+#     version_str = json.dumps(latest_map, sort_keys=True, ensure_ascii=False)
+#     version_hash = hashlib.md5(version_str.encode("utf-8")).hexdigest()
+#     cache_key = f"town_industry_data:{version_hash}"
+
+#     cached = cache.get(cache_key)
+#     if cached:
+#         return Response(cached, status=status.HTTP_200_OK)
+
+#     try:
+#         data_map = {
+#             qt: get_industry_data("town", latest_map[qt], query_type=qt)
+#             for qt in query_types.keys()
+#         }
+#     except Exception as e:
+#         return Response({"error": f"get_industry_data failed: {str(e)}"}, status=500)
+
+#     # 組裝各區塊資料
+#     try:
+#         industry_map_data = convert_industry_map_data(
+#             data_map["farming"],
+#             data_map["fishing"],
+#             data_map["poultry"],
+#             data_map["fruit"],
+#             data_map["crop"],
+#             data_map["special_crop"],
+#             data_map["rice"],
+#             data_map["livestock"],
+#             data_map["vege"],
+#             data_map["industry"],
+#         )
+
+#         agriculture_data = convert_agriculture_data(
+#             data_map["farming"],
+#             data_map["fruit"],
+#             data_map["crop"],
+#             data_map["special_crop"],
+#             data_map["rice"],
+#             data_map["vege"],
+#         )
+
+#         industry_and_commerce_data = convert_to_dict_format_data(
+#             data_map["industry"], INDUSTRY_KEY_MAPPING
+#         )
+
+#         town_fishing_data = convert_to_dict_format_data(
+#             data_map["fishing"], FISHING_KEY_MAPPING
+#         )
+
+#         town_poultry_data = convert_to_dict_format_data(
+#             data_map["poultry"], POULTRY_KEY_MAPPING
+#         )
+
+#         town_livestock_data = convert_to_dict_format_data(
+#             data_map["livestock"], LIVESTOCK_KEY_MAPPING
+#         )
+
+#         result = {
+#             "townEconomyAndIndustryMapData": industry_map_data,
+#             "townIndustryAndCommerceData": industry_and_commerce_data,
+#             "townAgricultureData": agriculture_data,
+#             "townFisheryData": town_fishing_data,
+#             "townAnimalHusbandaryPoultryData": town_poultry_data,
+#             "townAnimalHusbandaryLivestockData": town_livestock_data,
+#         }
+#     except Exception as e:
+#         return Response({"error": f"convert data failed: {str(e)}"}, status=500)
+
+#     # 寫入快取
+#     cache.set(cache_key, result, timeout=60 * 60 * 24 * 7)  # 7 天
+
+#     return Response(result, status=status.HTTP_200_OK)
+
+
 @api_view(["GET"])
 def town_industry_data(request):
-    query_types = {
-        "farming": None,
-        "fishing": None,
-        "poultry": None,
-        "fruit": None,
-        "crop": None,
-        "special_crop": None,
-        "vege": None,
-        "rice": None,
-        "livestock": None,
-        "industry": None,
-    }
+    latest_time = get_latest_time_list("town", query_type="farming")
+    farming_data = get_industry_data("town", latest_time, query_type="farming")
 
-    try:
-        latest_map = {
-            qt: get_latest_time_list("town", query_type=qt) for qt in query_types.keys()
-        }
-    except Exception as e:
-        # 若最新時間查詢就失敗，直接回應 500
-        return Response({"error": f"get_latest_time_list failed: {str(e)}"}, status=500)
+    latest_time = get_latest_time_list("town", query_type="fishing")
+    fishing_data = get_industry_data("town", latest_time, query_type="fishing")
 
-    # 3) 用 latest_map 當作 cache key
-    version_str = json.dumps(latest_map, sort_keys=True, ensure_ascii=False)
-    version_hash = hashlib.md5(version_str.encode("utf-8")).hexdigest()
-    cache_key = f"town_industry_data:{version_hash}"
+    latest_time = get_latest_time_list("town", query_type="poultry")
+    poultry_data = get_industry_data("town", latest_time, query_type="poultry")
 
-    cached = cache.get(cache_key)
-    if cached:
-        return Response(cached, status=status.HTTP_200_OK)
+    latest_time = get_latest_time_list("town", query_type="fruit")
+    fruit_data = get_industry_data("town", latest_time, query_type="fruit")
 
-    try:
-        data_map = {
-            qt: get_industry_data("town", latest_map[qt], query_type=qt)
-            for qt in query_types.keys()
-        }
-    except Exception as e:
-        return Response({"error": f"get_industry_data failed: {str(e)}"}, status=500)
+    latest_time = get_latest_time_list("town", query_type="crop")
+    crop_data = get_industry_data("town", latest_time, query_type="crop")
 
-    # 組裝各區塊資料
-    try:
-        industry_map_data = convert_industry_map_data(
-            data_map["farming"],
-            data_map["fishing"],
-            data_map["poultry"],
-            data_map["fruit"],
-            data_map["crop"],
-            data_map["special_crop"],
-            data_map["rice"],
-            data_map["livestock"],
-            data_map["vege"],
-            data_map["industry"],
-        )
+    latest_time = get_latest_time_list("town", query_type="special_crop")
+    special_crop_data = get_industry_data(
+        "town", latest_time, query_type="special_crop"
+    )
 
-        agriculture_data = convert_agriculture_data(
-            data_map["farming"],
-            data_map["fruit"],
-            data_map["crop"],
-            data_map["special_crop"],
-            data_map["rice"],
-            data_map["vege"],
-        )
+    latest_time = get_latest_time_list("town", query_type="vege")
+    vege_data = get_industry_data("town", latest_time, query_type="vege")
 
-        industry_and_commerce_data = convert_to_dict_format_data(
-            data_map["industry"], INDUSTRY_KEY_MAPPING
-        )
+    latest_time = get_latest_time_list("town", query_type="rice")
+    rice_data = get_industry_data("town", latest_time, query_type="rice")
 
-        town_fishing_data = convert_to_dict_format_data(
-            data_map["fishing"], FISHING_KEY_MAPPING
-        )
+    latest_time = get_latest_time_list("town", query_type="livestock")
+    livestock_data = get_industry_data("town", latest_time, query_type="livestock")
 
-        town_poultry_data = convert_to_dict_format_data(
-            data_map["poultry"], POULTRY_KEY_MAPPING
-        )
+    latest_time = get_latest_time_list("town", query_type="industry")
+    industry_data = get_industry_data("town", latest_time, query_type="industry")
 
-        town_livestock_data = convert_to_dict_format_data(
-            data_map["livestock"], LIVESTOCK_KEY_MAPPING
-        )
+    industry_map_data = convert_industry_map_data(
+        farming_data,
+        fishing_data,
+        poultry_data,
+        fruit_data,
+        crop_data,
+        special_crop_data,
+        rice_data,
+        livestock_data,
+        vege_data,
+        industry_data,
+    )
 
-        result = {
+    agriculture_data = convert_agriculture_data(
+        farming_data,
+        fruit_data,
+        crop_data,
+        special_crop_data,
+        rice_data,
+        vege_data,
+    )
+
+    industry_and_commerce_data = convert_to_dict_format_data(
+        industry_data, INDUSTRY_KEY_MAPPING
+    )
+
+    town_fishing_data = convert_to_dict_format_data(fishing_data, FISHING_KEY_MAPPING)
+
+    town_poultry_data = convert_to_dict_format_data(poultry_data, POULTRY_KEY_MAPPING)
+
+    town_livestock_data = convert_to_dict_format_data(
+        livestock_data, LIVESTOCK_KEY_MAPPING
+    )
+
+    return Response(
+        {
             "townEconomyAndIndustryMapData": industry_map_data,
             "townIndustryAndCommerceData": industry_and_commerce_data,
             "townAgricultureData": agriculture_data,
@@ -1025,10 +1111,4 @@ def town_industry_data(request):
             "townAnimalHusbandaryPoultryData": town_poultry_data,
             "townAnimalHusbandaryLivestockData": town_livestock_data,
         }
-    except Exception as e:
-        return Response({"error": f"convert data failed: {str(e)}"}, status=500)
-
-    # 寫入快取
-    cache.set(cache_key, result, timeout=60 * 60 * 24 * 7)  # 7 天
-
-    return Response(result, status=status.HTTP_200_OK)
+    )
