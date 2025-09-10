@@ -22,8 +22,9 @@ from .models import (
     Staff,
     ResearchesIssue,
     OysterFarmingStats,
+    FisheryFarmingStats,
 )
-from .resources import OysterFarmingStatsResource
+from .resources import OysterFarmingStatsResource, FisheryFarmingStatsResource
 from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
 from django.template.defaultfilters import truncatechars
@@ -544,6 +545,133 @@ class OysterFarmingStatsAdmin(ImportExportModelAdmin):
     )
 
 
+class FisheryFarmingStatsAdmin(ImportExportModelAdmin):
+    resource_class = FisheryFarmingStatsResource
+    list_display = ("id", "year")
+    ordering = ("year",)
+
+    fieldsets = (
+        ("基本資訊", {"fields": ("year",)}),
+        (
+            "文蛤",
+            {
+                "fields": (
+                    "hard_clam_households_total",
+                    "hard_clam_area_hectare",
+                    "hard_clam_stocking_in_pond",
+                    "hard_clam_stocking_new",
+                    "hard_clam_hatchery_households",
+                    "hard_clam_farmer_households",
+                )
+            },
+        ),
+        (
+            "烏魚",
+            {
+                "fields": (
+                    "mullet_households_total",
+                    "mullet_area_hectare",
+                    "mullet_stocking_in_pond",
+                    "mullet_stocking_new",
+                    "mullet_hatchery_households",
+                    "mullet_farmer_households",
+                )
+            },
+        ),
+        (
+            "虱目魚",
+            {
+                "fields": (
+                    "milkfish_households_total",
+                    "milkfish_area_hectare",
+                    "milkfish_stocking_in_pond",
+                    "milkfish_stocking_new",
+                    "milkfish_hatchery_households",
+                    "milkfish_farmer_households",
+                )
+            },
+        ),
+        (
+            "蜆",
+            {
+                "fields": (
+                    "asiatic_clam_households_total",
+                    "asiatic_clam_area_hectare",
+                    "asiatic_clam_stocking_in_pond",
+                    "asiatic_clam_stocking_new",
+                    "asiatic_clam_hatchery_households",
+                    "asiatic_clam_farmer_households",
+                )
+            },
+        ),
+        (
+            "白蝦",
+            {
+                "fields": (
+                    "white_shrimp_households_total",
+                    "white_shrimp_area_hectare",
+                    "white_shrimp_stocking_in_pond",
+                    "white_shrimp_stocking_new",
+                    "white_shrimp_hatchery_households",
+                    "white_shrimp_farmer_households",
+                )
+            },
+        ),
+        (
+            "吳郭魚",
+            {
+                "fields": (
+                    "tilapia_households_total",
+                    "tilapia_area_hectare",
+                    "tilapia_stocking_in_pond",
+                    "tilapia_stocking_new",
+                    "tilapia_hatchery_households",
+                    "tilapia_farmer_households",
+                )
+            },
+        ),
+        (
+            "鰻魚",
+            {
+                "fields": (
+                    "eel_households_total",
+                    "eel_area_hectare",
+                    "eel_stocking_in_pond",
+                    "eel_stocking_new",
+                    "eel_hatchery_households",
+                    "eel_farmer_households",
+                )
+            },
+        ),
+        (
+            "日本黑蜆",
+            {
+                "fields": (
+                    "yamato_clam_households_total",
+                    "yamato_clam_area_hectare",
+                    "yamato_clam_stocking_in_pond",
+                    "yamato_clam_stocking_new",
+                    "yamato_clam_hatchery_households",
+                    "yamato_clam_farmer_households",
+                )
+            },
+        ),
+        (
+            "西施貝",
+            {
+                "fields": (
+                    "purple_clam_households_total",
+                    "purple_clam_area_hectare",
+                    "purple_clam_stocking_in_pond",
+                    "purple_clam_stocking_new",
+                    "purple_clam_hatchery_households",
+                    "purple_clam_farmer_households",
+                )
+            },
+        ),
+    )
+
+
 admin.site.register(HomepagePhoto, HomepagePhotoAdmin)
 admin.site.register(LatestEventTag, LatestEventTagAdmin)
 admin.site.register(LatestEvent, LatestEventAdmin)
@@ -566,3 +694,4 @@ admin.site.register(BenthicOrganismData, BenthicOrganismDataAdmin)
 admin.site.register(Staff, StaffAdmin)
 admin.site.register(ResearchesIssue, ResearchesIssueAdmin)
 admin.site.register(OysterFarmingStats, OysterFarmingStatsAdmin)
+admin.site.register(FisheryFarmingStats, FisheryFarmingStatsAdmin)

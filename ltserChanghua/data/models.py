@@ -545,3 +545,195 @@ class OysterFarmingStats(models.Model):
         db_table = "OysterFarmingStats"
         verbose_name = "牡蠣放養統計"
         verbose_name_plural = "牡蠣放養統計"
+
+
+class FisheryFarmingStats(models.Model):
+    year = models.CharField("年份", max_length=10, blank=True, null=True)
+
+    # 文蛤
+    hard_clam_households_total = models.CharField(
+        "文蛤 - 養殖戶數", max_length=32, blank=True, null=True
+    )
+    hard_clam_area_hectare = models.CharField(
+        "文蛤 - 養殖面積（公頃）", max_length=64, blank=True, null=True
+    )
+    hard_clam_stocking_in_pond = models.CharField(
+        "文蛤 - 在池-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    hard_clam_stocking_new = models.CharField(
+        "文蛤 - 新放養-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    hard_clam_hatchery_households = models.CharField(
+        "文蛤 - 魚苗戶", max_length=32, blank=True, null=True
+    )
+    hard_clam_farmer_households = models.CharField(
+        "文蛤 - 養殖戶", max_length=32, blank=True, null=True
+    )
+
+    # 烏魚
+    mullet_households_total = models.CharField(
+        "烏魚 - 養殖戶數", max_length=32, blank=True, null=True
+    )
+    mullet_area_hectare = models.CharField(
+        "烏魚 - 養殖面積（公頃）", max_length=64, blank=True, null=True
+    )
+    mullet_stocking_in_pond = models.CharField(
+        "烏魚 - 在池-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    mullet_stocking_new = models.CharField(
+        "烏魚 - 新放養-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    mullet_hatchery_households = models.CharField(
+        "烏魚 - 魚苗戶", max_length=32, blank=True, null=True
+    )
+    mullet_farmer_households = models.CharField(
+        "烏魚 - 養殖戶", max_length=32, blank=True, null=True
+    )
+
+    # 虱目魚
+    milkfish_households_total = models.CharField(
+        "虱目魚 - 養殖戶數", max_length=32, blank=True, null=True
+    )
+    milkfish_area_hectare = models.CharField(
+        "虱目魚 - 養殖面積（公頃）", max_length=64, blank=True, null=True
+    )
+    milkfish_stocking_in_pond = models.CharField(
+        "虱目魚 - 在池-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    milkfish_stocking_new = models.CharField(
+        "虱目魚 - 新放養-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    milkfish_hatchery_households = models.CharField(
+        "虱目魚 - 魚苗戶", max_length=32, blank=True, null=True
+    )
+    milkfish_farmer_households = models.CharField(
+        "虱目魚 - 養殖戶", max_length=32, blank=True, null=True
+    )
+
+    # 蜆
+    asiatic_clam_households_total = models.CharField(
+        "蜆 - 養殖戶數", max_length=32, blank=True, null=True
+    )
+    asiatic_clam_area_hectare = models.CharField(
+        "蜆 - 養殖面積（公頃）", max_length=64, blank=True, null=True
+    )
+    asiatic_clam_stocking_in_pond = models.CharField(
+        "蜆 - 在池-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    asiatic_clam_stocking_new = models.CharField(
+        "蜆 - 新放養-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    asiatic_clam_hatchery_households = models.CharField(
+        "蜆 - 魚苗戶", max_length=32, blank=True, null=True
+    )
+    asiatic_clam_farmer_households = models.CharField(
+        "蜆 - 養殖戶", max_length=32, blank=True, null=True
+    )
+
+    # 白蝦
+    white_shrimp_households_total = models.CharField(
+        "白蝦 - 養殖戶數", max_length=32, blank=True, null=True
+    )
+    white_shrimp_area_hectare = models.CharField(
+        "白蝦 - 養殖面積（公頃）", max_length=64, blank=True, null=True
+    )
+    white_shrimp_stocking_in_pond = models.CharField(
+        "白蝦 - 在池-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    white_shrimp_stocking_new = models.CharField(
+        "白蝦 - 新放養-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    white_shrimp_hatchery_households = models.CharField(
+        "白蝦 - 魚苗戶", max_length=32, blank=True, null=True
+    )
+    white_shrimp_farmer_households = models.CharField(
+        "白蝦 - 養殖戶", max_length=32, blank=True, null=True
+    )
+
+    # 吳郭魚
+    tilapia_households_total = models.CharField(
+        "吳郭魚 - 養殖戶數", max_length=32, blank=True, null=True
+    )
+    tilapia_area_hectare = models.CharField(
+        "吳郭魚 - 養殖面積（公頃）", max_length=64, blank=True, null=True
+    )
+    tilapia_stocking_in_pond = models.CharField(
+        "吳郭魚 - 在池-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    tilapia_stocking_new = models.CharField(
+        "吳郭魚 - 新放養-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    tilapia_hatchery_households = models.CharField(
+        "吳郭魚 - 魚苗戶", max_length=32, blank=True, null=True
+    )
+    tilapia_farmer_households = models.CharField(
+        "吳郭魚 - 養殖戶", max_length=32, blank=True, null=True
+    )
+
+    # 鰻魚
+    eel_households_total = models.CharField(
+        "鰻魚 - 養殖戶數", max_length=32, blank=True, null=True
+    )
+    eel_area_hectare = models.CharField(
+        "鰻魚 - 養殖面積（公頃）", max_length=64, blank=True, null=True
+    )
+    eel_stocking_in_pond = models.CharField(
+        "鰻魚 - 在池-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    eel_stocking_new = models.CharField(
+        "鰻魚 - 新放養-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    eel_hatchery_households = models.CharField(
+        "鰻魚 - 魚苗戶", max_length=32, blank=True, null=True
+    )
+    eel_farmer_households = models.CharField(
+        "鰻魚 - 養殖戶", max_length=32, blank=True, null=True
+    )
+
+    # 日本黑蜆
+    yamato_clam_households_total = models.CharField(
+        "日本黑蜆 - 養殖戶數", max_length=32, blank=True, null=True
+    )
+    yamato_clam_area_hectare = models.CharField(
+        "日本黑蜆 - 養殖面積（公頃）", max_length=64, blank=True, null=True
+    )
+    yamato_clam_stocking_in_pond = models.CharField(
+        "日本黑蜆 - 在池-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    yamato_clam_stocking_new = models.CharField(
+        "日本黑蜆 - 新放養-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    yamato_clam_hatchery_households = models.CharField(
+        "日本黑蜆 - 魚苗戶", max_length=32, blank=True, null=True
+    )
+    yamato_clam_farmer_households = models.CharField(
+        "日本黑蜆 - 養殖戶", max_length=32, blank=True, null=True
+    )
+
+    # 西施貝
+    purple_clam_households_total = models.CharField(
+        "西施貝 - 養殖戶數", max_length=32, blank=True, null=True
+    )
+    purple_clam_area_hectare = models.CharField(
+        "西施貝 - 養殖面積（公頃）", max_length=64, blank=True, null=True
+    )
+    purple_clam_stocking_in_pond = models.CharField(
+        "西施貝 - 在池-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    purple_clam_stocking_new = models.CharField(
+        "西施貝 - 新放養-放養量（尾、粒、隻）", max_length=64, blank=True, null=True
+    )
+    purple_clam_hatchery_households = models.CharField(
+        "西施貝 - 魚苗戶", max_length=32, blank=True, null=True
+    )
+    purple_clam_farmer_households = models.CharField(
+        "西施貝 - 養殖戶", max_length=32, blank=True, null=True
+    )
+
+    def __str__(self):
+        return f"{self.year} 年份資料"
+
+    class Meta:
+        db_table = "FisheryFarmingStats"
+        verbose_name = "養殖放養統計"
+        verbose_name_plural = "養殖放養統計"

@@ -1,6 +1,6 @@
 # resources.py
 from import_export import resources
-from .models import OysterFarmingStats
+from .models import OysterFarmingStats, FisheryFarmingStats
 
 
 class OysterFarmingStatsResource(resources.ModelResource):
@@ -42,5 +42,69 @@ class OysterFarmingStatsResource(resources.ModelResource):
             "total_farmers_nation",
             "total_farmers_changhua",
             "total_farmers_fangyuan",
+        )
+        export_order = fields
+
+
+class FisheryFarmingStatsResource(resources.ModelResource):
+    class Meta:
+        model = FisheryFarmingStats
+        fields = (
+            "id",
+            "year",
+            "hard_clam_households_total",
+            "hard_clam_area_hectare",
+            "hard_clam_stocking_in_pond",
+            "hard_clam_stocking_new",
+            "hard_clam_hatchery_households",
+            "hard_clam_farmer_households",
+            "mullet_households_total",
+            "mullet_area_hectare",
+            "mullet_stocking_in_pond",
+            "mullet_stocking_new",
+            "mullet_hatchery_households",
+            "mullet_farmer_households",
+            "milkfish_households_total",
+            "milkfish_area_hectare",
+            "milkfish_stocking_in_pond",
+            "milkfish_stocking_new",
+            "milkfish_hatchery_households",
+            "milkfish_farmer_households",
+            "asiatic_clam_households_total",
+            "asiatic_clam_area_hectare",
+            "asiatic_clam_stocking_in_pond",
+            "asiatic_clam_stocking_new",
+            "asiatic_clam_hatchery_households",
+            "asiatic_clam_farmer_households",
+            "white_shrimp_households_total",
+            "white_shrimp_area_hectare",
+            "white_shrimp_stocking_in_pond",
+            "white_shrimp_stocking_new",
+            "white_shrimp_hatchery_households",
+            "white_shrimp_farmer_households",
+            "tilapia_households_total",
+            "tilapia_area_hectare",
+            "tilapia_stocking_in_pond",
+            "tilapia_stocking_new",
+            "tilapia_hatchery_households",
+            "tilapia_farmer_households",
+            "eel_households_total",
+            "eel_area_hectare",
+            "eel_stocking_in_pond",
+            "eel_stocking_new",
+            "eel_hatchery_households",
+            "eel_farmer_households",
+            "yamato_clam_households_total",
+            "yamato_clam_area_hectare",
+            "yamato_clam_stocking_in_pond",
+            "yamato_clam_stocking_new",
+            "yamato_clam_hatchery_households",
+            "yamato_clam_farmer_households",
+            "purple_clam_households_total",
+            "purple_clam_area_hectare",
+            "purple_clam_stocking_in_pond",
+            "purple_clam_stocking_new",
+            "purple_clam_hatchery_households",
+            "purple_clam_farmer_households",
         )
         export_order = fields

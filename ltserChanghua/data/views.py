@@ -25,6 +25,7 @@ from .models import (
     InterviewTag1,
     ResearchesIssue,
     OysterFarmingStats,
+    FisheryFarmingStats,
 )
 from .serializers import (
     HomepagePhotoSerializer,
@@ -48,6 +49,7 @@ from .serializers import (
     InterviewTag1Serializer,
     ResearchesIssueSerializer,
     OysterFarmingStatsSerializer,
+    FisheryFarmingStatsSerializer,
 )
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -1140,3 +1142,65 @@ class OysterFarmingStatsFormattedView(APIView):
                 "townOysterData": changhua_result,
             }
         )
+
+
+class FisheryFarmingStatsFormattedView(APIView):
+
+    # 物種對應名稱
+    SPECIES_PREFIX = {
+        "文蛤": "hard_clam",
+        "烏魚": "mullet",
+        "虱目魚": "milkfish",
+        "蜆": "asiatic_clam",
+        "白蝦": "white_shrimp",
+        "吳郭魚": "tilapia",
+        "鰻魚": "eel",
+        "日本黑蜆": "yamato_clam",
+        "西施貝": "purple_clam",
+    }
+
+    # 回傳物件名稱
+    OUTPUT_KEYS = {
+        "文蛤": "villageClamsData",
+        "烏魚": "villageMulletData",
+        "虱目魚": "villageMilkfishData",
+        "蜆": "villageClamData",
+        "白蝦": "villageWhiteShrimpData",
+        "吳郭魚": "villageTilapiaData",
+        "鰻魚": "villageEelData",
+        "日本黑蜆": "villageYamatoClamData",
+        "西施貝": "villagePurpleClamData",
+    }
+
+    # 中英欄位對應
+    COL_SUFFIX = {
+        "養殖戶數": "households_total",
+        "養殖面積（公頃）": "area_hectare",
+        "在池-放養量（尾、粒、隻）": "stocking_in_pond",
+        "新放養-放養量（尾、粒、隻）": "stocking_new",
+        "魚苗戶": "hatchery_households",
+        "養殖戶": "farmer_households",
+    }
+
+    def build_species_row(self, row: dict, species_label: str, prefix: str) -> dict:
+        """把一筆 serializer row 轉成該物種的輸出物件。"""
+        out = {species_label: row.get("year")}
+        for zh_label, suffix in self.COL_SUFFIX.items():
+            out[zh_label] = row.get(f"{prefix}_{suffix}")
+        return out
+
+    def get(self, request):
+        queryset = FisheryFarmingStats.objects.all().order_by("year")
+        serializer = FisheryFarmingStatsSerializer(queryset, many=True)
+        data = serializer.data
+
+        result = {out_key: [] for out_key in self.OUTPUT_KEYS.values()}
+
+        for row in data:
+            for species_label, prefix in self.SPECIES_PREFIX.items():
+                out_key = self.OUTPUT_KEYS[species_label]
+                result[out_key].append(
+                    self.build_species_row(row, species_label, prefix)
+                )
+
+        return Response(result)

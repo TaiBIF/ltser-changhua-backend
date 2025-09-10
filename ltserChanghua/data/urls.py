@@ -29,6 +29,7 @@ from .views import (
     town_industry_data,
     FangYuanOysterFarmingStatsFormattedView,
     OysterFarmingStatsFormattedView,
+    FisheryFarmingStatsFormattedView,
 )
 
 urlpatterns = [
@@ -144,5 +145,10 @@ urlpatterns = [
         "oyster-stats/",
         OysterFarmingStatsFormattedView.as_view(),
         name="oyster-stats",
+    ),
+    path(
+        "fishery-stats/",
+        FisheryFarmingStatsFormattedView.as_view(),
+        name="fishery-stats",
     ),
 ]
