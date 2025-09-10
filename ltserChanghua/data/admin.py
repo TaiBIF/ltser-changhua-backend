@@ -21,7 +21,9 @@ from .models import (
     CrabData,
     Staff,
     ResearchesIssue,
+    OysterFarmingStats,
 )
+from .resources import OysterFarmingStatsResource
 from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
 from django.template.defaultfilters import truncatechars
@@ -457,6 +459,91 @@ class ResearchesIssueAdmin(ImportExportModelAdmin):
     readonly_fields = ("hits",)
 
 
+class OysterFarmingStatsAdmin(ImportExportModelAdmin):
+    resource_class = OysterFarmingStatsResource
+    list_display = ("id", "year")
+    ordering = ("year",)
+
+    fieldsets = (
+        ("基本資訊", {"fields": ("year",)}),
+        (
+            "平掛式",
+            {
+                "fields": (
+                    "horizontal_facilities_nation",
+                    "horizontal_farmers_nation",
+                    "horizontal_facilities_changhua",
+                    "horizontal_farmers_changhua",
+                    "horizontal_facilities_fangyuan",
+                    "horizontal_farmers_fangyuan",
+                )
+            },
+        ),
+        (
+            "插篊式",
+            {
+                "fields": (
+                    "stake_facilities_nation",
+                    "stake_farmers_nation",
+                    "stake_facilities_changhua",
+                    "stake_farmers_changhua",
+                    "stake_facilities_fangyuan",
+                    "stake_farmers_fangyuan",
+                )
+            },
+        ),
+        (
+            "垂下式",
+            {
+                "fields": (
+                    "hanging_facilities_nation",
+                    "hanging_farmers_nation",
+                    "hanging_facilities_changhua",
+                    "hanging_farmers_changhua",
+                    "hanging_facilities_fangyuan",
+                    "hanging_farmers_fangyuan",
+                )
+            },
+        ),
+        (
+            "浮筏式",
+            {
+                "fields": (
+                    "raft_facilities_nation",
+                    "raft_farmers_nation",
+                    "raft_facilities_changhua",
+                    "raft_farmers_changhua",
+                    "raft_facilities_fangyuan",
+                    "raft_farmers_fangyuan",
+                )
+            },
+        ),
+        (
+            "延繩式",
+            {
+                "fields": (
+                    "longline_facilities_nation",
+                    "longline_farmers_nation",
+                    "longline_facilities_changhua",
+                    "longline_farmers_changhua",
+                    "longline_facilities_fangyuan",
+                    "longline_farmers_fangyuan",
+                )
+            },
+        ),
+        (
+            "申報（調查）總戶數",
+            {
+                "fields": (
+                    "total_farmers_nation",
+                    "total_farmers_changhua",
+                    "total_farmers_fangyuan",
+                )
+            },
+        ),
+    )
+
+
 admin.site.register(HomepagePhoto, HomepagePhotoAdmin)
 admin.site.register(LatestEventTag, LatestEventTagAdmin)
 admin.site.register(LatestEvent, LatestEventAdmin)
@@ -478,3 +565,4 @@ admin.site.register(WaterQualityManualData, WaterQualityManualDataAdmin)
 admin.site.register(BenthicOrganismData, BenthicOrganismDataAdmin)
 admin.site.register(Staff, StaffAdmin)
 admin.site.register(ResearchesIssue, ResearchesIssueAdmin)
+admin.site.register(OysterFarmingStats, OysterFarmingStatsAdmin)

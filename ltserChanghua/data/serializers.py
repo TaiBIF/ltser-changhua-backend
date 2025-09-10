@@ -20,6 +20,7 @@ from .models import (
     InterviewTag1,
     InterviewPeople,
     ResearchesIssue,
+    OysterFarmingStats,
 )
 import re
 from rest_framework import serializers
@@ -274,4 +275,10 @@ class StaffSerializer(serializers.ModelSerializer):
 class ResearchesIssueSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResearchesIssue
+        fields = "__all__"
+
+
+class OysterFarmingStatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OysterFarmingStats
         fields = "__all__"

@@ -27,6 +27,8 @@ from .views import (
     social_economic_population_data,
     village_pyramid_data,
     town_industry_data,
+    FangYuanOysterFarmingStatsFormattedView,
+    OysterFarmingStatsFormattedView,
 )
 
 urlpatterns = [
@@ -132,5 +134,15 @@ urlpatterns = [
         "town-industry-data/",
         town_industry_data,
         name="town-industry-data",
+    ),
+    path(
+        "oyster-stats/village/",
+        FangYuanOysterFarmingStatsFormattedView.as_view(),
+        name="village-oyster-stats",
+    ),
+    path(
+        "oyster-stats/",
+        OysterFarmingStatsFormattedView.as_view(),
+        name="oyster-stats",
     ),
 ]

@@ -442,3 +442,106 @@ class PopulationStats(models.Model):
         db_table = "PopulationStats"
         verbose_name = "人口統計"
         verbose_name_plural = "人口統計"
+
+
+class OysterFarmingStats(models.Model):
+    year = models.CharField("年份", max_length=10, blank=True, null=True)
+
+    # 平掛式
+    horizontal_facilities_nation = models.CharField(
+        "全國 - 平掛式設施(組)", max_length=20
+    )
+    horizontal_farmers_nation = models.CharField(
+        "全國 - 平掛式養殖（戶）", max_length=20
+    )
+    horizontal_facilities_fangyuan = models.CharField(
+        "芳苑鄉 - 平掛式設施(組)", max_length=20
+    )
+    horizontal_farmers_fangyuan = models.CharField(
+        "芳苑鄉 - 平掛式養殖（戶）", max_length=20
+    )
+    horizontal_facilities_changhua = models.CharField(
+        "彰化縣 - 平掛式設施(組)", max_length=20
+    )
+    horizontal_farmers_changhua = models.CharField(
+        "彰化縣 - 平掛式養殖（戶）", max_length=20
+    )
+
+    # 插篊式
+    stake_facilities_nation = models.CharField("全國 - 插篊式設施(組)", max_length=20)
+    stake_farmers_nation = models.CharField("全國 - 插篊式養殖（戶）", max_length=20)
+    stake_facilities_fangyuan = models.CharField(
+        "芳苑鄉 - 插篊式設施(組)", max_length=20
+    )
+    stake_farmers_fangyuan = models.CharField(
+        "芳苑鄉 - 插篊式養殖（戶）", max_length=20
+    )
+    stake_facilities_changhua = models.CharField(
+        "彰化縣 - 插篊式設施(組)", max_length=20
+    )
+    stake_farmers_changhua = models.CharField(
+        "彰化縣 - 插篊式養殖（戶）", max_length=20
+    )
+
+    # 垂下式
+    hanging_facilities_nation = models.CharField("全國 - 垂下式設施(棚)", max_length=20)
+    hanging_farmers_nation = models.CharField("全國 - 垂下式養殖（戶）", max_length=20)
+    hanging_facilities_fangyuan = models.CharField(
+        "芳苑鄉 - 垂下式設施(棚)", max_length=20
+    )
+    hanging_farmers_fangyuan = models.CharField(
+        "芳苑鄉 - 垂下式養殖（戶）", max_length=20
+    )
+    hanging_facilities_changhua = models.CharField(
+        "彰化縣 - 垂下式設施(棚)", max_length=20
+    )
+    hanging_farmers_changhua = models.CharField(
+        "彰化縣 - 垂下式養殖（戶）", max_length=20
+    )
+
+    # 浮筏式
+    raft_facilities_nation = models.CharField("全國 - 浮筏式設施(棚)", max_length=20)
+    raft_farmers_nation = models.CharField("全國 - 浮筏式養殖（戶）", max_length=20)
+    raft_facilities_fangyuan = models.CharField(
+        "芳苑鄉 - 浮筏式設施(棚)", max_length=20
+    )
+    raft_farmers_fangyuan = models.CharField("芳苑鄉 - 浮筏式養殖（戶）", max_length=20)
+    raft_facilities_changhua = models.CharField(
+        "彰化縣 - 浮筏式設施(棚)", max_length=20
+    )
+    raft_farmers_changhua = models.CharField("彰化縣 - 浮筏式養殖（戶）", max_length=20)
+
+    # 延繩式
+    longline_facilities_nation = models.CharField(
+        "全國 - 延繩式設施(組)", max_length=20
+    )
+    longline_farmers_nation = models.CharField("全國 - 延繩式養殖（戶）", max_length=20)
+    longline_facilities_fangyuan = models.CharField(
+        "芳苑鄉 - 延繩式設施(組)", max_length=20
+    )
+    longline_farmers_fangyuan = models.CharField(
+        "芳苑鄉 - 延繩式養殖（戶）", max_length=20
+    )
+    longline_facilities_changhua = models.CharField(
+        "彰化縣 - 延繩式設施(組)", max_length=20
+    )
+    longline_farmers_changhua = models.CharField(
+        "彰化縣 - 延繩式養殖（戶）", max_length=20
+    )
+
+    # 總戶數
+    total_farmers_nation = models.CharField("全國 - 申報（調查）總戶數", max_length=20)
+    total_farmers_fangyuan = models.CharField(
+        "芳苑鄉 - 申報（調查）總戶數", max_length=20
+    )
+    total_farmers_changhua = models.CharField(
+        "彰化縣 - 申報（調查）總戶數", max_length=20
+    )
+
+    def __str__(self):
+        return f"{self.year} 年份資料"
+
+    class Meta:
+        db_table = "OysterFarmingStats"
+        verbose_name = "牡蠣放養統計"
+        verbose_name_plural = "牡蠣放養統計"

@@ -24,6 +24,7 @@ from .models import (
     Staff,
     InterviewTag1,
     ResearchesIssue,
+    OysterFarmingStats,
 )
 from .serializers import (
     HomepagePhotoSerializer,
@@ -46,6 +47,7 @@ from .serializers import (
     InterviewStakeholderSerializer,
     InterviewTag1Serializer,
     ResearchesIssueSerializer,
+    OysterFarmingStatsSerializer,
 )
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -1044,3 +1046,97 @@ def town_industry_data(request):
     cache.set(cache_key, result, timeout=60 * 60 * 24 * 7)  # 7 天
 
     return Response(result, status=status.HTTP_200_OK)
+
+
+class FangYuanOysterFarmingStatsFormattedView(APIView):
+    def get(self, request):
+        queryset = OysterFarmingStats.objects.all().order_by("year")
+        serializer = OysterFarmingStatsSerializer(queryset, many=True)
+        data = serializer.data
+
+        # 轉換成指定格式
+        result = []
+
+        # 每年資料
+        for row in data:
+            result.append(
+                {
+                    "年份": row.get("year"),
+                    "設施（組）": row.get("horizontal_facilities_fangyuan"),
+                    "養殖（戶）": row.get("horizontal_farmers_fangyuan"),
+                }
+            )
+
+        return Response(result)
+
+
+class OysterFarmingStatsFormattedView(APIView):
+    def get(self, request):
+        queryset = OysterFarmingStats.objects.all().order_by("year")
+        serializer = OysterFarmingStatsSerializer(queryset, many=True)
+        data = serializer.data
+
+        nation_result, fangyuan_result, changhua_result = [], [], []
+
+        for row in data:
+            # 全國
+            nation_result.append(
+                {
+                    "全國": row.get("year"),
+                    "平掛式設施(組)": row.get("horizontal_facilities_nation"),
+                    "平掛式養殖（戶）": row.get("horizontal_farmers_nation"),
+                    "插篊式設施(組)": row.get("stake_facilities_nation"),
+                    "插篊式養殖（戶）": row.get("stake_farmers_nation"),
+                    "垂下式設施(棚)": row.get("hanging_facilities_nation"),
+                    "垂下式養殖（戶）": row.get("hanging_farmers_nation"),
+                    "浮筏式設施(棚)": row.get("raft_facilities_nation"),
+                    "浮筏式養殖（戶）": row.get("raft_farmers_nation"),
+                    "延繩式設施(組)": row.get("longline_facilities_nation"),
+                    "延繩式養殖（戶）": row.get("longline_farmers_nation"),
+                    "申報（調查）總戶數": row.get("total_farmers_nation"),
+                }
+            )
+
+            # 芳苑鄉
+            fangyuan_result.append(
+                {
+                    "芳苑鄉": row.get("year"),
+                    "平掛式設施(組)": row.get("horizontal_facilities_fangyuan"),
+                    "平掛式養殖（戶）": row.get("horizontal_farmers_fangyuan"),
+                    "插篊式設施(組)": row.get("stake_facilities_fangyuan"),
+                    "插篊式養殖（戶）": row.get("stake_farmers_fangyuan"),
+                    "垂下式設施(棚)": row.get("hanging_facilities_fangyuan"),
+                    "垂下式養殖（戶）": row.get("hanging_farmers_fangyuan"),
+                    "浮筏式設施(棚)": row.get("raft_facilities_fangyuan"),
+                    "浮筏式養殖（戶）": row.get("raft_farmers_fangyuan"),
+                    "延繩式設施(組)": row.get("longline_facilities_fangyuan"),
+                    "延繩式養殖（戶）": row.get("longline_farmers_fangyuan"),
+                    "申報（調查）總戶數": row.get("total_farmers_fangyuan"),
+                }
+            )
+
+            # 彰化縣
+            changhua_result.append(
+                {
+                    "彰化縣": row.get("year"),
+                    "平掛式設施(組)": row.get("horizontal_facilities_changhua"),
+                    "平掛式養殖（戶）": row.get("horizontal_farmers_changhua"),
+                    "插篊式設施(組)": row.get("stake_facilities_changhua"),
+                    "插篊式養殖（戶）": row.get("stake_farmers_changhua"),
+                    "垂下式設施(棚)": row.get("hanging_facilities_changhua"),
+                    "垂下式養殖（戶）": row.get("hanging_farmers_changhua"),
+                    "浮筏式設施(棚)": row.get("raft_facilities_changhua"),
+                    "浮筏式養殖（戶）": row.get("raft_farmers_changhua"),
+                    "延繩式設施(組)": row.get("longline_facilities_changhua"),
+                    "延繩式養殖（戶）": row.get("longline_farmers_changhua"),
+                    "申報（調查）總戶數": row.get("total_farmers_changhua"),
+                }
+            )
+
+        return Response(
+            {
+                "countryOysterData": nation_result,
+                "villageOysterData": fangyuan_result,
+                "townOysterData": changhua_result,
+            }
+        )
