@@ -929,10 +929,22 @@ def social_economic_population_data(request):
 @api_view(["GET"])
 def village_pyramid_data(request):
     latest_time = get_latest_time_list("village", query_type="pyramid")
+    # 用 latest_map 當作 cache key
+    version_str = json.dumps(latest_time, sort_keys=True, ensure_ascii=False)
+    version_hash = hashlib.md5(version_str.encode("utf-8")).hexdigest()
+    cache_key = f"village_pyramid_data:{version_hash}"
+
+    cached = cache.get(cache_key)
+    if cached:
+        return Response(json.loads(cached), status=status.HTTP_200_OK)
+
     village_population_pyramid = get_population_data(
         "village", latest_time, query_type="pyramid"
     )
     result = covert_pyrimad_data(village_population_pyramid)
+
+    # 寫入快取
+    cache.set(cache_key, result, timeout=60 * 60 * 24 * 7)  # 7 天
 
     return Response(result)
 
@@ -960,7 +972,7 @@ def town_industry_data(request):
         # 若最新時間查詢就失敗，直接回應 500
         return Response({"error": f"get_latest_time_list failed: {str(e)}"}, status=500)
 
-    # 3) 用 latest_map 當作 cache key
+    # 用 latest_map 當作 cache key
     version_str = json.dumps(latest_map, sort_keys=True, ensure_ascii=False)
     version_hash = hashlib.md5(version_str.encode("utf-8")).hexdigest()
     cache_key = f"town_industry_data:{version_hash}"
