@@ -936,7 +936,7 @@ def village_pyramid_data(request):
 
     cached = cache.get(cache_key)
     if cached:
-        return Response(json.loads(cached), status=status.HTTP_200_OK)
+        return Response(cached, status=status.HTTP_200_OK)
 
     village_population_pyramid = get_population_data(
         "village", latest_time, query_type="pyramid"
