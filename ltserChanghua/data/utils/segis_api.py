@@ -878,21 +878,18 @@ def convert_industry_map_data(
             ]
         )
 
-        poultry_COLUMN2 = to_float_or_zero(get(rec_poultry, "COLUMN2"))
-        poultry_COLUMN3 = to_float_or_zero(get(rec_poultry, "COLUMN3"))
-        poultry_COLUMN5 = to_float_or_zero(get(rec_poultry, "COLUMN5"))
-        poultry_COLUMN6 = to_float_or_zero(get(rec_poultry, "COLUMN6"))
-        poultry_COLUMN7 = to_float_or_zero(get(rec_poultry, "COLUMN7"))
-        poultry_COLUMN8 = to_float_or_zero(get(rec_poultry, "COLUMN8"))
-
-        poultry_count = str(
-            poultry_COLUMN2
-            + poultry_COLUMN3
-            + poultry_COLUMN5
-            + poultry_COLUMN6
-            + poultry_COLUMN7
-            + poultry_COLUMN8
+        poultry_count = sum_or_none(
+            [
+                get(rec_poultry, "COLUMN2"),
+                get(rec_poultry, "COLUMN3"),
+                get(rec_poultry, "COLUMN5"),
+                get(rec_poultry, "COLUMN6"),
+                get(rec_poultry, "COLUMN7"),
+                get(rec_poultry, "COLUMN8"),
+            ]
         )
+        if poultry_count == 0:
+            poultry_count = None
 
         item = {
             "縣市代碼": as_str_or_dash(county_code),
