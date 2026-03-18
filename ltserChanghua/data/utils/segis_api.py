@@ -785,6 +785,26 @@ def convert_industry_map_data(
         except Exception:
             return 0.0
 
+    def to_float_or_none(val):
+        try:
+            if val is None:
+                return None
+            if isinstance(val, str):
+                normalized = val.strip()
+                if normalized == "" or normalized == "-":
+                    return None
+                return float(normalized)
+            return float(val)
+        except Exception:
+            return None
+
+    def sum_or_none(values):
+        parsed_values = [to_float_or_none(v) for v in values]
+        valid_values = [v for v in parsed_values if v is not None]
+        if len(valid_values) == 0:
+            return None
+        return sum(valid_values)
+
     # ---- build lookups ----
     farming = {key_tuple(r): r for r in (farming_data or [])}
     fishing = {key_tuple(r): r for r in (fishing_data or [])}
@@ -838,24 +858,24 @@ def convert_industry_map_data(
         county_name = "彰化縣"
         township_name = TOWN_NAME_MAPPING.get(town_id)
 
-        fruit_count = to_float_or_zero(get(rec_fruit, "COLUMN2"))
-        crop_count = to_float_or_zero(get(rec_crop, "COLUMN2"))
-        special_crop_count = to_float_or_zero(get(rec_special_crop, "COLUMN2"))
-        rice_count = to_float_or_zero(get(rec_rice, "COLUMN2"))
-        vege_count = to_float_or_zero(get(rec_vege, "COLUMN2"))
-
-        farming_count = str(
-            fruit_count + crop_count + special_crop_count + rice_count + vege_count
+        farming_count = sum_or_none(
+            [
+                get(rec_fruit, "COLUMN2"),
+                get(rec_crop, "COLUMN2"),
+                get(rec_special_crop, "COLUMN2"),
+                get(rec_rice, "COLUMN2"),
+                get(rec_vege, "COLUMN2"),
+            ]
         )
 
-        fruit_area = to_float_or_zero(get(rec_fruit, "COLUMN1"))
-        crop_area = to_float_or_zero(get(rec_crop, "COLUMN1"))
-        special_crop_area = to_float_or_zero(get(rec_special_crop, "COLUMN1"))
-        rice_area = to_float_or_zero(get(rec_rice, "COLUMN1"))
-        vege_area = to_float_or_zero(get(rec_vege, "COLUMN1"))
-
-        farming_area = str(
-            fruit_area + crop_area + special_crop_area + rice_area + vege_area
+        farming_area = sum_or_none(
+            [
+                get(rec_fruit, "COLUMN1"),
+                get(rec_crop, "COLUMN1"),
+                get(rec_special_crop, "COLUMN1"),
+                get(rec_rice, "COLUMN1"),
+                get(rec_vege, "COLUMN1"),
+            ]
         )
 
         poultry_COLUMN2 = to_float_or_zero(get(rec_poultry, "COLUMN2"))
@@ -997,6 +1017,26 @@ def convert_agriculture_data(
         except Exception:
             return 0.0
 
+    def to_float_or_none(val):
+        try:
+            if val is None:
+                return None
+            if isinstance(val, str):
+                normalized = val.strip()
+                if normalized == "" or normalized == "-":
+                    return None
+                return float(normalized)
+            return float(val)
+        except Exception:
+            return None
+
+    def sum_or_none(values):
+        parsed_values = [to_float_or_none(v) for v in values]
+        valid_values = [v for v in parsed_values if v is not None]
+        if len(valid_values) == 0:
+            return None
+        return sum(valid_values)
+
     # ---- build lookups ----
     fruit = {key_tuple(r): r for r in (fruit_data or [])}
     crop = {key_tuple(r): r for r in (crop_data or [])}
@@ -1038,24 +1078,24 @@ def convert_agriculture_data(
         county_name = "彰化縣"
         township_name = TOWN_NAME_MAPPING.get(town_id)
 
-        fruit_count = to_float_or_zero(get(rec_fruit, "COLUMN2"))
-        crop_count = to_float_or_zero(get(rec_crop, "COLUMN2"))
-        special_crop_count = to_float_or_zero(get(rec_special_crop, "COLUMN2"))
-        rice_count = to_float_or_zero(get(rec_rice, "COLUMN2"))
-        vege_count = to_float_or_zero(get(rec_vege, "COLUMN2"))
-
-        farming_count = str(
-            fruit_count + crop_count + special_crop_count + rice_count + vege_count
+        farming_count = sum_or_none(
+            [
+                get(rec_fruit, "COLUMN2"),
+                get(rec_crop, "COLUMN2"),
+                get(rec_special_crop, "COLUMN2"),
+                get(rec_rice, "COLUMN2"),
+                get(rec_vege, "COLUMN2"),
+            ]
         )
 
-        fruit_area = to_float_or_zero(get(rec_fruit, "COLUMN1"))
-        crop_area = to_float_or_zero(get(rec_crop, "COLUMN1"))
-        special_crop_area = to_float_or_zero(get(rec_special_crop, "COLUMN1"))
-        rice_area = to_float_or_zero(get(rec_rice, "COLUMN1"))
-        vege_area = to_float_or_zero(get(rec_vege, "COLUMN1"))
-
-        farming_area = str(
-            fruit_area + crop_area + special_crop_area + rice_area + vege_area
+        farming_area = sum_or_none(
+            [
+                get(rec_fruit, "COLUMN1"),
+                get(rec_crop, "COLUMN1"),
+                get(rec_special_crop, "COLUMN1"),
+                get(rec_rice, "COLUMN1"),
+                get(rec_vege, "COLUMN1"),
+            ]
         )
 
         item = {

@@ -979,7 +979,7 @@ def town_industry_data(request):
     # 用 latest_map 當作 cache key
     version_str = json.dumps(latest_map, sort_keys=True, ensure_ascii=False)
     version_hash = hashlib.md5(version_str.encode("utf-8")).hexdigest()
-    cache_key = f"town_industry_data:{version_hash}"
+    cache_key = f"town_industry_data:v2:{version_hash}"
 
     cached = cache.get(cache_key)
     if cached:
