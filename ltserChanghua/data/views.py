@@ -981,9 +981,9 @@ def town_industry_data(request):
     version_hash = hashlib.md5(version_str.encode("utf-8")).hexdigest()
     cache_key = f"town_industry_data:v3:{version_hash}"
 
-    cached = cache.get(cache_key)
-    if cached:
-        return Response(cached, status=status.HTTP_200_OK)
+    # cached = cache.get(cache_key)
+    # if cached:
+    #     return Response(cached, status=status.HTTP_200_OK)
 
     try:
         data_map = {
