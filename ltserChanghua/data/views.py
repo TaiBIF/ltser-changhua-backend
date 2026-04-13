@@ -905,7 +905,7 @@ def social_economic_population_data(request):
             {"error": "Invalid scale. Use 'village' or 'town'."}, status=400
         )
 
-    cache_key = f"social_economic_population_data_v2_{scale}"
+    cache_key = f"social_economic_population_data_v3_{scale}"
     cached_data = cache.get(cache_key)
 
     if cached_data:  # 如果 Redis 中已有資料直接回傳
@@ -932,19 +932,26 @@ def social_economic_population_data(request):
         ]
         town_result = convert_population_data(*town_data_sets, "town")
 
+        def is_fangyuan_town_row(item):
+            town_id = item.get("鄉鎮市區代碼") or item.get("TOWN_ID")
+            town_name = item.get("鄉鎮市區名稱") or item.get("TOWN")
+            return str(town_id) == "10007230" or town_name == "芳苑鄉"
+
         town_by_year = {}
         for year_item in town_result:
             row = next(
                 (
                     item
                     for item in year_item.get("data", [])
-                    if item.get("鄉鎮市區名稱") == "芳苑鄉"
+                    if is_fangyuan_town_row(item)
                 ),
                 None,
             )
             if row:
                 town_by_year[str(year_item.get("year"))] = {
                     **row,
+                    "鄉鎮市區代碼": "10007230",
+                    "鄉鎮市區名稱": "芳苑鄉",
                     "村里代碼": "10007230-000",
                     "村里名稱": "全芳苑鄉",
                 }
