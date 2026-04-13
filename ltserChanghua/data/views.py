@@ -905,7 +905,7 @@ def social_economic_population_data(request):
             {"error": "Invalid scale. Use 'village' or 'town'."}, status=400
         )
 
-    cache_key = f"social_economic_population_data_{scale}"
+    cache_key = f"social_economic_population_data_v2_{scale}"
     cached_data = cache.get(cache_key)
 
     if cached_data:  # 如果 Redis 中已有資料直接回傳
@@ -922,6 +922,40 @@ def social_economic_population_data(request):
     ]
 
     result = convert_population_data(*population_data_sets, scale)
+
+    if scale == "village":
+        town_data_sets = [
+            get_population_data(
+                "town", get_latest_time_list("town", query_type=qt), query_type=qt
+            )
+            for qt in query_types
+        ]
+        town_result = convert_population_data(*town_data_sets, "town")
+
+        town_by_year = {}
+        for year_item in town_result:
+            row = next(
+                (
+                    item
+                    for item in year_item.get("data", [])
+                    if item.get("鄉鎮市區名稱") == "芳苑鄉"
+                ),
+                None,
+            )
+            if row:
+                town_by_year[str(year_item.get("year"))] = {
+                    **row,
+                    "村里代碼": "10007230-000",
+                    "村里名稱": "全芳苑鄉",
+                }
+
+        for year_item in result:
+            rows = year_item.get("data", [])
+            if any(item.get("村里名稱") == "全芳苑鄉" for item in rows):
+                continue
+            town_row = town_by_year.get(str(year_item.get("year")))
+            if town_row:
+                rows.append(town_row)
 
     if len(result) > 0:
         # 將結果用 redis cache 起來，保存期限為 7 天
