@@ -12,6 +12,7 @@ from .views import (
     ResearchAPIView,
     DownloadWaterQualityManyalAPIView,
     DownloadCrabAPIView,
+    DownloadIntertidalTopographyAPIView,
     InterviewSingleAPIView,
     InterviewMultipleAPIView,
     WaterQualityManualsAPIView,
@@ -84,6 +85,11 @@ urlpatterns = [
         name="download-waterquality-manual",
     ),
     path("download/crab/", DownloadCrabAPIView.as_view(), name="download-crab"),
+    path(
+        "download/intertidal-topography/",
+        DownloadIntertidalTopographyAPIView.as_view(),
+        name="download-intertidal-topography",
+    ),
     path(
         "interview-multiple/stakeholder/",
         InterviewStakeholderListAPIView.as_view(),

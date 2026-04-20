@@ -61,6 +61,7 @@ from datetime import datetime, timedelta
 import zipfile
 import csv
 import os
+from pathlib import Path
 from user.models import DownloadRecord
 from django.http import FileResponse
 import calendar
@@ -70,6 +71,7 @@ from django.db.models import IntegerField
 from django.db.models.functions import Cast
 from data.utils.segis_api import *
 import hashlib
+from django.conf import settings
 
 
 class CustomPageNumberPagination(PageNumberPagination):
@@ -632,6 +634,61 @@ class DownloadCrabAPIView(APIView):
             filename=f'LTSER Changhua_底棲生物資料_{now.strftime("%Y-%m-%d")}.zip',
         )
         return response
+
+
+class DownloadIntertidalTopographyAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    INTERTIDAL_FILE_MAP = {
+        2002: "intertidal-topography-2002.tif",
+        2005: "intertidal-topography-2005.tif",
+        2008: "intertidal-topography-2008.tif",
+        2011: "intertidal-topography-2011.tif",
+        2014: "intertidal-topography-2014.tif",
+        2016: "intertidal-topography-2016.tif",
+        2018: "intertidal-topography-2018.tif",
+        2019: "intertidal-topography-2019.tif",
+        2020: "intertidal-topography-2020.tif",
+        2021: "intertidal-topography-2021.tif",
+        2022: "intertidal-topography-2022.tif",
+        2023: "intertidal-topography-2023.tif",
+        2024: "intertidal-topography-2024.tif",
+    }
+    INTERTIDAL_DIR = (
+        Path(settings.BASE_DIR).resolve().parent.parent
+        / "ltser-changhua-frontend"
+        / "public"
+        / "downloads"
+        / "intertidal-topography"
+    )
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        year_param = request.query_params.get("year")
+
+        try:
+            year = int(year_param)
+        except (TypeError, ValueError):
+            return Response({"detail": "year 參數格式錯誤"}, status=status.HTTP_400_BAD_REQUEST)
+
+        file_name = self.INTERTIDAL_FILE_MAP.get(year)
+        if not file_name:
+            return Response({"detail": "查無對應年份資料"}, status=status.HTTP_400_BAD_REQUEST)
+        file_path = self.INTERTIDAL_DIR / file_name
+        if not file_path.exists():
+            return Response({"detail": "檔案不存在"}, status=status.HTTP_404_NOT_FOUND)
+
+        DownloadRecord.objects.create(
+            filename=file_name,
+            user=user,
+        )
+
+        return FileResponse(
+            open(file_path, "rb"),
+            as_attachment=True,
+            filename=file_name,
+            content_type="image/tiff",
+        )
 
 
 class InterviewStakeholderListAPIView(APIView):
