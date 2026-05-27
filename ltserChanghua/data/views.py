@@ -640,24 +640,22 @@ class DownloadIntertidalTopographyAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     INTERTIDAL_FILE_MAP = {
-        2002: "intertidal-topography-2002.tif",
-        2005: "intertidal-topography-2005.tif",
-        2008: "intertidal-topography-2008.tif",
-        2011: "intertidal-topography-2011.tif",
-        2014: "intertidal-topography-2014.tif",
-        2016: "intertidal-topography-2016.tif",
-        2018: "intertidal-topography-2018.tif",
-        2019: "intertidal-topography-2019.tif",
-        2020: "intertidal-topography-2020.tif",
-        2021: "intertidal-topography-2021.tif",
-        2022: "intertidal-topography-2022.tif",
-        2023: "intertidal-topography-2023.tif",
-        2024: "intertidal-topography-2024.tif",
+        2002: "Intertidal_Topo_2002_2004.zip",
+        2005: "Intertidal_Topo_2005_2007.zip",
+        2008: "Intertidal_Topo_2008_2010.zip",
+        2011: "Intertidal_Topo_2011_2013.zip",
+        2014: "Intertidal_Topo_2014_2015.zip",
+        2016: "Intertidal_Topo_2016_2017.zip",
+        2018: "Intertidal_Topo_2018.zip",
+        2019: "Intertidal_Topo_2019.zip",
+        2020: "Intertidal_Topo_2020.zip",
+        2021: "Intertidal_Topo_2021.zip",
+        2022: "Intertidal_Topo_2022.zip",
+        2023: "Intertidal_Topo_2023.zip",
+        2024: "Intertidal_Topo_2024.zip",
     }
     INTERTIDAL_DIR = (
         Path(settings.BASE_DIR).resolve().parent.parent
-        / "ltser-changhua-frontend"
-        / "public"
         / "downloads"
         / "intertidal-topography"
     )
@@ -669,11 +667,15 @@ class DownloadIntertidalTopographyAPIView(APIView):
         try:
             year = int(year_param)
         except (TypeError, ValueError):
-            return Response({"detail": "year 參數格式錯誤"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "year 參數格式錯誤"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         file_name = self.INTERTIDAL_FILE_MAP.get(year)
         if not file_name:
-            return Response({"detail": "查無對應年份資料"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "查無對應年份資料"}, status=status.HTTP_400_BAD_REQUEST
+            )
         file_path = self.INTERTIDAL_DIR / file_name
         if not file_path.exists():
             return Response({"detail": "檔案不存在"}, status=status.HTTP_404_NOT_FOUND)
@@ -687,7 +689,7 @@ class DownloadIntertidalTopographyAPIView(APIView):
             open(file_path, "rb"),
             as_attachment=True,
             filename=file_name,
-            content_type="image/tiff",
+            content_type="application/zip",
         )
 
 
