@@ -653,6 +653,7 @@ class DownloadIntertidalTopographyAPIView(APIView):
         2022: "Intertidal_Topo_2022.zip",
         2023: "Intertidal_Topo_2023.zip",
         2024: "Intertidal_Topo_2024.zip",
+        2025: "Intertidal_Topo_2025.zip",
     }
     INTERTIDAL_DIR = (
         Path(settings.BASE_DIR).resolve().parent.parent
