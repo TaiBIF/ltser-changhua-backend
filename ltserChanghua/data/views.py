@@ -64,7 +64,9 @@ import os
 from pathlib import Path
 from user.models import DownloadRecord
 from django.http import FileResponse
+from urllib.parse import parse_qs, urlencode, urlparse
 import calendar
+import requests
 from django.db.models import Q, F
 from rest_framework.exceptions import ValidationError
 from django.db.models import IntegerField
@@ -237,6 +239,108 @@ class WaterQualityManualsAPIView(APIView):
             obj["data"] = data
             res.append(obj)
         return Response(res, status=status.HTTP_200_OK)
+
+
+class BirdSurveyAPIView(APIView):
+    TBIA_OCCURRENCE_API_URL = "https://tbiadata.tw/api/v1/occurrence"
+
+    def get(self, request):
+        limit = self.get_limit(request.query_params.get("limit", 20))
+        params = {
+            "bioGroup": "鳥類",
+            "county": "彰化縣",
+            "municipality": "芳苑鄉",
+            "limit": limit,
+        }
+
+        for query_key in ["name", "taxonRank", "eventDate", "cursor"]:
+            query_value = request.query_params.get(query_key)
+            if query_value:
+                params[query_key] = query_value
+
+        try:
+            response = requests.get(
+                self.TBIA_OCCURRENCE_API_URL,
+                params=params,
+                timeout=20,
+            )
+            response.raise_for_status()
+            result = response.json()
+        except requests.RequestException as exc:
+            return Response(
+                {"error": f"TBIA API request failed: {str(exc)}"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+        except ValueError:
+            return Response(
+                {"error": "TBIA API returned invalid JSON."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        result["links"] = self.rewrite_links(request, result.get("links", {}))
+        return Response(result, status=status.HTTP_200_OK)
+
+    def get_limit(self, raw_limit):
+        try:
+            limit = int(raw_limit)
+        except (TypeError, ValueError):
+            return 20
+
+        return min(max(limit, 1), 1000)
+
+    def rewrite_links(self, request, links):
+        rewritten_links = {}
+        if links.get("self"):
+            rewritten_links["self"] = request.build_absolute_uri()
+
+        next_url = links.get("next")
+        if next_url:
+            cursor = parse_qs(urlparse(next_url).query).get("cursor", [None])[0]
+            if cursor:
+                query_params = request.query_params.copy()
+                query_params["cursor"] = cursor
+                rewritten_links["next"] = request.build_absolute_uri(
+                    f"{request.path}?{urlencode(query_params, doseq=True)}"
+                )
+
+        return rewritten_links
+
+
+class BirdSurveyMapAPIView(APIView):
+    TBIA_MAP_API_URL = "https://tbiadata.tw/api/v1/map"
+    VALID_GRID_LEVELS = {"1", "5", "10", "100"}
+
+    def get(self, request):
+        grid = request.query_params.get("grid", "5")
+        if grid not in self.VALID_GRID_LEVELS:
+            grid = "5"
+
+        params = {
+            "boundedBy": request.query_params.get("boundedBy", "121,24,120,23"),
+            "grid": grid,
+            "bioGroup": "鳥類",
+        }
+
+        try:
+            response = requests.get(
+                self.TBIA_MAP_API_URL,
+                params=params,
+                timeout=20,
+            )
+            response.raise_for_status()
+            result = response.json()
+        except requests.RequestException as exc:
+            return Response(
+                {"error": f"TBIA map API request failed: {str(exc)}"},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+        except ValueError:
+            return Response(
+                {"error": "TBIA map API returned invalid JSON."},
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        return Response(result, status=status.HTTP_200_OK)
 
 
 class LiteratureAPIView(APIView):

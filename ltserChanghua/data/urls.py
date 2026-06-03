@@ -16,6 +16,8 @@ from .views import (
     InterviewSingleAPIView,
     InterviewMultipleAPIView,
     WaterQualityManualsAPIView,
+    BirdSurveyAPIView,
+    BirdSurveyMapAPIView,
     InterviewTag2ListAPIView,
     InterviewTag3ListAPIView,
     DownloadInterviewSingleAPIView,
@@ -62,6 +64,12 @@ urlpatterns = [
         "getWaterQualityManuals/",
         WaterQualityManualsAPIView.as_view(),
         name="getWaterQualityManuals",
+    ),
+    path("getBirdSurveys/", BirdSurveyAPIView.as_view(), name="getBirdSurveys"),
+    path(
+        "getBirdSurveyMap/",
+        BirdSurveyMapAPIView.as_view(),
+        name="getBirdSurveyMap",
     ),
     path("literatures/", LiteratureAPIView.as_view(), name="get_literature_lists"),
     path(
