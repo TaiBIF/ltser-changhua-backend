@@ -1,0 +1,73 @@
+services:
+    db:
+        image: postgres:latest
+        container_name: ltser-changhua-db
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: ltser_local
+            POSTGRES_USER: ltser_user
+            POSTGRES_PASSWORD: "1234"
+        ports:
+            - "5432:5432"
+        volumes:
+            - ltser_pg_data:/var/lib/postgresql/data
+
+    redis:
+        image: redis:latest
+        container_name: ltser-changhua-redis
+        restart: unless-stopped
+        ports:
+            - "6379:6379"
+        volumes:
+            - ltser_redis_data:/data
+
+    adminer:
+        image: adminer:latest
+        container_name: ltser-changhua-adminer
+        restart: unless-stopped
+        ports:
+            - "8080:8080"
+        depends_on:
+            - db
+
+    celery:
+        build:
+            context: .
+        container_name: ltser-changhua-celery
+        restart: unless-stopped
+        command: celery -A ltserChanghua worker -l info
+        environment:
+            ENV_FILE: .env.local
+            DB_HOST: db
+            REDIS_URL: redis://redis:6379/0
+            CELERY_BROKER_URL: redis://redis:6379/0
+            CELERY_RESULT_BACKEND: django-db
+        env_file:
+            - .env.local
+        depends_on:
+            - db
+            - redis
+
+    n8n:
+        image: docker.n8n.io/n8nio/n8n:latest
+        container_name: ltser-changhua-n8n
+        restart: unless-stopped
+        ports:
+            - "5678:5678"
+        environment:
+            TZ: Asia/Taipei
+            GENERIC_TIMEZONE: Asia/Taipei
+            N8N_HOST: localhost
+            N8N_PORT: 5678
+            N8N_PROTOCOL: http
+            WEBHOOK_URL: http://localhost:5678/
+        volumes:
+            - ltser_changhua_n8n_data:/home/node/.n8n
+        depends_on:
+            - db
+            - redis
+
+volumes:
+    ltser_pg_data:
+    ltser_redis_data:
+    ltser_changhua_n8n_data:

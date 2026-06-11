@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.core.cache import cache
 from .models import (
@@ -21,6 +21,9 @@ from .models import (
     InterviewStakeholder,
     InterviewPeople,
     WaterQualityManualData,
+    WaterQuality,
+    Sediment,
+    Crab as DepositarCrab,
     Staff,
     InterviewTag1,
     ResearchesIssue,
@@ -56,24 +59,37 @@ from rest_framework.pagination import PageNumberPagination
 from datetime import datetime, timedelta
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
-import io
 from datetime import datetime, timedelta
-import zipfile
-import csv
-import os
 from pathlib import Path
 from user.models import DownloadRecord
 from django.http import FileResponse
 from urllib.parse import parse_qs, urlencode, urlparse
-import calendar
-import requests
 from django.db.models import Q, F
 from rest_framework.exceptions import ValidationError
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
 from data.utils.segis_api import *
-import hashlib
 from django.conf import settings
+from data.task import (
+    IPT_OBSERVATION_ITEMS,
+    import_ckan_and_notify,
+    send_import_email,
+    send_import_slack,
+    sync_ipt_crab_after_success,
+)
+from data.importing.registry import ADAPTERS, normalize_package_name
+from data.utils.email_recipients import get_email_targets
+from data.utils.ipt_sync import sync_crab_events, sync_crab_occurrence_extensions
+from data.permission import HasInternalApiKey
+from celery import chain
+
+import io
+import zipfile
+import csv
+import os
+import calendar
+import requests
+import hashlib
 
 
 class CustomPageNumberPagination(PageNumberPagination):
@@ -160,20 +176,40 @@ class WaterQualityManualSiteAPIView(APIView):
 
 
 class BenthicOrganismAPIView(APIView):
+    FIELD_MAP = {
+        "s_temp": "soilTemperature",
+        "t_sal": "tidalPoolSalinity",
+        "cw": "soilWater",
+        "co": "soilOrganicMatter",
+        "s_ph": "soilPH",
+        "mm": "medianGrainSize",
+        "sc": "sortingCoefficient",
+    }
+
     def get(self, request):
         site = request.query_params.get("site", None)
         if site is not None:
-            bo = (
-                BenthicOrganismData.objects.filter(site=site)
-                .annotate(
-                    year_int=Cast("year", IntegerField()),
-                    month_int=Cast("month", IntegerField()),
-                )
-                .order_by("year_int", "month_int")
+            sediments = Sediment.objects.filter(locationID=site).order_by(
+                "eventDate", "id"
             )
 
-            serializer = BenthicOrganismSerializer(bo, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            result = []
+            for item in sediments:
+                data = {
+                    "id": item.id,
+                    "year": item.eventDate.year,
+                    "month": item.eventDate.month,
+                    "site": item.locationID,
+                    "dataID": item.dataID,
+                    "eventDate": item.eventDate,
+                }
+
+                for output_field, model_field in self.FIELD_MAP.items():
+                    data[output_field] = getattr(item, model_field)
+
+                result.append(data)
+
+            return Response(result, status=status.HTTP_200_OK)
         else:
             return Response(
                 {"error": "No site parameter provided."},
@@ -182,34 +218,54 @@ class BenthicOrganismAPIView(APIView):
 
 
 class CrabAPIView(APIView):
+    def get_species_key(self, scientific_name):
+        if not scientific_name:
+            return None
+
+        return scientific_name.strip()
+
     def get(self, request):
         site = request.query_params.get("site", None)
         if site is not None:
-            crabs = (
-                CrabData.objects.filter(site=site)
-                .annotate(
-                    year_int=Cast("year", IntegerField()),
-                    month_int=Cast("month", IntegerField()),
-                )
-                .order_by("year_int", "month_int")
+            crabs = DepositarCrab.objects.filter(locationID=site).order_by(
+                "eventDate", "id"
             )
 
-            serializer = CrabSerializer(crabs, many=True)
-            list_of_objects = serializer.data
+            grouped = {}
+            for crab in crabs:
+                key = (crab.eventDate, crab.locationID)
+                if key not in grouped:
+                    grouped[key] = {
+                        "id": crab.id,
+                        "year": crab.eventDate.year,
+                        "month": crab.eventDate.month,
+                        "site": crab.locationID,
+                        "species": {},
+                        "speciesNames": [],
+                        "speciesTitles": {},
+                    }
 
-            res = []
-            for dic in list_of_objects:
-                obj = {}
-                species = {}
-                for key, value in dic.items():
-                    if key in ["id", "year", "site", "month"]:
-                        obj[key] = value
-                    else:
-                        species[key] = value
-                obj["species"] = species
-                res.append(obj)
+                species_key = self.get_species_key(crab.scientificName)
+                if not species_key:
+                    continue
 
-            return Response(res)
+                species_title = (
+                    crab.vernacularName.strip() if crab.vernacularName else species_key
+                )
+                grouped[key]["speciesTitles"][species_key] = species_title
+
+                individual_count = crab.individualCount or 0
+                grouped[key]["species"][species_key] = (
+                    grouped[key]["species"].get(species_key, 0) + individual_count
+                )
+
+                if (
+                    individual_count > 0
+                    and species_title not in grouped[key]["speciesNames"]
+                ):
+                    grouped[key]["speciesNames"].append(species_title)
+
+            return Response(list(grouped.values()))
         else:
             return Response(
                 {"error": "No site parameter provided."},
@@ -239,6 +295,52 @@ class WaterQualityManualsAPIView(APIView):
             obj["data"] = data
             res.append(obj)
         return Response(res, status=status.HTTP_200_OK)
+
+
+class WaterQualityAPIView(APIView):
+    FIELD_MAP = {
+        "w_temp": "waterTemperature",
+        "w_ph": "pH",
+        "phmv": "hydrogenIon",
+        "orp": "oxidationReductionPotential",
+        "cond": "conductivity",
+        "turb": "turbidity",
+        "do": "dissolvedOxygen",
+        "tds": "totalDissolvedSolids",
+        "w_sal": "salinity",
+        "sg": "specificGravity",
+    }
+
+    def get(self, request, *args, **kwargs):
+        site = request.query_params.get("site", None)
+        if site is None:
+            return Response(
+                {"error": "No site parameter provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        water_quality = WaterQuality.objects.filter(locationID=site).order_by(
+            "eventDate", "id"
+        )
+
+        result = []
+        for item in water_quality:
+            data = {"site": item.locationID}
+            for output_field, model_field in self.FIELD_MAP.items():
+                data[output_field] = getattr(item, model_field)
+
+            result.append(
+                {
+                    "id": item.id,
+                    "dataID": item.dataID,
+                    "eventDate": item.eventDate,
+                    "year": item.eventDate.year,
+                    "month": item.eventDate.month,
+                    "data": data,
+                }
+            )
+
+        return Response(result, status=status.HTTP_200_OK)
 
 
 class BirdSurveyAPIView(APIView):
@@ -311,9 +413,9 @@ class BirdSurveyMapAPIView(APIView):
     VALID_GRID_LEVELS = {"1", "5", "10", "100"}
 
     def get(self, request):
-        grid = request.query_params.get("grid", "5")
+        grid = request.query_params.get("grid", "1")
         if grid not in self.VALID_GRID_LEVELS:
-            grid = "5"
+            grid = "1"
 
         params = {
             "boundedBy": request.query_params.get("boundedBy", "121,24,120,23"),
@@ -1409,3 +1511,136 @@ class FisheryFarmingStatsFormattedView(APIView):
                 )
 
         return Response(result)
+
+
+class SyncIptCrabEventAPIView(APIView):
+    permission_classes = [HasInternalApiKey]
+
+    @staticmethod
+    def _to_bool(value, default=False):
+        if value is None:
+            return default
+        if isinstance(value, bool):
+            return value
+        return str(value).strip().lower() in {"1", "true", "t", "yes", "y", "on"}
+
+    def post(self, request):
+        dry_run = self._to_bool(request.data.get("dry_run"), default=False)
+        truncate = self._to_bool(request.data.get("truncate"), default=False)
+        limit = request.data.get("limit")
+
+        try:
+            result = sync_crab_events(
+                dry_run=dry_run,
+                truncate=truncate,
+                limit=limit,
+            )
+        except ValueError as exc:
+            return Response({"error": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(result, status=status.HTTP_200_OK)
+
+
+class SyncIptCrabOccurrenceExtensionAPIView(APIView):
+    permission_classes = [HasInternalApiKey]
+
+    @staticmethod
+    def _to_bool(value, default=False):
+        return SyncIptCrabEventAPIView._to_bool(value, default=default)
+
+    def post(self, request):
+        dry_run = self._to_bool(request.data.get("dry_run"), default=False)
+        truncate = self._to_bool(request.data.get("truncate"), default=False)
+        limit = request.data.get("limit")
+
+        try:
+            result = sync_crab_occurrence_extensions(
+                dry_run=dry_run,
+                truncate=truncate,
+                limit=limit,
+            )
+        except ValueError as exc:
+            return Response({"error": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(result, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@permission_classes([HasInternalApiKey])
+def import_ckan_resource(request):
+    base_url = "https://data.depositar.io/zh_Hant_TW"
+
+    resource_id = request.data.get("resource_id")
+    site = request.data.get("site")
+    observation_item = request.data.get("observation_item")
+    resource_name = request.data.get("resource_name")
+    base_adapter_id = request.data.get("id")
+    limit = request.data.get("limit") or 100
+
+    adapter_id = normalize_package_name(base_adapter_id)
+
+    if not resource_id:
+        return Response(
+            {"error": "resource_id_required"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not adapter_id:
+        return Response({"error": "id_required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    if adapter_id not in ADAPTERS:
+        return Response(
+            {
+                "error": "unknown_dataset",
+                "id": adapter_id,
+                "allowed": list(ADAPTERS.keys()),
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    to_list, cc_list = get_email_targets(observation_item)
+
+    sig1 = import_ckan_and_notify.s(
+        package_name=adapter_id,
+        resource_id=resource_id,
+        base_url=base_url,
+        site=site,
+        observation_item=observation_item,
+        resource_name=resource_name,
+        limit=limit,
+        notify_slack=False,
+    )
+
+    sig_slack = send_import_slack.s(
+        site=site,
+        observation_item=observation_item,
+        resource_name=resource_name,
+    )
+
+    # 注意：send_import_email 的第一個參數 report 會自動接到 sig1 的回傳值
+    sig2 = send_import_email.s(
+        to_emails=to_list,
+        cc_emails=cc_list,
+        observation_item=observation_item,
+        resource_name=resource_name,
+        task_id=None,
+    )
+
+    if observation_item in IPT_OBSERVATION_ITEMS:
+        sig_sync_ipt = sync_ipt_crab_after_success.s(
+            observation_item=observation_item,
+        )
+        result = chain(sig1, sig_sync_ipt, sig_slack, sig2).apply_async()
+    else:
+        result = chain(sig1, sig_slack, sig2).apply_async()
+
+    return Response(
+        {
+            "task_id": result.id,  # 這是 chain 的 root id
+            "id": adapter_id,
+            "resource_id": resource_id,
+            "site": site,
+            "observation_item": observation_item,
+            "resource_name": resource_name,
+        },
+        status=status.HTTP_202_ACCEPTED,
+    )

@@ -28,6 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 SEGISWS_API_ID = os.environ.get("SEGISWS_API_ID")
 SEGISWS_API_KEY = os.environ.get("SEGISWS_API_KEY")
+INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -35,6 +36,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "0.0.0.0",
     "127.0.0.1",
+    "localhost",
+    "host.docker.internal",
     "120.107.157.227",
     "ltserchanghua-fy.org",
     "www.ltserchanghua-fy.org",
@@ -60,6 +63,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "drf_yasg",
     "import_export",
+    "django_celery_results",
 ]
 
 REST_FRAMEWORK = {
@@ -79,6 +83,16 @@ CHANNEL_LAYERS = {
         },
     }
 }
+
+REDIS_URL = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/0")
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", REDIS_URL)
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", "django-db")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Taipei"
+CELERY_IMPORTS = ("data.task",)
+CELERY_RESULT_EXTENDED = True
 
 from datetime import timedelta
 

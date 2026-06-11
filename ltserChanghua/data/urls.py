@@ -16,6 +16,7 @@ from .views import (
     InterviewSingleAPIView,
     InterviewMultipleAPIView,
     WaterQualityManualsAPIView,
+    WaterQualityAPIView,
     BirdSurveyAPIView,
     BirdSurveyMapAPIView,
     InterviewTag2ListAPIView,
@@ -33,6 +34,9 @@ from .views import (
     FangYuanOysterFarmingStatsFormattedView,
     OysterFarmingStatsFormattedView,
     FisheryFarmingStatsFormattedView,
+    SyncIptCrabEventAPIView,
+    SyncIptCrabOccurrenceExtensionAPIView,
+    import_ckan_resource,
 )
 
 urlpatterns = [
@@ -64,6 +68,11 @@ urlpatterns = [
         "getWaterQualityManuals/",
         WaterQualityManualsAPIView.as_view(),
         name="getWaterQualityManuals",
+    ),
+    path(
+        "getWaterQualities/",
+        WaterQualityAPIView.as_view(),
+        name="getWaterQualities",
     ),
     path("getBirdSurveys/", BirdSurveyAPIView.as_view(), name="getBirdSurveys"),
     path(
@@ -164,5 +173,20 @@ urlpatterns = [
         "fishery-stats/",
         FisheryFarmingStatsFormattedView.as_view(),
         name="fishery-stats",
+    ),
+    path(
+        "import-ckan-resource/",
+        import_ckan_resource,
+        name="import-ckan-resource",
+    ),
+    path(
+        "internal/ipt/crab-events/sync/",
+        SyncIptCrabEventAPIView.as_view(),
+        name="sync-ipt-crab-events",
+    ),
+    path(
+        "internal/ipt/crab-occurrence-extensions/sync/",
+        SyncIptCrabOccurrenceExtensionAPIView.as_view(),
+        name="sync-ipt-crab-occurrence-extensions",
     ),
 ]

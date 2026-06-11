@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -163,6 +164,113 @@ class WaterQualityManualData(models.Model):
         db_table = "WaterQualityManualData"
         verbose_name = "水質觀測-人工數據"
         verbose_name_plural = "水質觀測-人工數據"
+
+
+class WaterQuality(models.Model):
+    dataID = models.CharField(max_length=100, unique=True)
+    eventDate = models.DateField()
+    locationID = models.CharField(max_length=50)
+    waterTemperature = models.FloatField(null=True, blank=True)
+    pH = models.FloatField(
+        validators=[MinValueValidator(0), MaxValueValidator(14)], null=True, blank=True
+    )
+    hydrogenIon = models.FloatField(null=True, blank=True)
+    oxidationReductionPotential = models.FloatField(null=True, blank=True)
+    conductivity = models.FloatField(null=True, blank=True)
+    turbidity = models.FloatField(null=True, blank=True)
+    dissolvedOxygen = models.FloatField(null=True, blank=True)
+    totalDissolvedSolids = models.FloatField(null=True, blank=True)
+    salinity = models.FloatField(null=True, blank=True)
+    specificGravity = models.FloatField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    data_hash = models.CharField(max_length=64, db_index=True)
+
+    def __str__(self):
+        return f"水質資料: {self.dataID}"
+
+    class Meta:
+        db_table = "depositar_water_quality"
+        verbose_name = "水質調查"
+        verbose_name_plural = "水質調查"
+
+
+class Sediment(models.Model):
+    dataID = models.CharField(max_length=100, unique=True)
+    eventDate = models.DateField()
+    locationID = models.CharField(max_length=50)
+    soilTemperature = models.FloatField(null=True, blank=True)
+    tidalPoolSalinity = models.FloatField(null=True, blank=True)
+    soilWater = models.FloatField(null=True, blank=True)
+    soilOrganicMatter = models.FloatField(null=True, blank=True)
+    soilPH = models.FloatField(
+        validators=[MinValueValidator(0), MaxValueValidator(14)], null=True, blank=True
+    )
+    medianGrainSize = models.FloatField(null=True, blank=True)
+    sortingCoefficient = models.FloatField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    data_hash = models.CharField(max_length=64, db_index=True)
+
+    def __str__(self):
+        return f"底質資料: {self.dataID}"
+
+    class Meta:
+        db_table = "depositar_sediment"
+        verbose_name = "底質調查"
+        verbose_name_plural = "底質調查"
+
+
+class Crab(models.Model):
+    BASIS_OF_RECORD_CHOICES = [
+        ("MaterialEntity", "MaterialEntity"),
+        ("PreservedSpecimen", "PreservedSpecimen"),
+        ("FossilSpecimen", "FossilSpecimen"),
+        ("LivingSpecimen", "LivingSpecimen"),
+        ("HumanObservation", "HumanObservation"),
+        ("MaterialSample", "MaterialSample"),
+        ("MachineObservation", "MachineObservation"),
+        ("Event", "Event"),
+        ("Taxon", "Taxon"),
+        ("Occurrence", "Occurrence"),
+        ("MaterialCitation", "MaterialCitation"),
+    ]
+
+    dataID = models.CharField(max_length=100, unique=True)
+    eventDate = models.DateField()
+    basisOfRecord = models.CharField(max_length=50, choices=BASIS_OF_RECORD_CHOICES)
+    scientificName = models.CharField(max_length=200)
+    vernacularName = models.CharField(max_length=200)
+    individualCount = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(9999)]
+    )
+    locality = models.CharField(max_length=200)
+    locationID = models.CharField(max_length=50)
+    decimalLatitude = models.FloatField(
+        validators=[MinValueValidator(-90), MaxValueValidator(90)]
+    )
+    decimalLongitude = models.FloatField(
+        validators=[MinValueValidator(-180), MaxValueValidator(180)]
+    )
+    geodeticDatum = models.CharField(max_length=50)
+    samplingProtocol = models.CharField(max_length=200, null=True, blank=True)
+    sampleSizeValue = models.FloatField(null=True, blank=True)
+    sampleSizeUnit = models.CharField(max_length=50, null=True, blank=True)
+    samplingEffort = models.CharField(max_length=200, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    data_hash = models.CharField(max_length=64, db_index=True)
+
+    def __str__(self):
+        return f"蟹類資料: {self.dataID}"
+
+    class Meta:
+        db_table = "depositar_crab"
+        verbose_name = "蟹類調查"
+        verbose_name_plural = "蟹類調查"
 
 
 class InterviewTag1(models.Model):
@@ -737,3 +845,78 @@ class FisheryFarmingStats(models.Model):
         db_table = "FisheryFarmingStats"
         verbose_name = "養殖放養統計"
         verbose_name_plural = "養殖放養統計"
+
+
+class IptEventBaseField(models.Model):
+    eventID = models.CharField(max_length=255, unique=True)
+    eventDate = models.CharField(max_length=50)
+    samplingProtocol = models.CharField(max_length=255)
+    sampleSizeValue = models.DecimalField(
+        max_digits=12, decimal_places=2, blank=True, null=True
+    )
+    sampleSizeUnit = models.CharField(max_length=255, blank=True, null=True)
+    samplingEffort = models.CharField(max_length=255, blank=True, null=True)
+
+    locationID = models.CharField(max_length=255, blank=True, null=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    countryCode = models.CharField(max_length=2, blank=True, null=True)
+    county = models.CharField(max_length=100, blank=True, null=True)
+    municipality = models.CharField(max_length=100, blank=True, null=True)
+    locality = models.CharField(max_length=255, blank=True, null=True)
+    verbatimLocality = models.CharField(max_length=255, blank=True, null=True)
+
+    decimalLatitude = models.DecimalField(
+        max_digits=9, decimal_places=6, blank=True, null=True
+    )
+    decimalLongitude = models.DecimalField(
+        max_digits=9, decimal_places=6, blank=True, null=True
+    )
+    geodeticDatum = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.eventID
+
+
+class IptOccurrenceExtensionBaseField(models.Model):
+    occurrenceID = models.CharField(max_length=255, unique=True)
+    eventID = models.CharField(max_length=255)
+    basisOfRecord = models.CharField(max_length=50)
+    scientificName = models.CharField(max_length=255)
+    individualCount = models.IntegerField(null=True, blank=True)
+    decimalLatitude = models.DecimalField(
+        max_digits=9, decimal_places=6, blank=True, null=True
+    )
+    decimalLongitude = models.DecimalField(
+        max_digits=9, decimal_places=6, blank=True, null=True
+    )
+    eventDate = models.CharField(max_length=50)
+
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return self.occurrenceID
+
+
+class IptCrabEvent(IptEventBaseField):
+    class Meta:
+        db_table = "ipt_crab_event"
+
+
+class IptCrabOccurrenceExtension(IptOccurrenceExtensionBaseField):
+    kingdom = models.CharField(max_length=255, default="Animalia")
+    phylum = models.CharField(max_length=255, null=True, blank=True)
+    class_field = models.CharField(
+        max_length=255, db_column="class", null=True, blank=True
+    )
+    order = models.CharField(max_length=255, null=True, blank=True)
+    family = models.CharField(max_length=255, null=True, blank=True)
+    genus = models.CharField(max_length=255, null=True, blank=True)
+    taxonRank = models.CharField(max_length=255, null=True, blank=True)
+    acceptedNameUsageID = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        db_table = "ipt_crab_occurrence_extension"
