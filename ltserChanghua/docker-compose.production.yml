@@ -1,0 +1,47 @@
+services:
+    redis:
+        image: redis:latest
+        container_name: ltser-changhua-redis
+        restart: unless-stopped
+        ports:
+            - "6379:6379"
+        volumes:
+            - ltser_redis_data:/data
+
+    celery:
+        build:
+            context: .
+        container_name: ltser-changhua-celery
+        restart: unless-stopped
+        command: celery -A ltserChanghua worker -l info
+        env_file:
+            - .env
+        environment:
+            ENV_FILE: .env
+            REDIS_URL: redis://redis:6379/0
+            CELERY_BROKER_URL: redis://redis:6379/0
+            CELERY_RESULT_BACKEND: django-db
+        depends_on:
+            - redis
+
+    n8n:
+        image: docker.n8n.io/n8nio/n8n:latest
+        container_name: ltser-changhua-n8n
+        restart: unless-stopped
+        ports:
+            - "5678:5678"
+        environment:
+            TZ: Asia/Taipei
+            GENERIC_TIMEZONE: Asia/Taipei
+            N8N_HOST: localhost
+            N8N_PORT: 5678
+            N8N_PROTOCOL: http
+            WEBHOOK_URL: http://localhost:5678/
+        volumes:
+            - ltser_changhua_n8n_data:/home/node/.n8n
+        depends_on:
+            - redis
+
+volumes:
+    ltser_redis_data:
+    ltser_changhua_n8n_data:
