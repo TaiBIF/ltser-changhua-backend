@@ -1,5 +1,5 @@
 DEFAULT_TO = ["nil158320@gmail.com"]
-DEFAULT_CC = ["b9120504@cc.ncue.edu.tw", "sfwang@cc.ncue.edu.tw"]
+DEFAULT_CC = ["b9120504@cc.ncue.edu.tw", "sfwang@cc.ncue.edu.tw", "jhujyunjhang@gmail.com"]
 
 OBSERVATION_EMAILS = {}
 
