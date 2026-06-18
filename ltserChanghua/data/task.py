@@ -416,7 +416,7 @@ def send_import_email(
             f"您所負責的「{observation_item}」子計畫中，\n"
             f"資料集「{resource_name}」匯入至網站資料庫時發生錯誤，未完成寫入。\n\n"
             f"如需確認站點目前資料狀態，可至下列網址查看：\n"
-            f"https://ltsertwlyudao.org/\n\n"
+            f"https://ltsertwchanghua.org/\n\n"
         )
     else:
         intro = (
@@ -424,7 +424,7 @@ def send_import_email(
             f"您所負責的「{observation_item}」子計畫中，\n"
             f"資料集「{resource_name}」已匯入至網站資料庫中。\n\n"
             f"最新資料可至下列網址查看：\n"
-            f"https://ltsertwlyudao.org/\n\n"
+            f"https://ltsertwchanghua.org/\n\n"
         )
 
     body = intro + (
