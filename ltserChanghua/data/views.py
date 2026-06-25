@@ -775,12 +775,13 @@ class DownloadWaterQualityManyalAPIView(APIView):
                 writer = csv.writer(f)
                 fields = [
                     field
-                    for field in WaterQualityManualData._meta.fields
-                    if field.name != "id"
+                    for field in WaterQuality._meta.fields
+                    if field.name
+                    not in ["id", "created_at", "updated_at", "data_hash"]
                 ]
                 writer.writerow([field.name for field in fields])
-                for instance in WaterQualityManualData.objects.all().order_by(
-                    "year", "month"
+                for instance in WaterQuality.objects.all().order_by(
+                    "eventDate", "dataID"
                 ):
                     row = []
                     for field in fields:
@@ -813,17 +814,20 @@ class DownloadCrabAPIView(APIView):
 
         with zipfile.ZipFile(zip_io, "w", zipfile.ZIP_DEFLATED) as zipf:
             for filename, model in [
-                (filename1, BenthicOrganismData),
-                (filename2, CrabData),
+                (filename1, Sediment),
+                (filename2, DepositarCrab),
             ]:
                 csv_file = f"{filename}.csv"
                 with open(csv_file, "w", newline="") as f:
                     writer = csv.writer(f)
                     fields = [
-                        field for field in model._meta.fields if field.name != "id"
+                        field
+                        for field in model._meta.fields
+                        if field.name
+                        not in ["id", "created_at", "updated_at", "data_hash"]
                     ]
                     writer.writerow([field.name for field in fields])
-                    for instance in model.objects.all().order_by("year", "month"):
+                    for instance in model.objects.all().order_by("eventDate", "dataID"):
                         row = []
                         for field in fields:
                             value = getattr(instance, field.name)
