@@ -158,17 +158,11 @@ class UserProfileAPIView(APIView):
 
     def get(self, request):
         user = request.user
-        try:
-            userProfile = UserProfile.objects.get(user_id=user.id)
-            serializer = UserProfileSerializer(userProfile)
-            data = serializer.data
-            data["is_verified"] = user.is_verified
-            return Response(data, status=status.HTTP_200_OK)
-        except UserProfile.DoesNotExist:
-            return Response(
-                {"error": "User profile does not exist"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        userProfile, _ = UserProfile.objects.get_or_create(user=user)
+        serializer = UserProfileSerializer(userProfile)
+        data = serializer.data
+        data["is_verified"] = user.is_verified
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class UserProfileUpdateAPIView(APIView):
