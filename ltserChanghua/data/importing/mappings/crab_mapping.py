@@ -16,7 +16,8 @@ BASIS_OF_RECORD_VALUES = {
 def _clean_text(value):
     if value is None:
         return None
-    return str(value).strip()
+    text = str(value).strip()
+    return text or None
 
 
 def _push_error(errors, *, field, error, value=None, expected=None):
@@ -52,12 +53,8 @@ def build_crab_payload(record, validators):
     basisOfRecord = validators["required"](
         record.get("basisOfRecord"), "basisOfRecord", record, errors
     )
-    scientificName = validators["required"](
-        record.get("scientificName"), "scientificName", record, errors
-    )
-    vernacularName = validators["required"](
-        record.get("vernacularName"), "vernacularName", record, errors
-    )
+    scientificName = _clean_text(record.get("scientificName"))
+    vernacularName = _clean_text(record.get("vernacularName"))
     locality = validators["required"](
         record.get("locality"), "locality", record, errors
     )

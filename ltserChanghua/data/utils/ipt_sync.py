@@ -52,6 +52,37 @@ def row_value(row, field_name):
     return getattr(row, field_name, None)
 
 
+def has_text(value):
+    return bool(str(value or "").strip())
+
+
+def is_absent_status(row):
+    occurrence_status = row_value(row, "occurrenceStatus")
+    if occurrence_status is None:
+        return True
+    return str(occurrence_status).strip().lower() == "absent"
+
+
+def is_present_occurrence(row):
+    return (
+        has_text(row.scientificName)
+        and row.individualCount is not None
+        and row.individualCount > 0
+    )
+
+
+def is_absent_survey(row):
+    return (
+        not has_text(row.scientificName)
+        and row.individualCount == 0
+        and is_absent_status(row)
+    )
+
+
+def has_crab_survey(row):
+    return is_present_occurrence(row) or is_absent_survey(row)
+
+
 def normalize_taxon_name(value):
     if not value:
         return ""
@@ -179,8 +210,10 @@ def crab_queryset(limit=None):
 def check_scientific_names(limit=None):
     limit = validate_limit(limit)
     names = set()
-    queryset = Crab.objects.exclude(scientificName__isnull=True).exclude(
-        scientificName=""
+    queryset = (
+        Crab.objects.filter(individualCount__gt=0)
+        .exclude(scientificName__isnull=True)
+        .exclude(scientificName="")
     )
 
     if limit is None:
@@ -206,7 +239,14 @@ def sync_crab_events(dry_run=False, truncate=False, limit=None):
     queryset = crab_queryset(limit=limit)
 
     grouped_events = {}
+    stale_event_ids = set()
+    skipped_no_survey = 0
     for row in queryset:
+        if not has_crab_survey(row):
+            stale_event_ids.add(build_event_id(row))
+            skipped_no_survey += 1
+            continue
+
         event_id = build_event_id(row)
         if event_id not in grouped_events:
             grouped_events[event_id] = {
@@ -241,9 +281,13 @@ def sync_crab_events(dry_run=False, truncate=False, limit=None):
     skipped_no_event_date = 0
     for event_id, payload in grouped_events.items():
         if not payload["eventDate"]:
+            stale_event_ids.add(event_id)
             skipped_no_event_date += 1
             continue
         payloads.append((event_id, payload))
+
+    active_event_ids = {event_id for event_id, _payload in payloads}
+    stale_event_ids -= active_event_ids
 
     existing_ids = set()
     if not truncate:
@@ -251,6 +295,7 @@ def sync_crab_events(dry_run=False, truncate=False, limit=None):
 
     created_count = 0
     updated_count = 0
+    deleted_count = 0
 
     if dry_run:
         for event_id, _payload in payloads:
@@ -258,12 +303,17 @@ def sync_crab_events(dry_run=False, truncate=False, limit=None):
                 updated_count += 1
             else:
                 created_count += 1
+        deleted_count = len(stale_event_ids & existing_ids)
     else:
         with transaction.atomic():
             if truncate:
                 table_name = IptCrabEvent._meta.db_table
                 with connection.cursor() as cursor:
                     cursor.execute(f'TRUNCATE TABLE "{table_name}" RESTART IDENTITY;')
+            elif stale_event_ids:
+                deleted_count, _ = IptCrabEvent.objects.filter(
+                    eventID__in=stale_event_ids
+                ).delete()
 
             for event_id, payload in payloads:
                 _, created = IptCrabEvent.objects.update_or_create(
@@ -281,9 +331,11 @@ def sync_crab_events(dry_run=False, truncate=False, limit=None):
         "source_records": queryset.count(),
         "grouped_events": len(grouped_events),
         "synced_events": len(payloads),
+        "skipped_no_survey": skipped_no_survey,
         "skipped_no_event_date": skipped_no_event_date,
         "created": created_count,
         "updated": updated_count,
+        "deleted": deleted_count,
     }
 
 
@@ -293,15 +345,39 @@ def sync_crab_occurrence_extensions(dry_run=False, truncate=False, limit=None):
     taxon_map, taxon_lookup_errors = fetch_nomenmatch_taxon_map(requested_taxon_names)
 
     occurrence_payloads = {}
+    stale_occurrence_ids = set()
     skipped_no_occurrence_id = 0
     skipped_no_scientific_name = 0
+    skipped_no_survey = 0
+    skipped_absent_survey = 0
+    skipped_no_event_date = 0
+    skipped_non_positive_count = 0
 
     for row in queryset:
+        if is_absent_survey(row):
+            if row.dataID:
+                stale_occurrence_ids.add(row.dataID)
+            skipped_absent_survey += 1
+            continue
+        if not has_crab_survey(row):
+            if row.dataID:
+                stale_occurrence_ids.add(row.dataID)
+            skipped_no_survey += 1
+            continue
         if not row.dataID:
             skipped_no_occurrence_id += 1
             continue
-        if not row.scientificName:
+        if not row.eventDate:
+            stale_occurrence_ids.add(row.dataID)
+            skipped_no_event_date += 1
+            continue
+        if not has_text(row.scientificName):
+            stale_occurrence_ids.add(row.dataID)
             skipped_no_scientific_name += 1
+            continue
+        if row.individualCount is None or row.individualCount <= 0:
+            stale_occurrence_ids.add(row.dataID)
+            skipped_non_positive_count += 1
             continue
 
         taxon = taxon_map.get(normalize_taxon_name(row.scientificName)) or {}
@@ -332,6 +408,7 @@ def sync_crab_occurrence_extensions(dry_run=False, truncate=False, limit=None):
 
     created_count = 0
     updated_count = 0
+    deleted_count = 0
 
     if dry_run:
         for occurrence_id in occurrence_payloads:
@@ -339,12 +416,17 @@ def sync_crab_occurrence_extensions(dry_run=False, truncate=False, limit=None):
                 updated_count += 1
             else:
                 created_count += 1
+        deleted_count = len(stale_occurrence_ids & existing_ids)
     else:
         with transaction.atomic():
             if truncate:
                 table_name = IptCrabOccurrenceExtension._meta.db_table
                 with connection.cursor() as cursor:
                     cursor.execute(f'TRUNCATE TABLE "{table_name}" RESTART IDENTITY;')
+            elif stale_occurrence_ids:
+                deleted_count, _ = IptCrabOccurrenceExtension.objects.filter(
+                    occurrenceID__in=stale_occurrence_ids
+                ).delete()
 
             for occurrence_id, payload in occurrence_payloads.items():
                 _, created = IptCrabOccurrenceExtension.objects.update_or_create(
@@ -363,6 +445,10 @@ def sync_crab_occurrence_extensions(dry_run=False, truncate=False, limit=None):
         "synced_occurrences": len(occurrence_payloads),
         "skipped_no_occurrence_id": skipped_no_occurrence_id,
         "skipped_no_scientific_name": skipped_no_scientific_name,
+        "skipped_absent_survey": skipped_absent_survey,
+        "skipped_no_survey": skipped_no_survey,
+        "skipped_no_event_date": skipped_no_event_date,
+        "skipped_non_positive_count": skipped_non_positive_count,
         "taxon_names_requested": len(requested_taxon_names),
         "taxon_names_matched": len(
             {name for name in requested_taxon_names if name in taxon_map}
@@ -370,4 +456,5 @@ def sync_crab_occurrence_extensions(dry_run=False, truncate=False, limit=None):
         "taxon_lookup_errors": len(taxon_lookup_errors),
         "created": created_count,
         "updated": updated_count,
+        "deleted": deleted_count,
     }

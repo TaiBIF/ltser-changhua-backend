@@ -241,8 +241,8 @@ class Crab(models.Model):
     dataID = models.CharField(max_length=100, unique=True)
     eventDate = models.DateField()
     basisOfRecord = models.CharField(max_length=50, choices=BASIS_OF_RECORD_CHOICES)
-    scientificName = models.CharField(max_length=200)
-    vernacularName = models.CharField(max_length=200)
+    scientificName = models.CharField(max_length=200, null=True, blank=True)
+    vernacularName = models.CharField(max_length=200, null=True, blank=True)
     individualCount = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(9999)]
     )

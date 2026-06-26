@@ -55,10 +55,68 @@ def format_slack_ipt_sync_lines(report):
         f"event_core.synced: {event_result.get('synced_events', 0)}",
         f"event_core.created: {event_result.get('created', 0)}",
         f"event_core.updated: {event_result.get('updated', 0)}",
+        f"event_core.deleted: {event_result.get('deleted', 0)}",
+        f"event_core.skipped_no_survey: {event_result.get('skipped_no_survey', 0)}",
+        f"event_core.skipped_no_event_date: {event_result.get('skipped_no_event_date', 0)}",
         f"occurrence_extension.synced: {occurrence_result.get('synced_occurrences', 0)}",
         f"occurrence_extension.created: {occurrence_result.get('created', 0)}",
         f"occurrence_extension.updated: {occurrence_result.get('updated', 0)}",
+        f"occurrence_extension.deleted: {occurrence_result.get('deleted', 0)}",
+        f"occurrence_extension.skipped_absent_survey: {occurrence_result.get('skipped_absent_survey', 0)}",
+        f"occurrence_extension.skipped_no_survey: {occurrence_result.get('skipped_no_survey', 0)}",
+        f"occurrence_extension.skipped_no_event_date: {occurrence_result.get('skipped_no_event_date', 0)}",
+        f"occurrence_extension.skipped_no_occurrence_id: {occurrence_result.get('skipped_no_occurrence_id', 0)}",
+        f"occurrence_extension.skipped_no_scientific_name: {occurrence_result.get('skipped_no_scientific_name', 0)}",
+        f"occurrence_extension.skipped_non_positive_count: {occurrence_result.get('skipped_non_positive_count', 0)}",
+        f"occurrence_extension.taxon_names_requested: {occurrence_result.get('taxon_names_requested', 0)}",
+        f"occurrence_extension.taxon_names_matched: {occurrence_result.get('taxon_names_matched', 0)}",
+        f"occurrence_extension.taxon_lookup_errors: {occurrence_result.get('taxon_lookup_errors', 0)}",
     ]
+
+
+def format_email_ipt_sync_section(report):
+    ipt_sync = report.get("ipt_sync") or {}
+    if not ipt_sync:
+        return ""
+
+    if ipt_sync.get("skipped"):
+        reason = ipt_sync.get("reason", "unknown")
+        if reason == "not_ipt_observation_items":
+            return ""
+        return (
+            "\n"
+            "──────────────────────────\n"
+            "IPT 同步結果\n"
+            "──────────────────────────\n"
+            f"IPT 同步略過：{reason}\n"
+        )
+
+    occurrence_result = ipt_sync.get("occurrence_extension") or {}
+    event_result = ipt_sync.get("event") or {}
+    return (
+        "\n"
+        "──────────────────────────\n"
+        "IPT 同步結果\n"
+        "──────────────────────────\n"
+        f"Event core 同步筆數：{event_result.get('synced_events', 0)}\n"
+        f"Event core 新增/更新/刪除：{event_result.get('created', 0)} / {event_result.get('updated', 0)} / {event_result.get('deleted', 0)}\n"
+        f"Event core 略過無調查資料：{event_result.get('skipped_no_survey', 0)}\n"
+        f"Event core 略過缺 eventDate：{event_result.get('skipped_no_event_date', 0)}\n\n"
+        f"Occurrence extension 同步筆數：{occurrence_result.get('synced_occurrences', 0)}\n"
+        f"Occurrence extension 新增/更新/刪除：{occurrence_result.get('created', 0)} / {occurrence_result.get('updated', 0)} / {occurrence_result.get('deleted', 0)}\n"
+        f"Occurrence extension 略過有調查但無物種：{occurrence_result.get('skipped_absent_survey', 0)}\n"
+        f"Occurrence extension 略過無調查資料：{occurrence_result.get('skipped_no_survey', 0)}\n"
+        f"Occurrence extension 略過缺 eventDate：{occurrence_result.get('skipped_no_event_date', 0)}\n"
+        f"Occurrence extension 略過缺 occurrenceID：{occurrence_result.get('skipped_no_occurrence_id', 0)}\n"
+        f"Occurrence extension 略過缺 scientificName：{occurrence_result.get('skipped_no_scientific_name', 0)}\n"
+        f"Occurrence extension 略過 individualCount <= 0：{occurrence_result.get('skipped_non_positive_count', 0)}\n"
+        f"分類查詢送出學名數：{occurrence_result.get('taxon_names_requested', 0)}\n"
+        f"分類查詢成功匹配學名數：{occurrence_result.get('taxon_names_matched', 0)}\n"
+        f"分類查詢錯誤數：{occurrence_result.get('taxon_lookup_errors', 0)}\n"
+        "\n"
+        "後續請至 IPT 資料集管理頁面確認資料集內容。\n"
+        "確認資料無誤後至 Publication 區塊發布新版資料集。\n"
+    )
 
 
 def format_slack_text(
@@ -371,25 +429,7 @@ def send_import_email(
 
     error_section = format_error_breakdown(report)
     fatal_hint = format_fatal_hint(report)
-    ipt_sync = report.get("ipt_sync") or {}
-    ipt_sync_section = ""
-    if ipt_sync and not ipt_sync.get("skipped"):
-        occurrence_result = ipt_sync.get("occurrence_extension") or {}
-        event_result = ipt_sync.get("event") or {}
-        ipt_sync_section = (
-            "\n"
-            "──────────────────────────\n"
-            "IPT 同步結果\n"
-            "──────────────────────────\n"
-            f"Event core 同步筆數：{event_result.get('synced_events', 0)}\n"
-            f"Event core 新增/更新：{event_result.get('created', 0)} / {event_result.get('updated', 0)}\n\n"
-            f"Occurrence extension 同步筆數：{occurrence_result.get('synced_occurrences', 0)}\n"
-            f"Occurrence extension 新增/更新：{occurrence_result.get('created', 0)} / {occurrence_result.get('updated', 0)}\n"
-            "\n"
-            "後續請至 IPT 資料集管理頁面確認資料集內容。\n"
-            "進入該資料集後，可於 Source Data 區塊點擊 Save，讓 IPT 重新讀取並套用最新同步資料；\n"
-            "確認資料無誤後，再至 Publication 區塊發布新版資料集。\n"
-        )
+    ipt_sync_section = format_email_ipt_sync_section(report)
 
     fatal_errors = report.get("fatal_errors") or []
 
