@@ -411,28 +411,23 @@ class BirdSurveyAPIView(APIView):
 class BirdSurveyMapAPIView(APIView):
     TBIA_MAP_API_URL = "https://tbiadata.tw/api/v1/map"
     VALID_GRID_LEVELS = {"1", "5", "10", "100"}
+    DEFAULT_BOUNDED_BY = ("121,25,120,24", "121,24,120,23")
 
     def get(self, request):
         grid = request.query_params.get("grid", "1")
         if grid not in self.VALID_GRID_LEVELS:
             grid = "1"
 
-        params = {
-            "boundedBy": request.query_params.get("boundedBy", "121,24,120,23"),
-            "grid": grid,
-            "bioGroup": "鳥類",
-            "county": "彰化縣",
-            "municipality": "芳苑鄉"
-        }
-
         try:
-            response = requests.get(
-                self.TBIA_MAP_API_URL,
-                params=params,
-                timeout=20,
-            )
-            response.raise_for_status()
-            result = response.json()
+            results = [
+                self.fetch_map_data(
+                    request,
+                    grid,
+                    bounded_by,
+                )
+                for bounded_by in self.DEFAULT_BOUNDED_BY
+            ]
+            result = self.merge_map_results(results)
         except requests.RequestException as exc:
             return Response(
                 {"error": f"TBIA map API request failed: {str(exc)}"},
@@ -445,6 +440,41 @@ class BirdSurveyMapAPIView(APIView):
             )
 
         return Response(result, status=status.HTTP_200_OK)
+
+    def fetch_map_data(self, request, grid, default_bounded_by):
+        params = {
+            "boundedBy": request.query_params.get("boundedBy", default_bounded_by),
+            "grid": grid,
+            "bioGroup": "鳥類",
+            "county": "彰化縣",
+            "municipality": "芳苑鄉",
+        }
+
+        response = requests.get(
+            self.TBIA_MAP_API_URL,
+            params=params,
+            timeout=20,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def merge_map_results(self, results):
+        if not results:
+            return {}
+
+        merged = dict(results[0])
+        merged_data = dict(merged.get("data", {}))
+        merged_features = []
+
+        for result in results:
+            data = result.get("data", {})
+            features = data.get("features", [])
+            if features:
+                merged_features.extend(features)
+
+        merged_data["features"] = merged_features
+        merged["data"] = merged_data
+        return merged
 
 
 class LiteratureAPIView(APIView):
