@@ -421,6 +421,8 @@ class BirdSurveyMapAPIView(APIView):
             "boundedBy": request.query_params.get("boundedBy", "121,24,120,23"),
             "grid": grid,
             "bioGroup": "鳥類",
+            "county": "彰化縣",
+            "municipality": "芳苑鄉"
         }
 
         try:
