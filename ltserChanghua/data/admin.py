@@ -93,7 +93,8 @@ class StaffAdmin(admin.ModelAdmin):
 
 
 class WaterQualityManualSiteAdmin(admin.ModelAdmin):
-    list_display = ["id", "title", "latitude", "longitude"]
+    list_display = ["id", "title", "latitude", "longitude", "is_highlight"]
+    list_filter = ["is_highlight"]
     search_fields = ["title"]
 
 

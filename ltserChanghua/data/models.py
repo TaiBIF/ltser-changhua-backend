@@ -68,6 +68,7 @@ class CrabSite(models.Model):
 
 class WaterQualityManualSite(models.Model):
     title = models.CharField(max_length=200)
+    is_highlight = models.BooleanField(default=False, verbose_name="前端重點標示")
     latitude = models.DecimalField(
         max_digits=15, decimal_places=8, null=True, blank=True
     )
@@ -182,6 +183,14 @@ class WaterQuality(models.Model):
     totalDissolvedSolids = models.FloatField(null=True, blank=True)
     salinity = models.FloatField(null=True, blank=True)
     specificGravity = models.FloatField(null=True, blank=True)
+    suspendedSolids = models.FloatField(null=True, blank=True)
+    bod = models.FloatField(null=True, blank=True)
+    ammoniaNitrogen = models.FloatField(null=True, blank=True)
+    nitrateNitrogen = models.FloatField(null=True, blank=True)
+    nitriteNitrogen = models.FloatField(null=True, blank=True)
+    keldahlNitrogen = models.FloatField(null=True, blank=True)
+    totalNitrogen = models.FloatField(null=True, blank=True)
+    totalPhosphorus = models.FloatField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

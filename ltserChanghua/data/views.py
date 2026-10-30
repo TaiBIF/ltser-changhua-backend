@@ -309,6 +309,14 @@ class WaterQualityAPIView(APIView):
         "tds": "totalDissolvedSolids",
         "w_sal": "salinity",
         "sg": "specificGravity",
+        "suspendedSolids": "suspendedSolids",
+        "bod": "bod",
+        "ammoniaNitrogen": "ammoniaNitrogen",
+        "nitrateNitrogen": "nitrateNitrogen",
+        "nitriteNitrogen": "nitriteNitrogen",
+        "keldahlNitrogen": "keldahlNitrogen",
+        "totalNitrogen": "totalNitrogen",
+        "totalPhosphorus": "totalPhosphorus",
     }
 
     def get(self, request, *args, **kwargs):
