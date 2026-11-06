@@ -68,7 +68,7 @@ class CrabSite(models.Model):
 
 class WaterQualityManualSite(models.Model):
     title = models.CharField(max_length=200)
-    is_highlight = models.BooleanField(default=False, verbose_name="前端重點標示")
+    is_highlight = models.BooleanField(default=False, verbose_name="是否為河口水質監測點位")
     latitude = models.DecimalField(
         max_digits=15, decimal_places=8, null=True, blank=True
     )
