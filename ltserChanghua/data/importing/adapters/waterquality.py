@@ -24,6 +24,14 @@ DEFAULT_WATERQUALITY_HASH_FIELDS = [
     "totalDissolvedSolids",
     "salinity",
     "specificGravity",
+    "suspendedSolids",
+    "bod",
+    "ammoniaNitrogen",
+    "nitrateNitrogen",
+    "nitriteNitrogen",
+    "keldahlNitrogen",
+    "totalNitrogen",
+    "totalPhosphorus",
 ]
 
 

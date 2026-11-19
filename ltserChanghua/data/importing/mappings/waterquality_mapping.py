@@ -73,6 +73,28 @@ def build_waterquality_payload(record, validators):
     specificGravity = validators["decimal"](
         record.get("specificGravity"), "specificGravity", record, errors, warnings
     )
+    suspendedSolids = validators["decimal"](
+        record.get("suspendedSolids"), "suspendedSolids", record, errors, warnings
+    )
+    bod = validators["decimal"](record.get("bod"), "bod", record, errors, warnings)
+    ammoniaNitrogen = validators["decimal"](
+        record.get("ammoniaNitrogen"), "ammoniaNitrogen", record, errors, warnings
+    )
+    nitrateNitrogen = validators["decimal"](
+        record.get("nitrateNitrogen"), "nitrateNitrogen", record, errors, warnings
+    )
+    nitriteNitrogen = validators["decimal"](
+        record.get("nitriteNitrogen"), "nitriteNitrogen", record, errors, warnings
+    )
+    keldahlNitrogen = validators["decimal"](
+        record.get("keldahlNitrogen"), "keldahlNitrogen", record, errors, warnings
+    )
+    totalNitrogen = validators["decimal"](
+        record.get("totalNitrogen"), "totalNitrogen", record, errors, warnings
+    )
+    totalPhosphorus = validators["decimal"](
+        record.get("totalPhosphorus"), "totalPhosphorus", record, errors, warnings
+    )
 
     if pH is not None and not 0 <= pH <= 14:
         _push_error(
@@ -97,6 +119,14 @@ def build_waterquality_payload(record, validators):
         "totalDissolvedSolids": totalDissolvedSolids,
         "salinity": salinity,
         "specificGravity": specificGravity,
+        "suspendedSolids": suspendedSolids,
+        "bod": bod,
+        "ammoniaNitrogen": ammoniaNitrogen,
+        "nitrateNitrogen": nitrateNitrogen,
+        "nitriteNitrogen": nitriteNitrogen,
+        "keldahlNitrogen": keldahlNitrogen,
+        "totalNitrogen": totalNitrogen,
+        "totalPhosphorus": totalPhosphorus,
     }
 
     return payload, errors, warnings
